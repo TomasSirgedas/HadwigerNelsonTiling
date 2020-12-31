@@ -16,9 +16,9 @@ public:
    void updateDrawing();
    void addVertex( int color );
 
-   void handleMouse( const XYZ& mousePos, bool isMove, bool isClick, bool isUnclick );
+   void handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isClick, bool isUnclick );
 
-   XYZ mousePos() const;
+   bool getMousePos( XYZ& pos ) const;
    DualGraph::VertexPtr dualVertexAtMouse( double maxPixelDist ) const;
 
 private:

@@ -120,13 +120,23 @@ public:
 class IGraphShape
 {
 public:
-
+   virtual bool toSurface( const XYZ& p, XYZ& surfacePoint ) const = 0;
+   virtual double modelSize() const = 0;
 };
 
 class GraphShapeSphere : public IGraphShape
 {
 public:
    GraphShapeSphere( double radius ) : _Radius( radius ) {}
+   bool toSurface( const XYZ& p, XYZ& surfacePoint ) const
+   {
+      double z2 = _Radius*_Radius - p.x*p.x - p.y*p.y;
+      if ( z2 <= 0 )
+         return false;
+      surfacePoint = XYZ( p.x, p.y, -sqrt( z2 ) );
+      return true;
+   }
+   virtual double modelSize() const { return _Radius; }
 
 private:
    double _Radius;

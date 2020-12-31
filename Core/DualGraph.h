@@ -71,7 +71,7 @@ public:
       std::vector<VertexPtr> neighbors;
    };
 
-   CORE_API DualGraph( std::shared_ptr<IGraphSymmetry> symmetry );
+   CORE_API DualGraph( std::shared_ptr<IGraphSymmetry> symmetry, std::shared_ptr<IGraphShape> shape );
 
    CORE_API std::vector<VertexPtr> allVertices() const;
 
@@ -82,8 +82,12 @@ public:
             
    CORE_API void toggleEdge( const VertexPtr& a, const VertexPtr& b );   
 
+
+   CORE_API std::shared_ptr<IGraphShape> shape() { return _GraphShape; }
+
 private:
    std::vector<Vertex> _Vertices;
    std::shared_ptr<IGraphSymmetry> _GraphSymmetry;
+   std::shared_ptr<IGraphShape> _GraphShape;
 };
 

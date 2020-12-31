@@ -4,6 +4,7 @@
 #include <Core/DataTypes.h>
 #include <QShortcut>
 #include <QMouseEvent>
+#include <QDebug>
 
 
 GraphUI::GraphUI( QWidget *parent )
@@ -18,36 +19,43 @@ GraphUI::GraphUI( QWidget *parent )
    //SymmetryGroup g3( Matrix4x4::rotation( XYZ(0,0,1), 2*PI/3 ) * Matrix4x4::translation( XYZ(3,0,0) ), Perm( { 1,2,0,3,4,5,6,7,8,9 } ) );   
    //std::shared_ptr<IGraphSymmetry> sym( new GraphSymmetry_Groups( { g3, g5 } ) );
 
-   SymmetryGroup symA( Icosahedron().map( {0,1,2}, {0,2,3} ), Perm( { 0,2,3,4,5,1,6,7,8,9 } ) );
-   std::shared_ptr<IGraphSymmetry> sym( new GraphSymmetry_Groups( { symA } ) );
+   SymmetryGroup symA( Icosahedron().map( {0,1,2}, { 5,4,8} ), Perm( { 5,4,2,3,1,0,6,7,8,9 } ) );
+   SymmetryGroup symB( Icosahedron().map( {0,1,2}, {11,7,3} ), Perm( { 5,1,3,2,4,0,6,7,8,9 } ) );
+   SymmetryGroup symC( Icosahedron().map( {0,1,2}, { 1,2,0} ), Perm( { 1,2,0,5,3,4,6,7,8,9 } ) );
+   SymmetryGroup symD( Icosahedron().map( {0,1,2}, { 0,2,3} ), Perm( { 0,2,3,4,5,1,6,7,8,9 } ) );
+   std::shared_ptr<IGraphSymmetry> sym( new GraphSymmetry_Groups( { symA, symB, symC, symD } ) );
 
 
    //_DualGraph.reset( new DualGraph( std::shared_ptr<IGraphSymmetry>( new GraphSymmetry_PlanarRotation( 5 ) ) ) );
-   _DualGraph.reset( new DualGraph( sym ) );
+   _DualGraph.reset( new DualGraph( sym, shape ) );
    _DualGraph->addVertex( 0, Icosahedron()[0] );
-   _DualGraph->addVertex( 2, (Icosahedron()[0]*3 + Icosahedron()[1]).normalized() );
+   _DualGraph->addVertex( 2, (Icosahedron()[0]*3 + Icosahedron()[1] + Icosahedron()[2]*.7).normalized() );
+   //for ( double t = .02; t < 1; t += .02 )
+   //   _DualGraph->addVertex( 2, (Icosahedron()[0]*(1-t) + Icosahedron()[1]*t + Icosahedron()[2]*.01 ).normalized() );
    //_DualGraph->addVertex( 5, XYZ(0,0,0) );
    //_DualGraph->addVertex( 1, XYZ(1,0,0) );
+
+   ui.drawing->_GraphShape = _DualGraph->shape();
 
    connect( ui.drawing, &Drawing::resized, [&](){ updateDrawing(); } );
 
 
    connect( ui.drawing, &Drawing::press, [this]( QMouseEvent* event ) {
       if ( event->buttons().testFlag( Qt::LeftButton ) )
-         handleMouse( ui.drawing->toModel( event->pos() ), true, true, false );
+         handleMouse( event->pos(), true, true, false );
       //if ( event->buttons().testFlag( Qt::RightButton ) )
       //   handleRightButton( event->pos(), true, true, false );
    } );
 
    connect( ui.drawing, &Drawing::move, [this]( QMouseEvent* event ) {
-      handleMouse( ui.drawing->toModel( event->pos() ), true, false, false );
+      handleMouse( event->pos(), true, false, false );
       //if ( event->buttons().testFlag( Qt::RightButton ) )
       //   handleRightButton( event->pos(), true, false, false );
    } );
 
    connect( ui.drawing, &Drawing::release, [this]( QMouseEvent* event ) {
       //if ( event->buttons().testFlag( Qt::LeftButton ) )
-      handleMouse( ui.drawing->toModel( event->pos() ), false, false, true );
+      handleMouse( event->pos(), false, false, true );
       ////if ( event->buttons().testFlag( Qt::RightButton ) )
       //handleRightButton( event->pos(), false, false, true );
    } );
@@ -81,14 +89,18 @@ GraphUI::~GraphUI()
 }
 
 
-XYZ GraphUI::mousePos() const
+bool GraphUI::getMousePos( XYZ& mousePos ) const
 {
-   return ui.drawing->toModel( ui.drawing->mapFromGlobal( QCursor::pos() ) );
+   return ui.drawing->getModelPos( ui.drawing->mapFromGlobal( QCursor::pos() ), mousePos );
 }
 
 DualGraph::VertexPtr GraphUI::dualVertexAtMouse( double maxPixelDist ) const
 {
-   return _DualGraph->vertexAt( mousePos(), ui.drawing->toModel( maxPixelDist ) );
+   XYZ mousePos;
+   if ( !getMousePos( mousePos ) )
+      return DualGraph::VertexPtr();
+
+   return _DualGraph->vertexAt( mousePos, ui.drawing->toModel( maxPixelDist ) );
 }
 
 void GraphUI::addVertex( int color )
@@ -100,7 +112,9 @@ void GraphUI::addVertex( int color )
    }
    else                 // add vtx
    {
-      _DualGraph->addVertex( color, mousePos() );
+      XYZ mousePos;
+      if ( getMousePos( mousePos ) )
+         _DualGraph->addVertex( color, mousePos );
    }
    updateDrawing();
 }
@@ -110,8 +124,12 @@ void GraphUI::updateDrawing()
    ui.drawing->updateDrawing( *_DualGraph );
 }
 
-void GraphUI::handleMouse( const XYZ& mousePos, bool isMove, bool isClick, bool isUnclick )
+void GraphUI::handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isClick, bool isUnclick )
 {
+   XYZ mousePos;
+   if ( !ui.drawing->getModelPos( mouseBitmapPos, mousePos ) )
+      return;
+
    if ( isUnclick )
    {
       if ( isKeyDown( 'E' ) )

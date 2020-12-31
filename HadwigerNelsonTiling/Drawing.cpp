@@ -1,7 +1,9 @@
 #include "Drawing.h"
+
 #include <QPainter>
 
 #include <Core/DualGraph.h>
+
 
 namespace
 {
@@ -16,6 +18,8 @@ Drawing::Drawing( QWidget *parent )
    : QWidget( parent )
 {
    ui.setupUi( this );
+
+   _ModelRotation = Matrix4x4::rotationY( 0. ) * Matrix4x4::rotationX( -.3 );
 }
 
 Drawing::~Drawing()
@@ -28,12 +32,15 @@ void Drawing::resizeEvent( QResizeEvent *event )
                   * Matrix4x4::scale( XYZ( _PixelsPerUnit, _PixelsPerUnit, 1 ) )
                   * Matrix4x4::scale( XYZ( 1, -1, 1 ) );
 
+   if ( _GraphShape && _GraphShape->modelSize() > 0 )
+      _PixelsPerUnit = height() / 2.* .99 / _GraphShape->modelSize();
+
    emit resized();
 }
 
 bool Drawing::isVisible( const XYZ& pos ) const
 {
-   return pos.z <= 0;
+   return (_ModelRotation * pos).z <= 0;
 }
 
 QImage Drawing::makeImage( const QSize& size, const DualGraph& dual )
@@ -47,7 +54,7 @@ QImage Drawing::makeImage( const QSize& size, const DualGraph& dual )
    // draw edges
    painter.setPen( QColor( 0, 0, 0, 192 ) );
    for ( const DualGraph::VertexPtr& a : dual.allVertices() )
-   for ( const DualGraph::VertexPtr& b : a.neighbors() ) if ( a < b )
+   for ( const DualGraph::VertexPtr& b : a.neighbors() ) if ( a < b ) if ( isVisible( a.pos() ) || isVisible( b.pos() ) )
    {
       painter.drawLine( toBitmap( a.pos() ), toBitmap( b.pos() ) );
       //painter.drawLine( toBitmap( a.pos() ), toBitmap( (a.pos() + b.pos()) / 2 ) );
@@ -74,4 +81,13 @@ QImage Drawing::makeImage( const QSize& size, const DualGraph& dual )
 void Drawing::updateDrawing( const DualGraph& dual )
 {  
    ui.label->setPixmap( QPixmap::fromImage( makeImage( size(), dual ) ) );
+}
+
+bool Drawing::getModelPos( const QPointF& bitmapPos, XYZ& modelPos ) const 
+{ 
+   XYZ surfacePos;
+   if ( !_GraphShape->toSurface( ( _ModelToBitmap.inverted() * XYZ( bitmapPos.x(), bitmapPos.y(), 0. ) ).toXYZ(), surfacePos ) )
+      return false; 
+   modelPos = (_ModelRotation.inverted() * surfacePos).toXYZ();
+   return true;
 }

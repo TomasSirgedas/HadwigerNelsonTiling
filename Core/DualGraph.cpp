@@ -33,7 +33,9 @@ DualGraph::VertexPtr DualGraph::VertexPtr::unpremul( const Sector&  otherSector 
 }
 
 
-DualGraph::DualGraph( std::shared_ptr<IGraphSymmetry> graphSymmetry ) : _GraphSymmetry( graphSymmetry )
+DualGraph::DualGraph( std::shared_ptr<IGraphSymmetry> graphSymmetry, std::shared_ptr<IGraphShape> shape ) 
+   : _GraphSymmetry( graphSymmetry )
+   , _GraphShape( shape )
 {   
 }
 

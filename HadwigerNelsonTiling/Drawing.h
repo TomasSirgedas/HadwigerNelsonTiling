@@ -1,13 +1,14 @@
 #pragma once
 
-#include <QWidget>
 #include "ui_Drawing.h"
-
-#include <Core/DataTypes.h>
-
 #include "Util.h"
 
+#include <QWidget>
+#include <Core/DataTypes.h>
+#include <memory>
+
 class DualGraph;
+class IGraphShape;
 
 class Drawing : public QWidget
 {
@@ -19,8 +20,9 @@ public:
 
    void updateDrawing( const DualGraph& dual );
 
-   QPointF toBitmap( const XYZ& modelPos ) { return toPointF( ( _ModelToBitmap * modelPos ).toXYZ() ); }
-   XYZ toModel( const QPointF& bitmapPos ) { return ( _ModelToBitmap.inverted() * XYZ( bitmapPos.x(), bitmapPos.y(), 0. ) ).toXYZ(); }
+   QPointF toBitmap( const XYZ& modelPos ) { return toPointF( ( _ModelToBitmap * _ModelRotation * modelPos ).toXYZ() ); }
+   //XYZ toModelZ0( const QPointF& bitmapPos ) { return ( (_ModelToBitmap * _ModelRotation).inverted() * XYZ( bitmapPos.x(), bitmapPos.y(), 0. ) ).toXYZ(); }
+   bool getModelPos( const QPointF& bitmapPos, XYZ& modelPos ) const;
    double toModel( double bitmapSize ) const { return bitmapSize / _PixelsPerUnit; }
 
    bool isVisible( const XYZ& pos ) const;
@@ -46,5 +48,7 @@ private:
 
 public:
    Matrix4x4 _ModelToBitmap;
+   Matrix4x4 _ModelRotation;
    double _PixelsPerUnit = 100;
+   std::shared_ptr<IGraphShape> _GraphShape;
 };
