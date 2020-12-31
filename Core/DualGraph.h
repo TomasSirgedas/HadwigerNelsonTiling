@@ -20,12 +20,12 @@ public:
    {
    public:
       VertexPtr() {}
-      VertexPtr( const DualGraph* graph, int index, int sectorId ) : graph(graph), index(index), sectorId(sectorId) 
+      VertexPtr( const DualGraph* graph, int index, const Sector& sector ) : graph(graph), index(index), sector(sector)
       {
       }
 
-      CORE_API bool operator==( const VertexPtr& rhs ) const { return graph == rhs.graph && index == rhs.index && sectorId == rhs.sectorId; }
-      CORE_API bool operator<( const VertexPtr& rhs ) const { return sectorId != rhs.sectorId ? sectorId < rhs.sectorId : index < rhs.index; }
+      CORE_API bool operator==( const VertexPtr& rhs ) const { return graph == rhs.graph && index == rhs.index && sector == rhs.sector; }
+      CORE_API bool operator<( const VertexPtr& rhs ) const { return sector != rhs.sector ? sector < rhs.sector : index < rhs.index; }
       CORE_API bool operator>( const VertexPtr& rhs ) const { return rhs < *this; }
 
       CORE_API bool isValid() const { return graph != nullptr; }
@@ -33,9 +33,9 @@ public:
       CORE_API int  color() const;
       CORE_API std::string name() const;
 
-      CORE_API VertexPtr              withSectorId( int sectorId ) const { VertexPtr ret = *this; ret.sectorId = baseVertex().symmetry->canonicalizedSector( sectorId ); return ret; }
-      CORE_API VertexPtr              premul( int sectorId ) const;
-      CORE_API VertexPtr              unpremul( int sectorId ) const;
+      CORE_API VertexPtr              withSectorId( const Sector& sector ) const { VertexPtr ret = *this; ret.sector = baseVertex().symmetry->canonicalizedSector( sector ); return ret; }
+      CORE_API VertexPtr              premul( const Sector& sector ) const;
+      CORE_API VertexPtr              unpremul( const Sector& sector ) const;
       CORE_API std::vector<VertexPtr> neighbors() const;
 
    private:
@@ -44,7 +44,7 @@ public:
    public:
       const DualGraph* graph = nullptr;
       int index = -1;
-      int sectorId = -1;
+      Sector sector;
    };
 
    class Vertex
@@ -52,7 +52,7 @@ public:
    public:
       Vertex( int index, int color, const XYZ& pos ) : index(index), color(color), pos(pos) {}
 
-      VertexPtr canonicalizedNeighbor( const VertexPtr& a ) const { return a.withSectorId( symmetry->canonicalizedSector( a.sectorId ) ); }
+      VertexPtr canonicalizedNeighbor( const VertexPtr& a ) const { return a.withSectorId( symmetry->canonicalizedSector( a.sector ) ); }
       bool hasNeighbor( VertexPtr a ) const { a = canonicalizedNeighbor( a ); for ( const VertexPtr& neighb : neighbors ) if ( neighb == a ) return true; return false; }
       void addNeighbor( VertexPtr a ) { a = canonicalizedNeighbor( a ); neighbors.push_back( a ); }
       void removeNeighbor( VertexPtr a ) 
@@ -67,7 +67,7 @@ public:
       int index;
       int color;
       XYZ pos;
-      std::shared_ptr<SectorSymmetry> symmetry;
+      std::shared_ptr<SectorSymmetryForVertex> symmetry;
       std::vector<VertexPtr> neighbors;
    };
 
