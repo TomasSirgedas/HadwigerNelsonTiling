@@ -23,6 +23,7 @@ public:
    XYZ toModel( const QPointF& bitmapPos ) { return ( _ModelToBitmap.inverted() * XYZ( bitmapPos.x(), bitmapPos.y(), 0. ) ).toXYZ(); }
    double toModel( double bitmapSize ) const { return bitmapSize / _PixelsPerUnit; }
 
+   bool isVisible( const XYZ& pos ) const;
    QImage makeImage( const QSize& size, const DualGraph& dual );
 
 

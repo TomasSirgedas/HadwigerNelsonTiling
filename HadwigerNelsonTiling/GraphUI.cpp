@@ -11,16 +11,23 @@ GraphUI::GraphUI( QWidget *parent )
 {
    ui.setupUi( this );
 
-   SymmetryGroup g5( Matrix4x4::rotation( XYZ(0,0,1), 2*PI/5 ), Perm( { 1,2,3,4,0,5,6,7,8,9 } ) );
-   SymmetryGroup g3( Matrix4x4::rotation( XYZ(0,0,1), 2*PI/3 ) * Matrix4x4::translation( XYZ(3,0,0) ), Perm( { 1,2,0,3,4,5,6,7,8,9 } ) );
-   
-   GraphSymmetry_Groups gg( { g3, g5 } );
+
+   std::shared_ptr<IGraphShape> shape( new GraphShapeSphere( 1. ) );
+
+   //SymmetryGroup g5( Matrix4x4::rotation( XYZ(0,0,1), 2*PI/5 ), Perm( { 1,2,3,4,0,5,6,7,8,9 } ) );
+   //SymmetryGroup g3( Matrix4x4::rotation( XYZ(0,0,1), 2*PI/3 ) * Matrix4x4::translation( XYZ(3,0,0) ), Perm( { 1,2,0,3,4,5,6,7,8,9 } ) );   
+   //std::shared_ptr<IGraphSymmetry> sym( new GraphSymmetry_Groups( { g3, g5 } ) );
+
+   SymmetryGroup symA( Icosahedron().map( {0,1,2}, {0,2,3} ), Perm( { 0,2,3,4,5,1,6,7,8,9 } ) );
+   std::shared_ptr<IGraphSymmetry> sym( new GraphSymmetry_Groups( { symA } ) );
 
 
    //_DualGraph.reset( new DualGraph( std::shared_ptr<IGraphSymmetry>( new GraphSymmetry_PlanarRotation( 5 ) ) ) );
-   _DualGraph.reset( new DualGraph( std::shared_ptr<IGraphSymmetry>( new GraphSymmetry_Groups( { g3, g5 } ) ) ) );
-   _DualGraph->addVertex( 5, XYZ(0,0,0) );
-   _DualGraph->addVertex( 1, XYZ(1,0,0) );
+   _DualGraph.reset( new DualGraph( sym ) );
+   _DualGraph->addVertex( 0, Icosahedron()[0] );
+   _DualGraph->addVertex( 2, (Icosahedron()[0]*3 + Icosahedron()[1]).normalized() );
+   //_DualGraph->addVertex( 5, XYZ(0,0,0) );
+   //_DualGraph->addVertex( 1, XYZ(1,0,0) );
 
    connect( ui.drawing, &Drawing::resized, [&](){ updateDrawing(); } );
 

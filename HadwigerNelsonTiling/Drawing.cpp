@@ -31,6 +31,11 @@ void Drawing::resizeEvent( QResizeEvent *event )
    emit resized();
 }
 
+bool Drawing::isVisible( const XYZ& pos ) const
+{
+   return pos.z <= 0;
+}
+
 QImage Drawing::makeImage( const QSize& size, const DualGraph& dual )
 {
    QImage image( size, QImage::Format_RGB888 );
@@ -50,7 +55,7 @@ QImage Drawing::makeImage( const QSize& size, const DualGraph& dual )
 
    // draw vertices
    painter.setPen( Qt::black );
-   for ( const DualGraph::VertexPtr& a : dual.allVertices() )
+   for ( const DualGraph::VertexPtr& a : dual.allVertices() ) if ( isVisible( a.pos() ) )
    {
       painter.setBrush( tileColor( a.color() ) );
       painter.drawEllipse( toBitmap( a.pos() ), 4, 4 );
@@ -58,7 +63,7 @@ QImage Drawing::makeImage( const QSize& size, const DualGraph& dual )
 
    // draw labels
    painter.setPen( Qt::black );
-   for ( const DualGraph::VertexPtr& a : dual.allVertices() )
+   for ( const DualGraph::VertexPtr& a : dual.allVertices() ) if ( isVisible( a.pos() ) )
    {
       drawTextCentered( painter, toBitmap( a.pos() ) + QPointF( 0, -11 ), a.name() );
    }

@@ -114,3 +114,20 @@ public:
    std::vector<SymmetryGroup> _Groups;
    std::vector<Sector> _AllSectors;
 };
+
+
+
+class IGraphShape
+{
+public:
+
+};
+
+class GraphShapeSphere : public IGraphShape
+{
+public:
+   GraphShapeSphere( double radius ) : _Radius( radius ) {}
+
+private:
+   double _Radius;
+};
