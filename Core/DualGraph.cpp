@@ -57,8 +57,8 @@ std::vector<DualGraph::VertexPtr> DualGraph::allVisibleVertices() const
    std::vector<VertexPtr> ret;
 
    for ( const Vertex& vtx : _Vertices )
-      for ( const Matrix4x4& sector : vtx.symmetry->sectors() )
-         ret.push_back( VertexPtr( this, vtx.index, sector ) );
+      for ( const Matrix4x4& sector : vtx.symmetry->uniqueSectors() )
+         ret.push_back( vtx.toVertexPtr( this ).withMatrix( sector ) );
 
    return ret;
 }

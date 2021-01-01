@@ -26,6 +26,7 @@ public:
          , _Index(index)
          , _Matrix(matrix)
       {
+         _Matrix = baseVertex().symmetry->canonicalizedSector( matrix );
          updateCache();
       }
 
@@ -63,16 +64,23 @@ public:
    public:
       Vertex( int index, int color, const XYZ& pos ) : index(index), color(color), pos(pos) {}
 
-      //VertexPtr canonicalizedNeighbor( const VertexPtr& a ) const { return a.withSectorId( symmetry->canonicalizedSector( a.sector ) ); }
-      VertexPtr canonicalizedNeighbor( const VertexPtr& a ) const { return a; }
-      bool hasNeighbor( VertexPtr a ) const { a = canonicalizedNeighbor( a ); for ( const VertexPtr& neighb : neighbors ) if ( neighb == a ) return true; return false; }
-      void addNeighbor( VertexPtr a ) { a = canonicalizedNeighbor( a ); neighbors.push_back( a ); }
+      VertexPtr toVertexPtr( const DualGraph* graph ) const { return VertexPtr( graph, index, Matrix4x4() ); }
+
+      //VertexPtr canonicalizedNeighbor( const VertexPtr& a ) const { return a; /*return a.withMatrix( symmetry->canonicalizedSector( a._Matrix ) );*/ }
+      bool hasNeighbor( VertexPtr a ) const { for ( const VertexPtr& neighb : neighbors ) if ( neighb == a ) return true; return false; }
+      void addNeighbor( VertexPtr a ) 
+      { 
+         for ( const Matrix4x4& premul : symmetry->sectorEquivalents( 0 ) ) 
+            neighbors.push_back( a.premul( premul ) ); 
+      }
       void removeNeighbor( VertexPtr a ) 
       { 
-         a = canonicalizedNeighbor( a ); 
-         size_t prevCt = neighbors.size();
-         neighbors.erase( std::remove_if( neighbors.begin(), neighbors.end(), [&]( const VertexPtr& b ) { return a == b; } ), neighbors.end() ); 
-         assert( neighbors.size() == prevCt - 1 );
+         for ( const Matrix4x4& premul : symmetry->sectorEquivalents( 0 ) ) 
+         {
+            size_t prevCt = neighbors.size();
+            neighbors.erase( std::remove_if( neighbors.begin(), neighbors.end(), [&]( const VertexPtr& b ) { return a.premul( premul ) == b; } ), neighbors.end() ); 
+            assert( neighbors.size() == prevCt - 1 );
+         }
       }
 
    public:

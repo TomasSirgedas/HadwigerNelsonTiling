@@ -95,42 +95,35 @@ void GraphSymmetry_Groups::initAllSectorGroupIndexes( int i, std::vector<int>& g
 
 
 SectorSymmetryForVertex::SectorSymmetryForVertex( const IGraphSymmetry* graphSymmetry, const XYZ& pos ) : _GraphSymmetry( graphSymmetry )
-{
-   int n = _GraphSymmetry->numSectors();
-   
-   //for ( const Matrix4x4& a : _GraphSymmetry->allVisibleSectors() )
-   //   if ( ( a * pos ).toXYZ().dist2( pos ) < 1e-12 )
-   //      _SectorEquivalents.push_back( a );
+{   
+   std::vector<Matrix4x4> allSectors = _GraphSymmetry->allSectors();
 
-   std::vector<XYZ> usedPoints;
-   for ( const Matrix4x4& sector : _GraphSymmetry->allSectors() )
+   _EquivalentSectorIds.resize( allSectors.size() );
+   _EquivalentSectors.resize( allSectors.size() );
+
+   for ( int a = 0; a < (int)allSectors.size(); a++ )
+   for ( int b = 0; b < (int)allSectors.size(); b++ )
    {
-      XYZ p = (sector * pos).toXYZ();
-      bool alreadyUsed = false;
-      for ( const XYZ& usedPoint : usedPoints )
-         if ( p.dist2( usedPoint ) < 1e-12 )
-         {
-            alreadyUsed = true;
-            break;
-         }
-      if ( alreadyUsed )
-         continue;
-      
-      usedPoints.push_back( p );
-      _Sectors.push_back( sector );
+      XYZ posA = ( allSectors[a] * pos ).toXYZ();
+      XYZ posB = ( allSectors[b] * pos ).toXYZ();
+      if ( posA.dist2( posB ) < 1e-12 )
+      {
+         _EquivalentSectorIds[a].push_back( b );
+         _EquivalentSectors[a].push_back( allSectors[b] );
+      }
    }
+
+   for ( int a = 0; a < (int)allSectors.size(); a++ )
+      if ( _EquivalentSectorIds[a][0] == a )
+         _UniqueSectors.push_back( allSectors[a] );
 }
 
-//
-//Sector SectorSymmetryForVertex::canonicalizedSector( const Sector& sector ) const
-//{
-//   if ( !hasSymmetry() )
-//      return sector;
-//
-//   std::vector<Sector> v;
-//   for ( const Sector& b : _Sector0Equivalents )
-//      v.push_back( _GraphSymmetry->combineSectors( sector, b ) );
-//   Sector ret = *std::min_element( v.begin(), v.end() );
-//   return ret;
-//}
+Matrix4x4 SectorSymmetryForVertex::canonicalizedSector( const Matrix4x4& sector ) const
+{
+   if ( !hasSymmetry() )
+      return sector;
+
+   return _EquivalentSectors[_GraphSymmetry->sectorId( sector )][0];
+}
+
 

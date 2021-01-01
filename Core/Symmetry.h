@@ -31,15 +31,16 @@ class SectorSymmetryForVertex
 public:
    SectorSymmetryForVertex( const IGraphSymmetry* _GraphSymmetry, const XYZ& pos );
 
-   std::vector<Matrix4x4> sectors() const { return _Sectors; }
-   //std::vector<Matrix4x4> sector0Equivalents() const { return _Sector0Equivalents; }
-   //Matrix4x4 canonicalizedSector( const Matrix4x4& sector ) const;
-   //bool hasSymmetry() const { return _Sector0Equivalents.size() > 1; }
+   std::vector<Matrix4x4> uniqueSectors() const { return _UniqueSectors; }
+   std::vector<Matrix4x4> sectorEquivalents( int sectorId ) const { return _EquivalentSectors[sectorId]; }
+   Matrix4x4 canonicalizedSector( const Matrix4x4& sector ) const;
+   bool hasSymmetry() const { return _EquivalentSectors[0].size() > 1; }
 
 private:
    const IGraphSymmetry* _GraphSymmetry;
-   //std::vector<Matrix4x4> _Sector0Equivalents;
-   std::vector<Matrix4x4> _Sectors;   
+   std::vector<std::vector<int>> _EquivalentSectorIds;
+   std::vector<std::vector<Matrix4x4>> _EquivalentSectors;
+   std::vector<Matrix4x4> _UniqueSectors;
 };
 
 class IGraphSymmetry
