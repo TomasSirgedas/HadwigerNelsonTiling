@@ -1,5 +1,7 @@
 #include "Util.h"
 
+#include <string>
+
 int mod( int x, int m ) { return x >= 0 ? x % m : (x+1) % m + m-1; }
 
 
@@ -48,4 +50,20 @@ Icosahedron::Icosahedron()
 Matrix4x4 Icosahedron::map( const std::vector<int>& a, const std::vector<int>& b ) const
 {
    return ::map( std::vector<XYZ> { v[a[0]], v[a[1]], v[a[2]] }, std::vector<XYZ> { v[b[0]], v[b[1]], v[b[2]] } );
+}
+
+uint64_t matrixHash( const Matrix4x4& m )
+{
+   std::wstring str;
+   std::vector<double> v = { m[0].x, m[0].y, m[0].z, m[0].w
+                           , m[1].x, m[1].y, m[1].z, m[1].w
+                           , m[2].x, m[2].y, m[2].z, m[2].w
+                           , m[3].x, m[3].y, m[3].z, m[3].w };
+      
+   static_assert( sizeof(wchar_t) >= 2 );
+   for ( double x : v )
+      str += wchar_t( lround( x * 1000 ) );
+   
+   uint64_t h = std::hash<std::wstring>{}( str );
+   return h;
 }

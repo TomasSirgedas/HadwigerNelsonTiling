@@ -18,33 +18,44 @@ public:
 
    class VertexPtr
    {
+      friend DualGraph;
    public:
       VertexPtr() {}
-      VertexPtr( const DualGraph* graph, int index, const Sector& sector ) : graph(graph), index(index), sector(sector)
+      VertexPtr( const DualGraph* graph, int index, const Matrix4x4& matrix ) 
+         : _Graph(graph)
+         , _Index(index)
+         , _Matrix(matrix)
       {
+         updateCache();
       }
 
-      CORE_API bool operator==( const VertexPtr& rhs ) const { return graph == rhs.graph && index == rhs.index && sector == rhs.sector; }
-      CORE_API bool operator<( const VertexPtr& rhs ) const { return sector != rhs.sector ? sector < rhs.sector : index < rhs.index; }
+      CORE_API bool operator==( const VertexPtr& rhs ) const { return _Graph == rhs._Graph && _Index == rhs._Index && _SectorId == rhs._SectorId; }
+      CORE_API bool operator<( const VertexPtr& rhs ) const { return _SectorId != rhs._SectorId ? _SectorId < rhs._SectorId : _Index < rhs._Index; }
       CORE_API bool operator>( const VertexPtr& rhs ) const { return rhs < *this; }
 
-      CORE_API bool isValid() const { return graph != nullptr; }
+      CORE_API bool isValid() const { return _Graph != nullptr; }
       CORE_API XYZ  pos() const;
       CORE_API int  color() const;
       CORE_API std::string name() const;
 
-      CORE_API VertexPtr              withSectorId( const Sector& sector ) const { VertexPtr ret = *this; ret.sector = baseVertex().symmetry->canonicalizedSector( sector ); return ret; }
-      CORE_API VertexPtr              premul( const Sector& sector ) const;
-      CORE_API VertexPtr              unpremul( const Sector& sector ) const;
+      CORE_API VertexPtr              withMatrix( const Matrix4x4& mtx ) const { return VertexPtr( _Graph, _Index, mtx ); }
+      CORE_API VertexPtr              premul( const Matrix4x4& mtx ) const;
+      CORE_API VertexPtr              unpremul( const Matrix4x4& mtx ) const;
       CORE_API std::vector<VertexPtr> neighbors() const;
+
+   public:
+      void updateCache();
 
    private:
       const Vertex& baseVertex() const;
 
-   public:
-      const DualGraph* graph = nullptr;
-      int index = -1;
-      Sector sector;
+   private:
+      const DualGraph* _Graph = nullptr;
+      int _Index = -1;
+      Matrix4x4 _Matrix;
+
+   private: // cached
+      int _SectorId = -1;
    };
 
    class Vertex
@@ -52,7 +63,8 @@ public:
    public:
       Vertex( int index, int color, const XYZ& pos ) : index(index), color(color), pos(pos) {}
 
-      VertexPtr canonicalizedNeighbor( const VertexPtr& a ) const { return a.withSectorId( symmetry->canonicalizedSector( a.sector ) ); }
+      //VertexPtr canonicalizedNeighbor( const VertexPtr& a ) const { return a.withSectorId( symmetry->canonicalizedSector( a.sector ) ); }
+      VertexPtr canonicalizedNeighbor( const VertexPtr& a ) const { return a; }
       bool hasNeighbor( VertexPtr a ) const { a = canonicalizedNeighbor( a ); for ( const VertexPtr& neighb : neighbors ) if ( neighb == a ) return true; return false; }
       void addNeighbor( VertexPtr a ) { a = canonicalizedNeighbor( a ); neighbors.push_back( a ); }
       void removeNeighbor( VertexPtr a ) 
@@ -73,7 +85,7 @@ public:
 
    CORE_API DualGraph( std::shared_ptr<IGraphSymmetry> symmetry, std::shared_ptr<IGraphShape> shape );
 
-   CORE_API std::vector<VertexPtr> allVertices() const;
+   CORE_API std::vector<VertexPtr> allVisibleVertices() const;
 
    CORE_API void addVertex( int color, const XYZ& pos );
    CORE_API VertexPtr vertexAt( const XYZ& pos, double maxDist ) const;

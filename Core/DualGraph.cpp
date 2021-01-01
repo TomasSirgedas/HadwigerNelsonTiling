@@ -1,13 +1,13 @@
 #include "DualGraph.h"
 
 
-const DualGraph::Vertex& DualGraph::VertexPtr::baseVertex() const { return graph->_Vertices[index]; }
-XYZ DualGraph::VertexPtr::pos() const { return graph->_GraphSymmetry->toSector( sector, baseVertex().pos ); };
-int DualGraph::VertexPtr::color() const { return graph->_GraphSymmetry->toSector( sector, baseVertex().color ); }
+const DualGraph::Vertex& DualGraph::VertexPtr::baseVertex() const { return _Graph->_Vertices[_Index]; }
+XYZ DualGraph::VertexPtr::pos() const { return ( _Matrix * baseVertex().pos ).toXYZ(); };
+int DualGraph::VertexPtr::color() const { return _Graph->_GraphSymmetry->toSector( _SectorId, baseVertex().color ); }
 std::string DualGraph::VertexPtr::name() const 
 { 
-   std::string sectorName = graph->_GraphSymmetry->sectorName( sector );
-   return std::to_string( index ) + (sectorName.empty() ? "" : "-") + sectorName;
+   std::string sectorName = _Graph->_GraphSymmetry->sectorName( _SectorId );
+   return std::to_string( _Index ) + (sectorName.empty() ? "" : "-") + sectorName;
 }
 
 std::vector<DualGraph::VertexPtr> DualGraph::VertexPtr::neighbors() const
@@ -15,21 +15,27 @@ std::vector<DualGraph::VertexPtr> DualGraph::VertexPtr::neighbors() const
    std::vector<DualGraph::VertexPtr> ret;
    for ( const DualGraph::VertexPtr& baseNeighb : baseVertex().neighbors )
    {
-      DualGraph::VertexPtr neighb = baseNeighb.premul( sector );
-      for ( const Sector& otherSector : baseVertex().symmetry->sector0Equivalents() )
-         ret.push_back( neighb.premul( otherSector ) );
+      ret.push_back( baseNeighb.premul( _Matrix ) );
+      //DualGraph::VertexPtr neighb = baseNeighb.premul( _Matrix );
+      //for ( const Matrix4x4& otherSector : baseVertex().symmetry->sector0Equivalents() )
+      //   ret.push_back( neighb.premul( otherSector ) );
    }
    return ret;
 }
 
-DualGraph::VertexPtr DualGraph::VertexPtr::premul( const Sector&  otherSector ) const
+void DualGraph::VertexPtr::updateCache()
 {
-   return withSectorId( graph->_GraphSymmetry->combineSectors( otherSector, sector ) );
+   _SectorId = _Graph->_GraphSymmetry->sectorId( _Matrix );
 }
 
-DualGraph::VertexPtr DualGraph::VertexPtr::unpremul( const Sector&  otherSector ) const
+DualGraph::VertexPtr DualGraph::VertexPtr::premul( const Matrix4x4& mtx ) const
 {
-   return withSectorId( graph->_GraphSymmetry->combineSectors( graph->_GraphSymmetry->invertSector( otherSector ), sector ) );
+   return withMatrix( mtx * _Matrix );
+}
+
+DualGraph::VertexPtr DualGraph::VertexPtr::unpremul( const Matrix4x4& mtx ) const
+{
+   return withMatrix( mtx.inverted() * _Matrix );
 }
 
 
@@ -46,12 +52,12 @@ void DualGraph::addVertex( int color, const XYZ& pos )
 }
 
 
-std::vector<DualGraph::VertexPtr> DualGraph::allVertices() const
+std::vector<DualGraph::VertexPtr> DualGraph::allVisibleVertices() const
 {
    std::vector<VertexPtr> ret;
 
    for ( const Vertex& vtx : _Vertices )
-      for ( const Sector& sector : vtx.symmetry->sectors() )
+      for ( const Matrix4x4& sector : vtx.symmetry->sectors() )
          ret.push_back( VertexPtr( this, vtx.index, sector ) );
 
    return ret;
@@ -63,7 +69,7 @@ DualGraph::VertexPtr DualGraph::vertexAt( const XYZ& pos, double maxDist ) const
    double bestDist2 = maxDist * maxDist;
 
 
-   for ( const VertexPtr& a : allVertices() )
+   for ( const VertexPtr& a : allVisibleVertices() )
    {
       double dist2 = a.pos().dist2( pos );
       if ( dist2 < bestDist2 )
@@ -78,12 +84,12 @@ DualGraph::VertexPtr DualGraph::vertexAt( const XYZ& pos, double maxDist ) const
 
 void DualGraph::setVertexColor( const VertexPtr& vtx, int color )
 {
-   _Vertices[vtx.index].color = _GraphSymmetry->fromSector( vtx.sector, color );
+   _Vertices[vtx._Index].color = _GraphSymmetry->fromSector( vtx._SectorId, color );
 }
 
 void DualGraph::setVertexPos( const VertexPtr& vtx, const XYZ& pos )
 {
-   _Vertices[vtx.index].pos = _GraphSymmetry->fromSector( vtx.sector, pos );
+   _Vertices[vtx._Index].pos = (vtx._Matrix.inverted() * pos).toXYZ();
 }
 
 void DualGraph::toggleEdge( const VertexPtr& a, const VertexPtr& b )
@@ -91,15 +97,15 @@ void DualGraph::toggleEdge( const VertexPtr& a, const VertexPtr& b )
    if ( !a.isValid() || !b.isValid() || a == b )
       return;
 
-   bool hadEdge = _Vertices[a.index].hasNeighbor( b.unpremul( a.sector ) );
+   bool hadEdge = _Vertices[a._Index].hasNeighbor( b.unpremul( a._Matrix ) );
    if ( hadEdge )
    {
-      _Vertices[a.index].removeNeighbor( b.unpremul( a.sector ) );
-      _Vertices[b.index].removeNeighbor( a.unpremul( b.sector ) );
+      _Vertices[a._Index].removeNeighbor( b.unpremul( a._Matrix ) );
+      _Vertices[b._Index].removeNeighbor( a.unpremul( b._Matrix ) );
    }
    else
    {
-      _Vertices[a.index].addNeighbor( b.unpremul( a.sector ) );
-      _Vertices[b.index].addNeighbor( a.unpremul( b.sector ) );
+      _Vertices[a._Index].addNeighbor( b.unpremul( a._Matrix ) );
+      _Vertices[b._Index].addNeighbor( a.unpremul( b._Matrix ) );
    }
 }

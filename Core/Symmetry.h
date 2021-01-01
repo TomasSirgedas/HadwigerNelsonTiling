@@ -7,54 +7,51 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <unordered_map>
 
 class IGraphSymmetry;
 
 
-struct Sector
-{
-   Sector with0AtIndex( int index ) const { if ( index < 0 ) return *this; Sector ret = *this; ret[index] = 0; return ret; }
-   std::string name() const { std::string ret; for ( int x : v ) ret += std::to_string( x ); return ret; }
-   int& operator[]( int index ) { return v[index]; }
-   int operator[]( int index ) const { return v[index]; }
-   bool operator==( const Sector& rhs ) const { return v == rhs.v; }
-   bool operator!=( const Sector& rhs ) const { return !(*this == rhs); }
-   bool operator<( const Sector& rhs ) const { return v < rhs.v; }
+//struct Sector
+//{
+//   Sector with0AtIndex( int index ) const { if ( index < 0 ) return *this; Sector ret = *this; ret[index] = 0; return ret; }
+//   std::string name() const { std::string ret; for ( int x : v ) ret += std::to_string( x ); return ret; }
+//   int& operator[]( int index ) { return v[index]; }
+//   int operator[]( int index ) const { return v[index]; }
+//   bool operator==( const Sector& rhs ) const { return v == rhs.v; }
+//   bool operator!=( const Sector& rhs ) const { return !(*this == rhs); }
+//   bool operator<( const Sector& rhs ) const { return v < rhs.v; }
+//
+//   std::vector<int> v;
+//};
 
-   std::vector<int> v;
-};
 
 class SectorSymmetryForVertex
 {
 public:
    SectorSymmetryForVertex( const IGraphSymmetry* _GraphSymmetry, const XYZ& pos );
 
-   std::vector<Sector> sectors() const { return _Sectors; }
-   std::vector<Sector> sector0Equivalents() const { return _Sector0Equivalents; }
-   Sector canonicalizedSector( const Sector& sector ) const;
-   bool hasSymmetry() const { return _Sector0Equivalents.size() > 1; }
+   std::vector<Matrix4x4> sectors() const { return _Sectors; }
+   //std::vector<Matrix4x4> sector0Equivalents() const { return _Sector0Equivalents; }
+   //Matrix4x4 canonicalizedSector( const Matrix4x4& sector ) const;
+   //bool hasSymmetry() const { return _Sector0Equivalents.size() > 1; }
 
 private:
    const IGraphSymmetry* _GraphSymmetry;
-   std::vector<Sector> _Sector0Equivalents;
-   std::vector<Sector> _Sectors;
-   
+   //std::vector<Matrix4x4> _Sector0Equivalents;
+   std::vector<Matrix4x4> _Sectors;   
 };
 
 class IGraphSymmetry
 {
 public:
    virtual int numSectors() const = 0;
-   //virtual int numVisibleSectors() const = 0;
-   virtual XYZ toSector( const Sector& sector, const XYZ& pos ) const = 0;
-   virtual XYZ fromSector( const Sector& sector, const XYZ& pos ) const = 0;
-   virtual int toSector( const Sector& sector, int color ) const = 0;
-   virtual int fromSector( const Sector& sector, int color ) const = 0;
-   virtual Sector combineSectors( const Sector& a, const Sector& b ) const = 0;
-   virtual Sector invertSector( const Sector& sector ) const = 0;
-   virtual std::string sectorName( const Sector& sector ) const { return sector == sector0() ? std::string() : sector.name(); }
-   virtual Sector sector0() const = 0;
-   virtual std::vector<Sector> allSectors() const = 0;
+   virtual int sectorId( const Matrix4x4& sector ) const = 0;
+   virtual int toSector( int sectorId, int color ) const = 0;
+   virtual int fromSector( int sectorId, int color ) const = 0;
+   virtual std::string sectorName( int sectorId ) const = 0;
+   //virtual std::vector<Matrix4x4> allVisibleSectors() const = 0;
+   virtual std::vector<Matrix4x4> allSectors() const = 0;
 
    std::shared_ptr<SectorSymmetryForVertex> calcSectorSymmetry( const XYZ& pos ) const { return std::shared_ptr<SectorSymmetryForVertex>( new SectorSymmetryForVertex( this, pos ) ); }
 };
@@ -63,11 +60,14 @@ class SymmetryGroup
 {
 public:
    CORE_API SymmetryGroup( const Matrix4x4& matrix, const Perm& colorPerm ) : _Matrix(matrix), _ColorPerm(colorPerm) { init( 0, 0 ); }
-   CORE_API SymmetryGroup( const Matrix4x4& matrix, const Perm& colorPerm, int loIndex, int hiIndex ) : _Matrix(matrix), _ColorPerm(colorPerm) { init( loIndex, hiIndex ); }
+   CORE_API SymmetryGroup( const Matrix4x4& matrix, const Perm& colorPerm, int visibleLoIndex, int visibleHiIndex ) : _Matrix(matrix), _ColorPerm(colorPerm) { init( visibleLoIndex, visibleHiIndex ); }
+   CORE_API int visibleLoIndex() const { return _VisibleLoIndex; }
+   CORE_API int visibleHiIndex() const { return _VisibleHiIndex; }
    CORE_API int loIndex() const { return _LoIndex; }
    CORE_API int hiIndex() const { return _HiIndex; }
    
    CORE_API int canonicalizedIndex( int index ) const { return _IsFinite ? mod( index - _LoIndex, size() ) + _LoIndex : index; }
+   //CORE_API int visibleSize() const { return _VisibleHiIndex - _VisibleLoIndex; }
    CORE_API int size() const { return _HiIndex - _LoIndex; }
    CORE_API Matrix4x4 matrix( int index ) const { return _Matrix.pow( canonicalizedIndex( index ) ); }
    CORE_API Perm colorPerm( int index ) const { return _ColorPerm.pow( canonicalizedIndex( index ) ); }
@@ -83,36 +83,42 @@ public:
    //}
 
 private:
-   void init( int loIndexHint, int hiIndexHint );
+   void init( int visibleLoIndex, int visibleHiIndex );
 
 private:
    Matrix4x4 _Matrix;
    Perm      _ColorPerm;
    int       _LoIndex = 0; // inclusive
    int       _HiIndex = 0; // exclusive
+   int       _VisibleLoIndex = 0; // inclusive
+   int       _VisibleHiIndex = 0; // exclusive
    bool      _IsFinite;
 };
 
 class GraphSymmetry_Groups : public IGraphSymmetry
 {
 public:
+
    CORE_API GraphSymmetry_Groups( const std::vector<SymmetryGroup>& groups );
    CORE_API int numSectors() const override { int ret = 1; for ( const SymmetryGroup& g : _Groups ) ret *= g.size(); return ret; }
-   CORE_API XYZ toSector( const Sector& sector, const XYZ& pos ) const override { XYZ p = pos; for ( int i = (int) _Groups.size()-1; i >= 0; i-- ) p = ( _Groups[i].matrix( sector[i] ) * p ).toXYZ(); return p; }
-   CORE_API XYZ fromSector( const Sector& sector, const XYZ& pos ) const override { return toSector( invertSector( sector ), pos ); }
-   CORE_API int toSector( const Sector& sector, int color ) const override { int c = color; for ( int i = (int) _Groups.size()-1; i >= 0; i-- ) c = _Groups[i].colorPerm( sector[i] )[c]; return c; }
-   CORE_API int fromSector( const Sector& sector, int color ) const override { return toSector( invertSector( sector ), color ); }
-   CORE_API Sector combineSectors( const Sector& a, const Sector& b ) const override { Sector ret = sector0(); for ( int i = 0; i < (int) _Groups.size(); i++ ) ret[i] = _Groups[i].combine( a[i], b[i] ); return ret; }
-   CORE_API Sector invertSector( const Sector& sector ) const override { Sector ret = sector0(); for ( int i = 0; i < (int) _Groups.size(); i++ ) ret[i] = _Groups[i].invert( sector[i] ); return ret; }
-   CORE_API Sector sector0() const override { return Sector { std::vector<int>( _Groups.size(), 0 ) }; }
-   CORE_API std::vector<Sector> allSectors() const override { return _AllSectors; }
+   CORE_API int sectorId( const Matrix4x4& sector ) const override { return _SectorHashToId.at( matrixHash( sector ) ); }
+   CORE_API int toSector( int sectorId, int color ) const override { return _SectorIdToColorPerm[sectorId][color]; }
+   CORE_API int fromSector( int sectorId, int color ) const override { return _SectorIdToColorPerm[sectorId].inverted()[color]; }
+   CORE_API std::string sectorName( int sectorId ) const { return _SectorIdToName[sectorId]; }
+   //CORE_API std::vector<Matrix4x4> allVisibleSectors() const override { return _AllVisibleSectors; }
+   CORE_API std::vector<Matrix4x4> allSectors() const override { return _SectorIdToMatrix; }
 
 private:
-   void initAllSectors( int i, Sector& sector );
+   void initAllSectorGroupIndexes( int i, std::vector<int>& groupIndexes );
 
 public:
    std::vector<SymmetryGroup> _Groups;
-   std::vector<Sector> _AllSectors;
+   std::unordered_map<uint64_t, int> _SectorHashToId;
+   //std::vector<Matrix4x4> _AllVisibleSectors;
+   std::vector<std::vector<int>> _AllSectorGroupIndexes;
+   std::vector<Matrix4x4> _SectorIdToMatrix;
+   std::vector<Perm> _SectorIdToColorPerm;
+   std::vector<std::string> _SectorIdToName;
 };
 
 

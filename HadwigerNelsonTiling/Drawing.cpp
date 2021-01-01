@@ -53,7 +53,7 @@ QImage Drawing::makeImage( const QSize& size, const DualGraph& dual )
 
    // draw edges
    painter.setPen( QColor( 0, 0, 0, 192 ) );
-   for ( const DualGraph::VertexPtr& a : dual.allVertices() )
+   for ( const DualGraph::VertexPtr& a : dual.allVisibleVertices() )
    for ( const DualGraph::VertexPtr& b : a.neighbors() ) if ( a < b ) if ( isVisible( a.pos() ) || isVisible( b.pos() ) )
    {
       painter.drawLine( toBitmap( a.pos() ), toBitmap( b.pos() ) );
@@ -62,7 +62,7 @@ QImage Drawing::makeImage( const QSize& size, const DualGraph& dual )
 
    // draw vertices
    painter.setPen( Qt::black );
-   for ( const DualGraph::VertexPtr& a : dual.allVertices() ) if ( isVisible( a.pos() ) )
+   for ( const DualGraph::VertexPtr& a : dual.allVisibleVertices() ) if ( isVisible( a.pos() ) )
    {
       painter.setBrush( tileColor( a.color() ) );
       painter.drawEllipse( toBitmap( a.pos() ), 4, 4 );
@@ -70,7 +70,7 @@ QImage Drawing::makeImage( const QSize& size, const DualGraph& dual )
 
    // draw labels
    painter.setPen( Qt::black );
-   for ( const DualGraph::VertexPtr& a : dual.allVertices() ) if ( isVisible( a.pos() ) )
+   for ( const DualGraph::VertexPtr& a : dual.allVisibleVertices() ) if ( isVisible( a.pos() ) )
    {
       drawTextCentered( painter, toBitmap( a.pos() ) + QPointF( 0, -11 ), a.name() );
    }
