@@ -85,6 +85,7 @@ QImage Drawing::makeImage( const QSize& size, const DualGraph& dual, const TileG
 
    if ( /*_ShowTileGraph &&*/ &graph != nullptr )
    {
+      painter.setPen( Qt::NoPen );
       for ( const TileGraph::TilePtr& tile : graph.allTiles() ) // if ( isVisible( a.pos() ) )
       {
          QPolygonF poly;
@@ -94,7 +95,7 @@ QImage Drawing::makeImage( const QSize& size, const DualGraph& dual, const TileG
          if ( signedArea( poly ) > 0 )
             continue;
 
-         painter.setBrush( withAlpha( tileColor( tile.color() ), .5 ) );
+         painter.setBrush( withAlpha( tileColor( tile.color() ), .7 ) );
          painter.drawPolygon( poly );
       }
 
