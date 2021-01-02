@@ -31,6 +31,7 @@ public:
       }
 
       CORE_API bool operator==( const VertexPtr& rhs ) const { return _Graph == rhs._Graph && _Index == rhs._Index && _SectorId == rhs._SectorId; }
+      CORE_API bool operator!=( const VertexPtr& rhs ) const { return !(*this == rhs); }
       CORE_API bool operator<( const VertexPtr& rhs ) const { return _SectorId != rhs._SectorId ? _SectorId < rhs._SectorId : _Index < rhs._Index; }
       CORE_API bool operator>( const VertexPtr& rhs ) const { return rhs < *this; }
 

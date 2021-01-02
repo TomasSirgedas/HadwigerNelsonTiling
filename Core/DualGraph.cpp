@@ -97,15 +97,20 @@ void DualGraph::toggleEdge( const VertexPtr& a, const VertexPtr& b )
    if ( !a.isValid() || !b.isValid() || a == b )
       return;
 
-   bool hadEdge = _Vertices[a._Index].hasNeighbor( b.unpremul( a._Matrix ) );
+   VertexPtr a0 = a.unpremul( b._Matrix );
+   VertexPtr b0 = b.unpremul( a._Matrix );
+
+   bool hadEdge = _Vertices[a._Index].hasNeighbor( b0 );
    if ( hadEdge )
    {
-      _Vertices[a._Index].removeNeighbor( b.unpremul( a._Matrix ) );
-      _Vertices[b._Index].removeNeighbor( a.unpremul( b._Matrix ) );
+      _Vertices[a._Index].removeNeighbor( b0 );
+      if ( a0 != b0 )
+         _Vertices[b._Index].removeNeighbor( a0 );
    }
    else
    {
-      _Vertices[a._Index].addNeighbor( b.unpremul( a._Matrix ) );
-      _Vertices[b._Index].addNeighbor( a.unpremul( b._Matrix ) );
+      _Vertices[a._Index].addNeighbor( b0 );
+      if ( a0 != b0 )
+         _Vertices[b._Index].addNeighbor( a0 );
    }
 }
