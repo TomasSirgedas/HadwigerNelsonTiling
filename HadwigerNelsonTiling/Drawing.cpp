@@ -91,6 +91,9 @@ QImage Drawing::makeImage( const QSize& size, const DualGraph& dual, const TileG
          for ( const TileGraph::VertexPtr& a : tile.vertices() )
             poly.append( toBitmap( a.pos() ) );
 
+         if ( signedArea( poly ) > 0 )
+            continue;
+
          painter.setBrush( withAlpha( tileColor( tile.color() ), .5 ) );
          painter.drawPolygon( poly );
       }

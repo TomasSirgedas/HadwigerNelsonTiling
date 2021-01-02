@@ -2,8 +2,12 @@
 
 
 std::vector<TileGraph::TilePtr> TileGraph::allTiles() const
-{
-   return rawTiles();
+{   
+   std::vector<TilePtr> ret;
+   for ( const Tile& tile : _Tiles )
+      for ( const Matrix4x4& sector : tile._Symmetry->uniqueSectors() )
+         ret.push_back( tile.toTilePtr( this ).premul( sector ) );
+   return ret;
 }
 
 std::vector<TileGraph::TilePtr> TileGraph::rawTiles() const

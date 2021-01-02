@@ -11,3 +11,13 @@ QColor tileColor( int idx )
 }
 
 QColor withAlpha( const QColor& color, double alpha ) { return QColor( color.red(), color.green(), color.blue(), lround( alpha*255 ) ); }
+
+double signedArea( const QPolygonF& poly )
+{
+   double area2 = poly[0].x() * poly.back().y() - poly.back().x() * poly[0].y();
+      
+   for ( int i = 0; i+1 < poly.size(); i++ )
+      area2 += poly[i+1].x() * poly[i].y() - poly[i].x() * poly[i+1].y();
+
+   return area2 / 2;
+}
