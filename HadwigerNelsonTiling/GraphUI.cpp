@@ -32,6 +32,11 @@ GraphUI::GraphUI( QWidget *parent )
    _DualGraph.reset( new DualGraph( sym, shape ) );
    _DualGraph->addVertex( 0, Icosahedron()[0] );
    _DualGraph->addVertex( 2, (Icosahedron()[0]*3 + Icosahedron()[1] + Icosahedron()[2]*.7).normalized() );
+   _DualGraph->toggleEdge( _DualGraph->vertexWithName( "0" ), _DualGraph->vertexWithName( "1" ) );
+   _DualGraph->toggleEdge( _DualGraph->vertexWithName( "1" ), _DualGraph->vertexWithName( "1-0001" ) );
+   _DualGraph->toggleEdge( _DualGraph->vertexWithName( "1" ), _DualGraph->vertexWithName( "1-0010" ) );
+   _DualGraph->toggleEdge( _DualGraph->vertexWithName( "1" ), _DualGraph->vertexWithName( "1-0011" ) );
+
    //for ( double t = .02; t < 1; t += .02 )
    //   _DualGraph->addVertex( 2, (Icosahedron()[0]*(1-t) + Icosahedron()[1]*t + Icosahedron()[2]*.01 ).normalized() );
    //_DualGraph->addVertex( 5, XYZ(0,0,0) );

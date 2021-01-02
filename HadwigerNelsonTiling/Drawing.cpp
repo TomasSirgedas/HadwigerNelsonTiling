@@ -83,7 +83,7 @@ QImage Drawing::makeImage( const QSize& size, const DualGraph& dual, const TileG
       }
    }
 
-   if ( _ShowTileGraph && &graph != nullptr )
+   if ( /*_ShowTileGraph &&*/ &graph != nullptr )
    {
       for ( const TileGraph::TilePtr& tile : graph.allTiles() ) // if ( isVisible( a.pos() ) )
       {
@@ -91,7 +91,7 @@ QImage Drawing::makeImage( const QSize& size, const DualGraph& dual, const TileG
          for ( const TileGraph::VertexPtr& a : tile.vertices() )
             poly.append( toBitmap( a.pos() ) );
 
-         painter.setBrush( tileColor( tile.color() ) );
+         painter.setBrush( withAlpha( tileColor( tile.color() ), .5 ) );
          painter.drawPolygon( poly );
       }
 

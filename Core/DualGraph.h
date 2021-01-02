@@ -121,6 +121,9 @@ public:
 
    CORE_API DualGraph( std::shared_ptr<IGraphSymmetry> symmetry, std::shared_ptr<IGraphShape> shape );
 
+   CORE_API VertexPtr operator[]( int index ) const { return _Vertices[index].toVertexPtr( this ); }
+   CORE_API VertexPtr vertexWithName( const std::string& name ) const { for ( const VertexPtr& a : allVisibleVertices() ) if ( a.name() == name ) return a; return VertexPtr(); }
+
    CORE_API std::vector<VertexPtr> allVisibleVertices() const;
 
    CORE_API void addVertex( int color, const XYZ& pos );

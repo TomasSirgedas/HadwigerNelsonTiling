@@ -9,3 +9,5 @@ QColor tileColor( int idx )
 {
    return QColor::fromRgb( COLORS[idx] );
 }
+
+QColor withAlpha( const QColor& color, double alpha ) { return QColor( color.red(), color.green(), color.blue(), lround( alpha*255 ) ); }

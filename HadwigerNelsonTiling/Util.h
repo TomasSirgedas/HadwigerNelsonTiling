@@ -8,3 +8,4 @@
 
 QPointF toPointF( const XYZ& pos );
 QColor tileColor( int idx );
+QColor withAlpha( const QColor& color, double alpha );

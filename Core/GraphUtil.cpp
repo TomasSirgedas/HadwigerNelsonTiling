@@ -56,13 +56,8 @@ std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
             for ( const DualGraph::VertexPtr& c : poly )
                sum += c.pos();
 
-            TileGraph::Vertex v( (int) graph->_Vertices.size() );
-            //v._IsSymmetrical = MatrixSymmetryMap::symmetryFor( sum )->hasSymmetry();
-            //v._Neighbors;
-            v._Pos = graph->_GraphShape->toSurfaceFrom3D( sum / poly.size() ) * radius;
-            //v._Tiles;
-            graph->_Vertices.push_back( v );
-            tileVertex = TileGraph::VertexPtr( graph.get(), v._Index, Matrix4x4() );
+            TileGraph::Vertex& v = graph->addVertex( graph->_GraphShape->toSurfaceFrom3D( sum / poly.size() ) * radius );
+            tileVertex = v.toVertexPtr( graph.get() );
             dualPolygonToTileVertex[polyAsSet] = tileVertex;
          }
 
