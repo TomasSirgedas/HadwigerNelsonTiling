@@ -45,10 +45,25 @@ public:
       CORE_API VertexPtr              unpremul( const Matrix4x4& mtx ) const;
       CORE_API std::vector<VertexPtr> neighbors() const;
 
+
+      CORE_API VertexPtr next( const VertexPtr& a ) const { return baseVertex().next( a.unpremul( _Matrix ) ).premul( _Matrix ); }
+      CORE_API std::vector<VertexPtr> polygon( const VertexPtr& a ) const
+      {
+         std::vector<VertexPtr> ret = { a, *this };
+         while ( true )
+         {
+            VertexPtr c = ret.back().next( ret[ret.size()-2] );
+            if ( c == ret[0] )
+               return ret;
+            ret.push_back( c );
+         }
+      }
+      CORE_API int id() const { return isValid() ? _Graph->_Vertices.size() * _Graph->_GraphSymmetry->sectorId( _Matrix ) + _Index : -1; }
+
    public:
       void updateCache();
 
-   private:
+   public:
       const Vertex& baseVertex() const;
 
    private:
@@ -83,6 +98,18 @@ public:
             assert( neighbors.size() == prevCt - 1 );
          }
       }
+      int neighborIndexOf( const VertexPtr& a ) const
+      {
+         for ( int i = 0; i < (int)neighbors.size(); i++ )
+            if ( a == neighbors[i] )
+               return i;
+         return -1;
+      }
+      VertexPtr next( const VertexPtr& a ) const // next neighbor counter-clockwise
+      {
+         int indexOfA = neighborIndexOf( a );
+         return indexOfA == -1 ? VertexPtr() : neighbors[(indexOfA+1)%(int)neighbors.size()];
+      }
 
    public:
       int index;
@@ -107,7 +134,7 @@ public:
 
    CORE_API std::shared_ptr<IGraphShape> shape() { return _GraphShape; }
 
-private:
+public:
    std::vector<Vertex> _Vertices;
    std::shared_ptr<IGraphSymmetry> _GraphSymmetry;
    std::shared_ptr<IGraphShape> _GraphShape;

@@ -127,7 +127,8 @@ public:
 class IGraphShape
 {
 public:
-   virtual bool toSurface( const XYZ& p, XYZ& surfacePoint ) const = 0;
+   virtual bool toSurfaceFrom2D( const XYZ& p, XYZ& surfacePoint ) const = 0;
+   virtual XYZ toSurfaceFrom3D( const XYZ& p ) const = 0;
    virtual double modelSize() const = 0;
    virtual XYZ normalAt( const XYZ& p ) const = 0;
 };
@@ -136,7 +137,7 @@ class GraphShapeSphere : public IGraphShape
 {
 public:
    GraphShapeSphere( double radius ) : _Radius( radius ) {}
-   bool toSurface( const XYZ& p, XYZ& surfacePoint ) const override
+   bool toSurfaceFrom2D( const XYZ& p, XYZ& surfacePoint ) const override
    {
       double z2 = _Radius*_Radius - p.x*p.x - p.y*p.y;
       if ( z2 <= 0 )
@@ -144,6 +145,7 @@ public:
       surfacePoint = XYZ( p.x, p.y, -sqrt( z2 ) );
       return true;
    }
+   XYZ toSurfaceFrom3D( const XYZ& p ) const override { return p.normalized() * _Radius; }
    double modelSize() const override { return _Radius; }
    XYZ normalAt( const XYZ& p ) const override { return p.normalized(); }
 
@@ -156,11 +158,12 @@ class GraphShapePlane : public IGraphShape
 {
 public:
    GraphShapePlane() {}
-   bool toSurface( const XYZ& p, XYZ& surfacePoint ) const override
+   bool toSurfaceFrom2D( const XYZ& p, XYZ& surfacePoint ) const override
    {
       surfacePoint = XYZ( p.x, p.y, 0. );
       return true;
    }
+   XYZ toSurfaceFrom3D( const XYZ& p ) const override { return XYZ( p.x, p.y, 0 ); }
    double modelSize() const override { return 0; }
    XYZ normalAt( const XYZ& p ) const override { return XYZ( 0, 0, -1 ); }
 };
