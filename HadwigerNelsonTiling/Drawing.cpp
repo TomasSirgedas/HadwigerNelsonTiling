@@ -41,7 +41,7 @@ void Drawing::resizeEvent( QResizeEvent *event )
 
 bool Drawing::isVisible( const XYZ& pos ) const
 {
-   return (_ModelRotation * pos).z <= 0;
+   return _GraphShape->isVisible( pos, _ModelRotation );
 }
 
 QImage Drawing::makeImage( const QSize& size, const DualGraph& dual, const TileGraph& graph )

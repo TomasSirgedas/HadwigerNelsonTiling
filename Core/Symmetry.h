@@ -61,7 +61,7 @@ class SymmetryGroup
 {
 public:
    CORE_API SymmetryGroup( const Matrix4x4& matrix, const Perm& colorPerm ) : _Matrix(matrix), _ColorPerm(colorPerm) { init( 0, 0 ); }
-   CORE_API SymmetryGroup( const Matrix4x4& matrix, const Perm& colorPerm, int visibleLoIndex, int visibleHiIndex ) : _Matrix(matrix), _ColorPerm(colorPerm) { init( visibleLoIndex, visibleHiIndex ); }
+   CORE_API SymmetryGroup( const Matrix4x4& matrix, const Perm& colorPerm, int visibleLoIndexHint, int visibleHiIndexHint ) : _Matrix(matrix), _ColorPerm(colorPerm) { init( visibleLoIndexHint, visibleHiIndexHint ); }
    CORE_API int visibleLoIndex() const { return _VisibleLoIndex; }
    CORE_API int visibleHiIndex() const { return _VisibleHiIndex; }
    CORE_API int loIndex() const { return _LoIndex; }
@@ -131,6 +131,7 @@ public:
    virtual XYZ toSurfaceFrom3D( const XYZ& p ) const = 0;
    virtual double modelSize() const = 0;
    virtual XYZ normalAt( const XYZ& p ) const = 0;
+   virtual bool isVisible( const XYZ& pos, const Matrix4x4& rotationMatrix ) const = 0;
 };
 
 class GraphShapeSphere : public IGraphShape
@@ -148,6 +149,7 @@ public:
    XYZ toSurfaceFrom3D( const XYZ& p ) const override { return p.normalized() * _Radius; }
    double modelSize() const override { return _Radius; }
    XYZ normalAt( const XYZ& p ) const override { return p.normalized(); }
+   bool isVisible( const XYZ& pos, const Matrix4x4& rotationMatrix ) const override { return (rotationMatrix * pos).z <= 0; }
 
 private:
    double _Radius;
@@ -166,4 +168,5 @@ public:
    XYZ toSurfaceFrom3D( const XYZ& p ) const override { return XYZ( p.x, p.y, 0 ); }
    double modelSize() const override { return 0; }
    XYZ normalAt( const XYZ& p ) const override { return XYZ( 0, 0, -1 ); }
+   bool isVisible( const XYZ& pos, const Matrix4x4& rotationMatrix ) const override { return true; }
 };

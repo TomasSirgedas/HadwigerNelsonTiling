@@ -4,27 +4,29 @@
 #include <set>
 #include <algorithm>
 
-void SymmetryGroup::init( int loIndexHint, int hiIndexHint )
+void SymmetryGroup::init( int visibleLoIndexHint, int visibleHiIndexHint )
 {
    const int MAX_SIZE = 100;
    Matrix4x4 m = _Matrix;
-   for ( _VisibleHiIndex = 1; !m.eq( Matrix4x4() ) && _VisibleHiIndex <= MAX_SIZE; _VisibleHiIndex++ )
+   for ( _HiIndex = 1; !m.eq( Matrix4x4() ) && _HiIndex <= MAX_SIZE; _HiIndex++ )
       m = _Matrix * m;
+
+   _VisibleLoIndex = visibleLoIndexHint;
+   _VisibleHiIndex = visibleHiIndexHint;
 
    if ( _HiIndex > MAX_SIZE )
    {
-      _VisibleLoIndex = loIndexHint;
-      _VisibleHiIndex = hiIndexHint;
+      _IsFinite = false;
       _LoIndex = _VisibleLoIndex - 8;
       _HiIndex = _VisibleHiIndex + 8;
-      _IsFinite = false;
       assert( _VisibleHiIndex > _VisibleLoIndex );
    }
    else
    {
+      assert( visibleLoIndexHint == 0 && visibleHiIndexHint == 0 ); // only use hints for infinite groups
+      _IsFinite = true;
       _LoIndex = _VisibleLoIndex;
       _HiIndex = _VisibleHiIndex;
-      _IsFinite = true;
       assert( _ColorPerm.pow( _VisibleHiIndex ).isIdentity() ); // make sure color group permutation is valid
    }
 }
