@@ -80,3 +80,4 @@ std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
    return graph;
 }
 
+std::ostream& operator<<( std::ostream& os, const DualGraph::VertexPtr& a ) { return os << a.name(); }

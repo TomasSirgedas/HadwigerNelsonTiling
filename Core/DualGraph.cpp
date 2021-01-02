@@ -6,8 +6,10 @@ XYZ DualGraph::VertexPtr::pos() const { return _Matrix * baseVertex().pos; };
 int DualGraph::VertexPtr::color() const { return _Graph->_GraphSymmetry->toSector( _SectorId, baseVertex().color ); }
 std::string DualGraph::VertexPtr::name() const 
 { 
-   std::string sectorName = _Graph->_GraphSymmetry->sectorName( _SectorId );
-   return std::to_string( _Index ) + (sectorName.empty() ? "" : "-") + sectorName;
+   //std::string sectorName = _Graph->_GraphSymmetry->sectorName( _SectorId );
+   //return std::to_string( _Index ) + (sectorName.empty() ? "" : "-") + sectorName;
+   return std::to_string( _Index ) + "-" + std::to_string( _SectorId );
+   //return std::to_string( id() );
 }
 
 std::vector<DualGraph::VertexPtr> DualGraph::VertexPtr::neighbors() const
@@ -124,7 +126,7 @@ void DualGraph::sortNeighbors()
    for ( Vertex& vtx : _Vertices )
    {
       XYZ n = _GraphShape->normalAt( vtx.pos );
-      Matrix4x4 m = matrixRotateToZAxis( n );
+      Matrix4x4 m = matrixRotateToZAxis( n ) * Matrix4x4::translation( -vtx.pos );
       auto angleOf = [&]( const XYZ& p ) { XYZ q = m*p; return ::atan2( q.y, q.x ); };
       sort( vtx.neighbors.begin(), vtx.neighbors.end(), [&]( const VertexPtr& a, const VertexPtr& b ) { return angleOf( a.pos() ) < angleOf( b.pos() ); } );
    }

@@ -49,7 +49,14 @@ GraphUI::GraphUI( QWidget *parent )
 
       _DualGraph.reset( new DualGraph( sym, shape ) );
       _DualGraph->addVertex( 0, XYZ( 0, 0, 0 ) );
-      _DualGraph->addVertex( 3, XYZ( .7, 0, 0 ) );
+      _DualGraph->addVertex( 3, XYZ( 1.5, 1, 0 ) );
+
+      _DualGraph->toggleEdge( _DualGraph->vertexWithName( "0-180" ), _DualGraph->vertexWithName( "1-180" ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithName( "0-180" ), _DualGraph->vertexWithName( "1-161" ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithName( "0-180" ), _DualGraph->vertexWithName( "0-161" ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithName( "0-180" ), _DualGraph->vertexWithName( "1-160" ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithName( "0-180" ), _DualGraph->vertexWithName( "1-179" ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithName( "1-180" ), _DualGraph->vertexWithName( "1-161" ) );
    }
 
 
