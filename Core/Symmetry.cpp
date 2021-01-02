@@ -104,8 +104,8 @@ SectorSymmetryForVertex::SectorSymmetryForVertex( const IGraphSymmetry* graphSym
    for ( int a = 0; a < (int)allSectors.size(); a++ )
    for ( int b = 0; b < (int)allSectors.size(); b++ )
    {
-      XYZ posA = ( allSectors[a] * pos ).toXYZ();
-      XYZ posB = ( allSectors[b] * pos ).toXYZ();
+      XYZ posA = allSectors[a] * pos;
+      XYZ posB = allSectors[b] * pos;
       if ( posA.dist2( posB ) < 1e-12 )
       {
          _EquivalentSectorIds[a].push_back( b );

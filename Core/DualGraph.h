@@ -100,8 +100,9 @@ public:
    CORE_API VertexPtr vertexAt( const XYZ& pos, double maxDist ) const;
    CORE_API void setVertexColor( const VertexPtr& vtx, int color );
    CORE_API void setVertexPos( const VertexPtr& vtx, const XYZ& pos );
-            
+
    CORE_API void toggleEdge( const VertexPtr& a, const VertexPtr& b );   
+   CORE_API void sortNeighbors();
 
 
    CORE_API std::shared_ptr<IGraphShape> shape() { return _GraphShape; }

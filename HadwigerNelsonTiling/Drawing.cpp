@@ -86,8 +86,8 @@ void Drawing::updateDrawing( const DualGraph& dual )
 bool Drawing::getModelPos( const QPointF& bitmapPos, XYZ& modelPos ) const 
 { 
    XYZ surfacePos;
-   if ( !_GraphShape->toSurface( ( _ModelToBitmap.inverted() * XYZ( bitmapPos.x(), bitmapPos.y(), 0. ) ).toXYZ(), surfacePos ) )
+   if ( !_GraphShape->toSurface( _ModelToBitmap.inverted() * XYZ( bitmapPos.x(), bitmapPos.y(), 0. ), surfacePos ) )
       return false; 
-   modelPos = (_ModelRotation.inverted() * surfacePos).toXYZ();
+   modelPos = _ModelRotation.inverted() * surfacePos;
    return true;
 }

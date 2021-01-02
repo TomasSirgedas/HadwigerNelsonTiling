@@ -67,3 +67,19 @@ uint64_t matrixHash( const Matrix4x4& m )
    uint64_t h = std::hash<std::wstring>{}( str );
    return h;
 }
+
+
+// rotation matrix that rotates p to the Z-axis
+Matrix4x4 matrixRotateToZAxis( XYZ& p )
+{
+   XYZ newZ = p.normalized();
+   XYZ q = abs(newZ.z) < abs(newZ.y) ? XYZ(0,0,1) : XYZ(0,1,0);
+   XYZ newX = (newZ ^ q).normalized();
+   XYZ newY = (newZ ^ newX).normalized();
+   return Matrix4x4( toMatrix( newX, newY, newZ ) ).inverted();
+}
+
+XYZ operator*( const Matrix4x4& m, const XYZ& p ) 
+{
+   return (m * XYZW( p )).toXYZ();
+}

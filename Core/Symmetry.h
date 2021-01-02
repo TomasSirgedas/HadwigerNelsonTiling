@@ -129,13 +129,14 @@ class IGraphShape
 public:
    virtual bool toSurface( const XYZ& p, XYZ& surfacePoint ) const = 0;
    virtual double modelSize() const = 0;
+   virtual XYZ normalAt( const XYZ& p ) const = 0;
 };
 
 class GraphShapeSphere : public IGraphShape
 {
 public:
    GraphShapeSphere( double radius ) : _Radius( radius ) {}
-   bool toSurface( const XYZ& p, XYZ& surfacePoint ) const
+   bool toSurface( const XYZ& p, XYZ& surfacePoint ) const override
    {
       double z2 = _Radius*_Radius - p.x*p.x - p.y*p.y;
       if ( z2 <= 0 )
@@ -143,8 +144,23 @@ public:
       surfacePoint = XYZ( p.x, p.y, -sqrt( z2 ) );
       return true;
    }
-   virtual double modelSize() const { return _Radius; }
+   double modelSize() const override { return _Radius; }
+   XYZ normalAt( const XYZ& p ) const override { return p.normalized(); }
 
 private:
    double _Radius;
+};
+
+
+class GraphShapePlane : public IGraphShape
+{
+public:
+   GraphShapePlane() {}
+   bool toSurface( const XYZ& p, XYZ& surfacePoint ) const override
+   {
+      surfacePoint = XYZ( p.x, p.y, 0. );
+      return true;
+   }
+   double modelSize() const override { return 0; }
+   XYZ normalAt( const XYZ& p ) const override { return XYZ( 0, 0, -1 ); }
 };

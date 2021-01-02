@@ -2,7 +2,7 @@
 
 
 const DualGraph::Vertex& DualGraph::VertexPtr::baseVertex() const { return _Graph->_Vertices[_Index]; }
-XYZ DualGraph::VertexPtr::pos() const { return ( _Matrix * baseVertex().pos ).toXYZ(); };
+XYZ DualGraph::VertexPtr::pos() const { return _Matrix * baseVertex().pos; };
 int DualGraph::VertexPtr::color() const { return _Graph->_GraphSymmetry->toSector( _SectorId, baseVertex().color ); }
 std::string DualGraph::VertexPtr::name() const 
 { 
@@ -89,7 +89,7 @@ void DualGraph::setVertexColor( const VertexPtr& vtx, int color )
 
 void DualGraph::setVertexPos( const VertexPtr& vtx, const XYZ& pos )
 {
-   _Vertices[vtx._Index].pos = (vtx._Matrix.inverted() * pos).toXYZ();
+   _Vertices[vtx._Index].pos = vtx._Matrix.inverted() * pos;
 }
 
 void DualGraph::toggleEdge( const VertexPtr& a, const VertexPtr& b )
@@ -112,5 +112,16 @@ void DualGraph::toggleEdge( const VertexPtr& a, const VertexPtr& b )
       _Vertices[a._Index].addNeighbor( b0 );
       if ( a0 != b0 )
          _Vertices[b._Index].addNeighbor( a0 );
+   }
+}
+
+void DualGraph::sortNeighbors()
+{
+   for ( Vertex& vtx : _Vertices )
+   {
+      XYZ n = _GraphShape->normalAt( vtx.pos );
+      Matrix4x4 m = matrixRotateToZAxis( n );
+      auto angleOf = [&]( const XYZ& p ) { XYZ q = m*p; return ::atan2( q.y, q.x ); };
+      sort( vtx.neighbors.begin(), vtx.neighbors.end(), [&]( const VertexPtr& a, const VertexPtr& b ) { return angleOf( a.pos() ) < angleOf( b.pos() ); } );
    }
 }

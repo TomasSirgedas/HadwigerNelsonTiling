@@ -5,6 +5,7 @@
 
 #include <QWidget>
 #include <Core/DataTypes.h>
+#include <Core/Util.h>
 #include <memory>
 
 class DualGraph;
@@ -20,7 +21,7 @@ public:
 
    void updateDrawing( const DualGraph& dual );
 
-   QPointF toBitmap( const XYZ& modelPos ) { return toPointF( ( _ModelToBitmap * _ModelRotation * modelPos ).toXYZ() ); }
+   QPointF toBitmap( const XYZ& modelPos ) { return toPointF( _ModelToBitmap * _ModelRotation * modelPos ); }
    //XYZ toModelZ0( const QPointF& bitmapPos ) { return ( (_ModelToBitmap * _ModelRotation).inverted() * XYZ( bitmapPos.x(), bitmapPos.y(), 0. ) ).toXYZ(); }
    bool getModelPos( const QPointF& bitmapPos, XYZ& modelPos ) const;
    double toModel( double bitmapSize ) const { return bitmapSize / _PixelsPerUnit; }
