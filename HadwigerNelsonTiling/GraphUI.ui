@@ -33,16 +33,36 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="dualToTileButton">
        <property name="text">
-        <string>PushButton</string>
+        <string>Dual-&gt;Tile</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_2">
+      <widget class="QCheckBox" name="showDualGraphCheckBox">
        <property name="text">
-        <string>PushButton</string>
+        <string>Show Dual Graph</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="showTileGraphCheckBox">
+       <property name="text">
+        <string>Show Tile Graph</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="showLabelsCheckBox">
+       <property name="text">
+        <string>Show Labels</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

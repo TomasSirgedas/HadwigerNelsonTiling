@@ -9,6 +9,7 @@
 #include <memory>
 
 class DualGraph;
+class TileGraph;
 class IGraphShape;
 
 class Drawing : public QWidget
@@ -19,7 +20,7 @@ public:
    Drawing( QWidget *parent = Q_NULLPTR );
    ~Drawing();
 
-   void updateDrawing( const DualGraph& dual );
+   void updateDrawing( const DualGraph& dual, const TileGraph& tileGraph );
 
    QPointF toBitmap( const XYZ& modelPos ) { return toPointF( _ModelToBitmap * _ModelRotation * modelPos ); }
    //XYZ toModelZ0( const QPointF& bitmapPos ) { return ( (_ModelToBitmap * _ModelRotation).inverted() * XYZ( bitmapPos.x(), bitmapPos.y(), 0. ) ).toXYZ(); }
@@ -27,7 +28,7 @@ public:
    double toModel( double bitmapSize ) const { return bitmapSize / _PixelsPerUnit; }
 
    bool isVisible( const XYZ& pos ) const;
-   QImage makeImage( const QSize& size, const DualGraph& dual );
+   QImage makeImage( const QSize& size, const DualGraph& dual, const TileGraph& graph );
 
 
 private:
@@ -51,5 +52,8 @@ public:
    Matrix4x4 _ModelToBitmap;
    Matrix4x4 _ModelRotation;
    double _PixelsPerUnit = 100;
+   bool _ShowTileGraph = false;
+   bool _ShowDualGraph = true;
+   bool _ShowLabels = true;
    std::shared_ptr<IGraphShape> _GraphShape;
 };

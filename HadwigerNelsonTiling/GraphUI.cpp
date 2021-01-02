@@ -2,6 +2,8 @@
 #include "PlatformSpecific.h"
 
 #include <Core/DataTypes.h>
+#include <Core/GraphUtil.h>
+
 #include <QShortcut>
 #include <QMouseEvent>
 #include <QDebug>
@@ -37,8 +39,28 @@ GraphUI::GraphUI( QWidget *parent )
 
    ui.drawing->_GraphShape = _DualGraph->shape();
 
-   connect( ui.drawing, &Drawing::resized, [&](){ updateDrawing(); } );
 
+   connect( ui.dualToTileButton, &QPushButton::clicked, [&](){  
+      _TileGraph = makeTileGraph( *_DualGraph, 1. );
+      updateDrawing();
+   } );
+
+   connect( ui.showTileGraphCheckBox, &QCheckBox::toggled, [&]() {
+      ui.drawing->_ShowTileGraph = ui.showTileGraphCheckBox->isChecked();
+      updateDrawing();
+   } );
+
+   connect( ui.showDualGraphCheckBox, &QCheckBox::toggled, [&]() {
+      ui.drawing->_ShowDualGraph = ui.showDualGraphCheckBox->isChecked();
+      updateDrawing();
+   } );
+
+   connect( ui.showLabelsCheckBox, &QCheckBox::toggled, [&]() {
+      ui.drawing->_ShowLabels = ui.showLabelsCheckBox->isChecked();
+      updateDrawing();
+   } );
+
+   connect( ui.drawing, &Drawing::resized, [&](){ updateDrawing(); } );
 
    connect( ui.drawing, &Drawing::press, [this]( QMouseEvent* event ) {
       if ( event->buttons().testFlag( Qt::LeftButton ) )
@@ -121,7 +143,7 @@ void GraphUI::addVertex( int color )
 
 void GraphUI::updateDrawing()
 {
-   ui.drawing->updateDrawing( *_DualGraph );
+   ui.drawing->updateDrawing( *_DualGraph, *_TileGraph );
 }
 
 void GraphUI::handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isClick, bool isUnclick )

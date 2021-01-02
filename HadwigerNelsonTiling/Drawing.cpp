@@ -3,6 +3,7 @@
 #include <QPainter>
 
 #include <Core/DualGraph.h>
+#include <Core/TileGraph.h>
 
 
 namespace
@@ -43,7 +44,7 @@ bool Drawing::isVisible( const XYZ& pos ) const
    return (_ModelRotation * pos).z <= 0;
 }
 
-QImage Drawing::makeImage( const QSize& size, const DualGraph& dual )
+QImage Drawing::makeImage( const QSize& size, const DualGraph& dual, const TileGraph& graph )
 {
    QImage image( size, QImage::Format_RGB888 );
 
@@ -51,36 +52,57 @@ QImage Drawing::makeImage( const QSize& size, const DualGraph& dual )
    painter.fillRect( image.rect(), Qt::darkGray );
    painter.setRenderHint( QPainter::Antialiasing, true );
 
-   // draw edges
-   painter.setPen( QColor( 0, 0, 0, 192 ) );
-   for ( const DualGraph::VertexPtr& a : dual.allVisibleVertices() )
-   for ( const DualGraph::VertexPtr& b : a.neighbors() ) if ( a < b ) if ( isVisible( a.pos() ) || isVisible( b.pos() ) )
+
+   if ( _ShowDualGraph )
    {
-      painter.drawLine( toBitmap( a.pos() ), toBitmap( b.pos() ) );
-      //painter.drawLine( toBitmap( a.pos() ), toBitmap( (a.pos() + b.pos()) / 2 ) );
+      // draw edges
+      painter.setPen( QColor( 0, 0, 0, 192 ) );
+      for ( const DualGraph::VertexPtr& a : dual.allVisibleVertices() )
+      for ( const DualGraph::VertexPtr& b : a.neighbors() ) if ( a < b ) if ( isVisible( a.pos() ) || isVisible( b.pos() ) )
+      {
+         painter.drawLine( toBitmap( a.pos() ), toBitmap( b.pos() ) );
+         //painter.drawLine( toBitmap( a.pos() ), toBitmap( (a.pos() + b.pos()) / 2 ) );
+      }
+
+      // draw vertices
+      painter.setPen( Qt::black );
+      for ( const DualGraph::VertexPtr& a : dual.allVisibleVertices() ) if ( isVisible( a.pos() ) )
+      {
+         painter.setBrush( tileColor( a.color() ) );
+         painter.drawEllipse( toBitmap( a.pos() ), 4, 4 );
+      }
+
+      // draw labels
+      if ( _ShowLabels )
+      {
+         painter.setPen( Qt::black );
+         for ( const DualGraph::VertexPtr& a : dual.allVisibleVertices() ) if ( isVisible( a.pos() ) )
+         {
+            drawTextCentered( painter, toBitmap( a.pos() ) + QPointF( 0, -11 ), a.name() );
+         }
+      }
    }
 
-   // draw vertices
-   painter.setPen( Qt::black );
-   for ( const DualGraph::VertexPtr& a : dual.allVisibleVertices() ) if ( isVisible( a.pos() ) )
+   if ( _ShowTileGraph && &graph != nullptr )
    {
-      painter.setBrush( tileColor( a.color() ) );
-      painter.drawEllipse( toBitmap( a.pos() ), 4, 4 );
-   }
+      for ( const TileGraph::TilePtr& tile : graph.allTiles() ) // if ( isVisible( a.pos() ) )
+      {
+         QPolygonF poly;
+         for ( const TileGraph::VertexPtr& a : tile.vertices() )
+            poly.append( toBitmap( a.pos() ) );
 
-   // draw labels
-   painter.setPen( Qt::black );
-   for ( const DualGraph::VertexPtr& a : dual.allVisibleVertices() ) if ( isVisible( a.pos() ) )
-   {
-      drawTextCentered( painter, toBitmap( a.pos() ) + QPointF( 0, -11 ), a.name() );
+         painter.setBrush( tileColor( tile.color() ) );
+         painter.drawPolygon( poly );
+      }
+
    }
 
    return image;
 }
 
-void Drawing::updateDrawing( const DualGraph& dual )
+void Drawing::updateDrawing( const DualGraph& dual, const TileGraph& tileGraph )
 {  
-   ui.label->setPixmap( QPixmap::fromImage( makeImage( size(), dual ) ) );
+   ui.label->setPixmap( QPixmap::fromImage( makeImage( size(), dual, tileGraph ) ) );
 }
 
 bool Drawing::getModelPos( const QPointF& bitmapPos, XYZ& modelPos ) const 

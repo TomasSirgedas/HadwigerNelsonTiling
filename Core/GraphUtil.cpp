@@ -7,7 +7,7 @@
 
 
 
-std::shared_ptr<TileGraph> makeGraph( DualGraph& dual, double radius )
+std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
 {
    dual.sortNeighbors();
 
@@ -15,7 +15,7 @@ std::shared_ptr<TileGraph> makeGraph( DualGraph& dual, double radius )
    graph->_GraphShape = dual._GraphShape;
    graph->_GraphSymmetry = dual._GraphSymmetry;
 
-   std::map<std::set<int>, int> dualPolygonToTileVertexIndex;
+   std::map<std::set<int>, TileGraph::VertexPtr> dualPolygonToTileVertex;
 
    for ( const DualGraph::Vertex& aa : dual._Vertices )
    {
@@ -42,9 +42,9 @@ std::shared_ptr<TileGraph> makeGraph( DualGraph& dual, double radius )
                std::set<int> polyAsSet;
                for ( const DualGraph::VertexPtr& c : poly )
                   polyAsSet.insert( c.premul( sector ).id() );
-               if ( dualPolygonToTileVertexIndex.count( polyAsSet ) )
+               if ( dualPolygonToTileVertex.count( polyAsSet ) )
                {
-                  tileVertex = TileGraph::VertexPtr( dualPolygonToTileVertexIndex.at(polyAsSet), sector.inverted() );
+                  tileVertex = dualPolygonToTileVertex.at(polyAsSet).premul( sector.inverted() );
                   break;
                }
             }
@@ -62,8 +62,8 @@ std::shared_ptr<TileGraph> makeGraph( DualGraph& dual, double radius )
             v._Pos = graph->_GraphShape->toSurfaceFrom3D( sum / poly.size() ) * radius;
             //v._Tiles;
             graph->_Vertices.push_back( v );
-            tileVertex = TileGraph::VertexPtr( v._Index, Matrix4x4() );
-            dualPolygonToTileVertexIndex[polyAsSet] = v._Index;
+            tileVertex = TileGraph::VertexPtr( graph.get(), v._Index, Matrix4x4() );
+            dualPolygonToTileVertex[polyAsSet] = tileVertex;
          }
 
          tile._Vertices.push_back( tileVertex );         

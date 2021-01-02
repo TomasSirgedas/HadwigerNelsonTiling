@@ -13,32 +13,51 @@
 class TileGraph
 {
 public:
+   class Tile;
+   class Vertex;
+
    class VertexPtr
    {
    public:
       VertexPtr() {}
-      VertexPtr( int idx, const Matrix4x4& mtx ) : _Index(idx), _Mtx(mtx) {}
-      bool isValid() const { return _Index >= 0; }
-      VertexPtr premul( const Matrix4x4& mtx ) const { return VertexPtr( _Index, mtx * _Mtx ); }
-      bool operator==( const VertexPtr& rhs ) const;
-      uint64_t id() const;
+      VertexPtr( const TileGraph* graph, int idx, const Matrix4x4& mtx ) : _Graph(graph), _Index(idx), _Matrix(mtx) {}
+      CORE_API bool isValid() const { return _Graph != nullptr; }
+      CORE_API VertexPtr premul( const Matrix4x4& mtx ) const { return VertexPtr( _Graph, _Index, mtx * _Matrix ); }
+      CORE_API bool operator==( const VertexPtr& rhs ) const;
+      //uint64_t id() const;
 
+      CORE_API const Vertex& baseVertex() const { return _Graph->_Vertices[_Index]; }
+      CORE_API VertexPtr toVertexPtr( const TileGraph* graph ) const { return VertexPtr( graph, _Index, Matrix4x4() ); }
+      CORE_API XYZ pos() const { return _Matrix * baseVertex()._Pos; }
+
+   private:
+      const TileGraph* _Graph = nullptr;
       int _Index = -1;
-      Matrix4x4 _Mtx;
+      Matrix4x4 _Matrix;
    };
    class TilePtr
    {
    public:
       TilePtr() {}
-      TilePtr( int idx, const Matrix4x4& mtx ) : _Index(idx), _Mtx(mtx) {}
-      TilePtr premul( const Matrix4x4& mtx ) const { return TilePtr( _Index, mtx * _Mtx ); }
-      bool isValid() const { return _Index >= 0; }
+      TilePtr( const TileGraph* graph, int idx, const Matrix4x4& mtx ) : _Graph(graph), _Index(idx), _Matrix(mtx) {}
+      CORE_API TilePtr premul( const Matrix4x4& mtx ) const { return TilePtr( _Graph, _Index, mtx * _Matrix ); }
+      CORE_API bool isValid() const { return _Graph != nullptr; }
       //bool operator==( const TilePtr& rhs ) const;
+
+      CORE_API const Tile& baseTile() const { return _Graph->_Tiles[_Index]; }
+      CORE_API int color() const { return 0; }
+      CORE_API std::vector<VertexPtr> vertices() const;
+
+   private:
+      const TileGraph* _Graph = nullptr;
       int _Index = -1;
-      Matrix4x4 _Mtx;
+      Matrix4x4 _Matrix;
    };
    class Vertex
    {
+   public:
+      VertexPtr toVertexPtr( const TileGraph* graph ) const { return VertexPtr( graph, _Index, Matrix4x4() ); }
+
    public:
       Vertex( int idx ) : _Index(idx) {}
       int _Index;
@@ -50,10 +69,14 @@ public:
    class Tile
    {
    public:
+      TilePtr toTilePtr( const TileGraph* graph ) const { return TilePtr( graph, _Index, Matrix4x4() ); }
+
+   public:
       int _Index;
       int _Color;
       std::vector<VertexPtr> _Vertices;
       std::shared_ptr<SectorSymmetryForVertex> _Symmetry;
+
       //bool _IsSymmetrical = false;
       //std::shared_ptr<MatrixSymmetryMap> _SymmetryMap;
 
@@ -82,7 +105,8 @@ public:
       VertexPtr b;
    };
 
-
+   CORE_API std::vector<TilePtr> rawTiles() const;
+   CORE_API std::vector<TilePtr> allTiles() const;
 
 public:
    std::vector<Vertex> _Vertices;
