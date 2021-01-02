@@ -53,8 +53,9 @@ public:
    virtual int toSector( int sectorId, int color ) const = 0;
    virtual int fromSector( int sectorId, int color ) const = 0;
    virtual std::string sectorName( int sectorId ) const = 0;
-   //virtual std::vector<Matrix4x4> allVisibleSectors() const = 0;
+   virtual std::vector<Matrix4x4> allVisibleSectors() const = 0;
    virtual std::vector<Matrix4x4> allSectors() const = 0;
+   virtual bool isSectorIdVisible( int sectorId ) const = 0;
 
    std::shared_ptr<SectorSymmetryForVertex> calcSectorSymmetry( const XYZ& pos ) const { return std::shared_ptr<SectorSymmetryForVertex>( new SectorSymmetryForVertex( this, pos ) ); }
 };
@@ -77,6 +78,7 @@ public:
    //CORE_API int combine( int indexA, int indexB ) const { return indexOf( matrix( indexA ) * matrix( indexB ) ); }
    CORE_API int combine( int indexA, int indexB ) const { return canonicalizedIndex( indexA + indexB ); }
    CORE_API int invert( int index ) const { return canonicalizedIndex( -index ); }
+   CORE_API bool isVisible( int index ) const { return index >= _VisibleLoIndex && index < _VisibleHiIndex; }
    //CORE_API int indexOf( const Matrix4x4& rhs ) const
    //{
    //   for ( int i = _LoIndex; i < _HiIndex; i++ )
@@ -104,12 +106,13 @@ public:
 
    CORE_API GraphSymmetry_Groups( const std::vector<SymmetryGroup>& groups );
    CORE_API int numSectors() const override { int ret = 1; for ( const SymmetryGroup& g : _Groups ) ret *= g.size(); return ret; }
-   CORE_API int sectorId( const Matrix4x4& sector ) const override { return _SectorHashToId.at( matrixHash( sector ) ); }
+   CORE_API int sectorId( const Matrix4x4& sector ) const override { return  _SectorHashToId.count( matrixHash( sector ) ) ? _SectorHashToId.at( matrixHash( sector ) ) : -1; }
    CORE_API int toSector( int sectorId, int color ) const override { return _SectorIdToColorPerm[sectorId][color]; }
    CORE_API int fromSector( int sectorId, int color ) const override { return _SectorIdToColorPerm[sectorId].inverted()[color]; }
    CORE_API std::string sectorName( int sectorId ) const { return _SectorIdToName[sectorId]; }
-   //CORE_API std::vector<Matrix4x4> allVisibleSectors() const override { return _AllVisibleSectors; }
+   CORE_API std::vector<Matrix4x4> allVisibleSectors() const override { return _AllVisibleSectors; }
    CORE_API std::vector<Matrix4x4> allSectors() const override { return _SectorIdToMatrix; }
+   CORE_API bool isSectorIdVisible( int sectorId ) const override { return _SectorIdIsVisible[sectorId]; }
 
 private:
    void initAllSectorGroupIndexes( int i, std::vector<int>& groupIndexes );
@@ -120,6 +123,8 @@ public:
    //std::vector<Matrix4x4> _AllVisibleSectors;
    std::vector<std::vector<int>> _AllSectorGroupIndexes;
    std::vector<Matrix4x4> _SectorIdToMatrix;
+   std::vector<bool> _SectorIdIsVisible;
+   std::vector<Matrix4x4> _AllVisibleSectors;
    std::vector<Perm> _SectorIdToColorPerm;
    std::vector<std::string> _SectorIdToName;
 };

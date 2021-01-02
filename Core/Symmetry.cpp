@@ -73,6 +73,16 @@ GraphSymmetry_Groups::GraphSymmetry_Groups( const std::vector<SymmetryGroup>& gr
 
       _SectorIdToName.push_back( name );
    }   
+
+   for ( int sectorId = 0; sectorId < (int)_AllSectorGroupIndexes.size(); sectorId++ )
+   {
+      bool isVisible = true;
+      for ( int i = 0; i < N; i++ )
+         isVisible = isVisible && _Groups[i].isVisible( _AllSectorGroupIndexes[sectorId][i] );
+      if ( isVisible )
+         _AllVisibleSectors.push_back( _SectorIdToMatrix[sectorId] );
+      _SectorIdIsVisible.push_back( isVisible );
+   }
 }
 
 void GraphSymmetry_Groups::initAllSectorGroupIndexes( int i, std::vector<int>& groupIndexes )
@@ -115,7 +125,7 @@ SectorSymmetryForVertex::SectorSymmetryForVertex( const IGraphSymmetry* graphSym
       }
    }
 
-   for ( int a = 0; a < (int)allSectors.size(); a++ )
+   for ( int a = 0; a < (int)allSectors.size(); a++ ) if ( _GraphSymmetry->isSectorIdVisible( a ) )
       if ( _EquivalentSectorIds[a][0] == a )
          _UniqueSectors.push_back( allSectors[a] );
 

@@ -20,7 +20,7 @@ Drawing::Drawing( QWidget *parent )
 {
    ui.setupUi( this );
 
-   _ModelRotation = Matrix4x4::rotationY( 0. ) * Matrix4x4::rotationX( -.3 );
+   _ModelRotation = Matrix4x4::rotationY( 0. ) * Matrix4x4::rotationX( -.0 );
 }
 
 Drawing::~Drawing()

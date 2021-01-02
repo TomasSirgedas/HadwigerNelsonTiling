@@ -37,7 +37,7 @@ std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
 
          // find TileGraph vertex if it was already created
          {            
-            for ( const Matrix4x4& sector : dual._GraphSymmetry->allSectors() )
+            for ( const Matrix4x4& sector : dual._GraphSymmetry->allVisibleSectors() )
             {
                std::set<int> polyAsSet;
                for ( const DualGraph::VertexPtr& c : poly )
@@ -50,7 +50,7 @@ std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
             }
          }         
 
-         if ( !tileVertex.isValid() ) // create it if needed
+         if ( !tileVertex.isValid() && !poly.empty() ) // create it if needed
          {
             XYZ sum;
             for ( const DualGraph::VertexPtr& c : poly )
@@ -61,7 +61,8 @@ std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
             dualPolygonToTileVertex[polyAsSet] = tileVertex;
          }
 
-         tile._Vertices.push_back( tileVertex );         
+         if ( tileVertex.isValid() )
+            tile._Vertices.push_back( tileVertex );         
       }
       graph->_Tiles.push_back( tile );
       //for ( const TileGraph::VertexPtr& vtx : tile._Vertices )

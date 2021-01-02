@@ -28,6 +28,8 @@ public:
       {
          _Matrix = baseVertex().symmetry->canonicalizedSector( matrix );
          updateCache();
+         if ( _SectorId < 0 )
+            *this = VertexPtr();
       }
 
       CORE_API bool operator==( const VertexPtr& rhs ) const { return _Graph == rhs._Graph && _Index == rhs._Index && _SectorId == rhs._SectorId; }
@@ -53,6 +55,8 @@ public:
          while ( true )
          {
             VertexPtr c = ret.back().next( ret[ret.size()-2] );
+            if ( !c.isValid() )
+               return {};
             if ( c == ret[0] )
                return ret;
             ret.push_back( c );
