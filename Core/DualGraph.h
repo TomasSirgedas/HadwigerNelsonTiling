@@ -86,12 +86,12 @@ public:
       bool hasNeighbor( VertexPtr a ) const { for ( const VertexPtr& neighb : neighbors ) if ( neighb == a ) return true; return false; }
       void addNeighbor( VertexPtr a ) 
       { 
-         for ( const Matrix4x4& premul : symmetry->sectorEquivalents( 0 ) ) 
+         for ( const Matrix4x4& premul : symmetry->sectorEquivalentsToIdentity() ) 
             neighbors.push_back( a.premul( premul ) ); 
       }
       void removeNeighbor( VertexPtr a ) 
       { 
-         for ( const Matrix4x4& premul : symmetry->sectorEquivalents( 0 ) ) 
+         for ( const Matrix4x4& premul : symmetry->sectorEquivalentsToIdentity() ) 
          {
             size_t prevCt = neighbors.size();
             neighbors.erase( std::remove_if( neighbors.begin(), neighbors.end(), [&]( const VertexPtr& b ) { return a.premul( premul ) == b; } ), neighbors.end() ); 

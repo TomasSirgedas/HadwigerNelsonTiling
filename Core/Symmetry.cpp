@@ -118,6 +118,8 @@ SectorSymmetryForVertex::SectorSymmetryForVertex( const IGraphSymmetry* graphSym
    for ( int a = 0; a < (int)allSectors.size(); a++ )
       if ( _EquivalentSectorIds[a][0] == a )
          _UniqueSectors.push_back( allSectors[a] );
+
+   _IdentitySectorId = graphSymmetry->sectorId( Matrix4x4() );
 }
 
 Matrix4x4 SectorSymmetryForVertex::canonicalizedSector( const Matrix4x4& sector ) const

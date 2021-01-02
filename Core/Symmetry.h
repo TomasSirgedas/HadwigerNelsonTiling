@@ -33,14 +33,16 @@ public:
 
    std::vector<Matrix4x4> uniqueSectors() const { return _UniqueSectors; }
    std::vector<Matrix4x4> sectorEquivalents( int sectorId ) const { return _EquivalentSectors[sectorId]; }
+   std::vector<Matrix4x4> sectorEquivalentsToIdentity() const { return _EquivalentSectors[_IdentitySectorId]; }
    Matrix4x4 canonicalizedSector( const Matrix4x4& sector ) const;
    bool hasSymmetry() const { return _EquivalentSectors[0].size() > 1; }
 
 private:
-   const IGraphSymmetry* _GraphSymmetry;
+   const IGraphSymmetry* _GraphSymmetry = nullptr;
    std::vector<std::vector<int>> _EquivalentSectorIds;
    std::vector<std::vector<Matrix4x4>> _EquivalentSectors;
    std::vector<Matrix4x4> _UniqueSectors;
+   int _IdentitySectorId = -1;
 };
 
 class IGraphSymmetry
