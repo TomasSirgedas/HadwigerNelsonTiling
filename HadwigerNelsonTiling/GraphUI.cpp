@@ -44,11 +44,12 @@ GraphUI::GraphUI( QWidget *parent )
       std::shared_ptr<IGraphShape> shape( new GraphShapePlane );
 
       SymmetryGroup symA( Matrix4x4::translation( XYZ( 0, 2, 0 ) ), Perm( { 1,2,3,4,5,6,0,7,8,9 } ), -1, 2 );
-      std::shared_ptr<IGraphSymmetry> sym( new GraphSymmetry_Groups( { symA } ) );
+      SymmetryGroup symB( Matrix4x4::translation( XYZ( 3, 0, 0 ) ), Perm( { 1,2,3,4,5,6,0,7,8,9 } ).pow( 5 ), -1, 2 );
+      std::shared_ptr<IGraphSymmetry> sym( new GraphSymmetry_Groups( { symA, symB } ) );
 
       _DualGraph.reset( new DualGraph( sym, shape ) );
       _DualGraph->addVertex( 0, XYZ( 0, 0, 0 ) );
-      _DualGraph->addVertex( 1, XYZ( .7, 0, 0 ) );
+      _DualGraph->addVertex( 3, XYZ( .7, 0, 0 ) );
    }
 
 

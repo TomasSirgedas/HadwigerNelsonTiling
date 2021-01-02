@@ -46,6 +46,7 @@ public:
       CORE_API VertexPtr              premul( const Matrix4x4& mtx ) const;
       CORE_API VertexPtr              unpremul( const Matrix4x4& mtx ) const;
       CORE_API std::vector<VertexPtr> neighbors() const;
+      CORE_API bool                   isVisible() const { return _Graph->_GraphSymmetry->isSectorIdVisible( _SectorId ); }
 
 
       CORE_API VertexPtr next( const VertexPtr& a ) const { return baseVertex().next( a.unpremul( _Matrix ) ).premul( _Matrix ); }
@@ -62,7 +63,7 @@ public:
             ret.push_back( c );
          }
       }
-      CORE_API int id() const { return isValid() ? _Graph->_Vertices.size() * _Graph->_GraphSymmetry->sectorId( _Matrix ) + _Index : -1; }
+      CORE_API int id() const { return isValid() ? _Graph->_Vertices.size() * _SectorId + _Index : -1; }
 
    public:
       void updateCache();

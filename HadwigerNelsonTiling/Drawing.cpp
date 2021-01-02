@@ -58,10 +58,12 @@ QImage Drawing::makeImage( const QSize& size, const DualGraph& dual, const TileG
       // draw edges
       painter.setPen( QColor( 0, 0, 0, 192 ) );
       for ( const DualGraph::VertexPtr& a : dual.allVisibleVertices() )
-      for ( const DualGraph::VertexPtr& b : a.neighbors() ) if ( a < b ) if ( isVisible( a.pos() ) || isVisible( b.pos() ) )
-      {
-         painter.drawLine( toBitmap( a.pos() ), toBitmap( b.pos() ) );
-         //painter.drawLine( toBitmap( a.pos() ), toBitmap( (a.pos() + b.pos()) / 2 ) );
+      for ( const DualGraph::VertexPtr& b : a.neighbors() ) if ( isVisible( a.pos() ) || isVisible( b.pos() ) )
+      {  
+         if ( b.isVisible() && a < b )
+            painter.drawLine( toBitmap( a.pos() ), toBitmap( b.pos() ) );
+         if ( !b.isVisible() )
+            painter.drawLine( toBitmap( a.pos() ), toBitmap( (a.pos()*.8 + b.pos()*.2) ) );
       }
 
       // draw vertices

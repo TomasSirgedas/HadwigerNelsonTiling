@@ -1,5 +1,5 @@
 #include "DualGraph.h"
-
+#include "trace.h"
 
 const DualGraph::Vertex& DualGraph::VertexPtr::baseVertex() const { return _Graph->_Vertices[_Index]; }
 XYZ DualGraph::VertexPtr::pos() const { return _Matrix * baseVertex().pos; };
@@ -113,6 +113,10 @@ void DualGraph::toggleEdge( const VertexPtr& a, const VertexPtr& b )
       if ( a0 != b0 )
          _Vertices[b._Index].addNeighbor( a0 );
    }
+
+   for ( auto a : (*this)[0].neighbors() )
+      std::trace << a.name() << " ";
+   std::trace << std::endl;
 }
 
 void DualGraph::sortNeighbors()

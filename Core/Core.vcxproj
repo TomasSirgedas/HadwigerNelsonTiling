@@ -164,6 +164,8 @@
     <ClCompile Include="DualGraph.cpp" />
     <ClCompile Include="Symmetry.cpp" />
     <ClCompile Include="TileGraph.cpp" />
+    <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="trace.cpp" />
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -173,6 +175,8 @@
     <ClInclude Include="DualGraph.h" />
     <ClInclude Include="Symmetry.h" />
     <ClInclude Include="TileGraph.h" />
+    <ClInclude Include="Timer.h" />
+    <ClInclude Include="trace.h" />
     <ClInclude Include="Util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
