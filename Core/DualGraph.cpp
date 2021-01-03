@@ -8,8 +8,8 @@ std::string DualGraph::VertexPtr::name() const
 { 
    //std::string sectorName = _Graph->_GraphSymmetry->sectorName( _SectorId );
    //return std::to_string( _Index ) + (sectorName.empty() ? "" : "-") + sectorName;
-   return std::to_string( _Index ) + "-" + std::to_string( _SectorId );
-   //return std::to_string( id() );
+   //return std::to_string( _Index ) + "-" + std::to_string( _SectorId );
+   return std::to_string( id() );
 }
 
 std::vector<DualGraph::VertexPtr> DualGraph::VertexPtr::neighbors() const
@@ -116,9 +116,9 @@ void DualGraph::toggleEdge( const VertexPtr& a, const VertexPtr& b )
          _Vertices[b._Index].addNeighbor( a0 );
    }
 
-   for ( auto a : (*this)[0].neighbors() )
-      std::trace << a.name() << " ";
-   std::trace << std::endl;
+   //for ( auto a : (*this)[0].neighbors() )
+   //   std::trace << a.name() << " ";
+   //std::trace << std::endl;
 }
 
 void DualGraph::sortNeighbors()

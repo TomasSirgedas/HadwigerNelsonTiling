@@ -8,26 +8,26 @@ void SymmetryGroup::init( int visibleLoIndexHint, int visibleHiIndexHint )
 {
    const int MAX_SIZE = 100;
    Matrix4x4 m = _Matrix;
-   for ( _HiIndex = 1; !m.eq( Matrix4x4() ) && _HiIndex <= MAX_SIZE; _HiIndex++ )
+   int groupSize;
+   for ( groupSize = 1; !m.eq( Matrix4x4() ) && groupSize <= MAX_SIZE; groupSize++ )
       m = _Matrix * m;
 
-   _VisibleLoIndex = visibleLoIndexHint;
-   _VisibleHiIndex = visibleHiIndexHint;
-
-   if ( _HiIndex > MAX_SIZE )
+   if ( groupSize > MAX_SIZE )
    {
       _IsFinite = false;
       _LoIndex = _VisibleLoIndex - 8;
       _HiIndex = _VisibleHiIndex + 8;
+      _VisibleLoIndex = visibleLoIndexHint;
+      _VisibleHiIndex = visibleHiIndexHint;
       assert( _VisibleHiIndex > _VisibleLoIndex );
    }
    else
    {
       assert( visibleLoIndexHint == 0 && visibleHiIndexHint == 0 ); // only use hints for infinite groups
       _IsFinite = true;
-      _LoIndex = _VisibleLoIndex;
-      _HiIndex = _VisibleHiIndex;
-      assert( _ColorPerm.pow( _VisibleHiIndex ).isIdentity() ); // make sure color group permutation is valid
+      _VisibleLoIndex = _LoIndex = 0;
+      _VisibleHiIndex = _HiIndex = groupSize;
+      assert( _ColorPerm.pow( groupSize ).isIdentity() ); // make sure color group permutation is valid
    }
 }
 
