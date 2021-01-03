@@ -21,6 +21,7 @@ public:
 
    bool getMousePos( XYZ& pos ) const;
    DualGraph::VertexPtr dualVertexAtMouse( double maxPixelDist ) const;
+   TileGraph::VertexPtr tileVertexAtMouse( double maxPixelDist ) const;
 
 private:
    Ui::GraphUI ui;
@@ -29,4 +30,5 @@ private:
    std::shared_ptr<TileGraph> _TileGraph;
    DualGraph::VertexPtr _DragDualVtx;
    DualGraph::VertexPtr _DragDualEdgeStartVtx;
+   TileGraph::VertexPtr _DragTileVtx;
 };

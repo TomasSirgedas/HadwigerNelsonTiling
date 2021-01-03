@@ -60,3 +60,27 @@ TileGraph::Vertex& TileGraph::addVertex( const XYZ& pos )
    _Vertices.back()._Symmetry = _GraphSymmetry->calcSectorSymmetry( pos );
    return _Vertices.back();
 }
+
+
+TileGraph::VertexPtr TileGraph::vertexAt( const XYZ& pos, double maxDist ) const
+{
+   VertexPtr ret;
+   double bestDist2 = maxDist * maxDist;
+
+   for ( const VertexPtr& a : allVertices() )
+   {
+      double dist2 = a.pos().dist2( pos );
+      if ( dist2 < bestDist2 )
+      {
+         bestDist2 = dist2;
+         ret = a;
+      }
+   }
+
+   return ret;
+}
+
+void TileGraph::setVertexPos( const VertexPtr& vtx, const XYZ& pos )
+{
+   _Vertices[vtx.index()]._Pos = vtx.matrix().inverted() * pos;
+}

@@ -155,6 +155,15 @@ DualGraph::VertexPtr GraphUI::dualVertexAtMouse( double maxPixelDist ) const
    return _DualGraph->vertexAt( mousePos, ui.drawing->toModel( maxPixelDist ) );
 }
 
+TileGraph::VertexPtr GraphUI::tileVertexAtMouse( double maxPixelDist ) const
+{
+   XYZ mousePos;
+   if ( !getMousePos( mousePos ) )
+      return TileGraph::VertexPtr();
+
+   return _TileGraph->vertexAt( mousePos, ui.drawing->toModel( maxPixelDist ) );
+}
+
 void GraphUI::addVertex( int color )
 {
    DualGraph::VertexPtr vtx = dualVertexAtMouse( 6 );
@@ -192,11 +201,15 @@ void GraphUI::handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isCli
 
       _DragDualVtx = DualGraph::VertexPtr();
       _DragDualEdgeStartVtx = DualGraph::VertexPtr();
+      _DragTileVtx = TileGraph::VertexPtr();
    }
 
-   if ( isKeyDown( 'M' ) && isClick )
+   if ( isClick )
    {
-      _DragDualVtx = dualVertexAtMouse( 8. );
+      if ( isKeyDown( 'M' ) )
+         _DragDualVtx = dualVertexAtMouse( 8. );
+      else
+         _DragTileVtx = tileVertexAtMouse( 8. );
    }
 
    if ( isKeyDown( 'E' ) && isClick )
@@ -204,13 +217,23 @@ void GraphUI::handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isCli
       _DragDualEdgeStartVtx = dualVertexAtMouse( 12. );
    }
 
-   if ( isKeyDown( 'M' ) && isMove )
+   if ( isMove )
    {
-      XYZ modelPos;
-      if ( _DragDualVtx.isValid() )
+      if ( isKeyDown( 'M' ) )
       {
-         _DualGraph->setVertexPos( _DragDualVtx, mousePos );
-         updateDrawing();
+         if ( _DragDualVtx.isValid() )
+         {
+            _DualGraph->setVertexPos( _DragDualVtx, mousePos );
+            updateDrawing();
+         }
+      }
+      else
+      {
+         if ( _DragTileVtx.isValid() )
+         {
+            _TileGraph->setVertexPos( _DragTileVtx, mousePos );
+            updateDrawing();
+         }
       }
    }   
 }
