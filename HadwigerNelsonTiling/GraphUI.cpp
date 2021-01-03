@@ -21,43 +21,43 @@ GraphUI::GraphUI( QWidget *parent )
    //std::shared_ptr<IGraphSymmetry> sym( new GraphSymmetry_Groups( { g3, g5 } ) );
 
 
-   // ico-symmetry sphere
-   {
-      std::shared_ptr<IGraphShape> shape( new GraphShapeSphere( 1. ) );
-
-      SymmetryGroup symA( Icosahedron().map( {0,1,2}, { 5,4,8} ), Perm( { 5,4,2,3,1,0,6,7,8,9 } ) );
-      SymmetryGroup symB( Icosahedron().map( {0,1,2}, {11,7,3} ), Perm( { 5,1,3,2,4,0,6,7,8,9 } ) );
-      SymmetryGroup symC( Icosahedron().map( {0,1,2}, { 1,2,0} ), Perm( { 1,2,0,5,3,4,6,7,8,9 } ) );
-      SymmetryGroup symD( Icosahedron().map( {0,1,2}, { 0,2,3} ), Perm( { 0,2,3,4,5,1,6,7,8,9 } ) );
-      std::shared_ptr<IGraphSymmetry> sym( new GraphSymmetry_Groups( { symA, symB, symC, symD } ) );
-
-      _DualGraph.reset( new DualGraph( sym, shape ) );
-      _DualGraph->addVertex( 0, Icosahedron()[0] );
-      _DualGraph->addVertex( 5, (Icosahedron()[0]*3 + Icosahedron()[1] + Icosahedron()[2]*.7).normalized() );
-      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 0 ), _DualGraph->vertexWithId( 1 ) );
-      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 1 ), _DualGraph->vertexWithId( 3 ) );
-      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 1 ), _DualGraph->vertexWithId( 11 ) );
-      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 1 ), _DualGraph->vertexWithId( 13 ) );
-   }
-
+   //// ico-symmetry sphere
    //{
-   //   std::shared_ptr<IGraphShape> shape( new GraphShapePlane );
+   //   std::shared_ptr<IGraphShape> shape( new GraphShapeSphere( 1. ) );
 
-   //   SymmetryGroup symA( Matrix4x4::translation( XYZ( 0, 2, 0 ) ), Perm( { 1,2,3,4,5,6,0,7,8,9 } ), -1, 2 );
-   //   SymmetryGroup symB( Matrix4x4::translation( XYZ( 3, 0, 0 ) ), Perm( { 1,2,3,4,5,6,0,7,8,9 } ).pow( 5 ), -1, 2 );
-   //   std::shared_ptr<IGraphSymmetry> sym( new GraphSymmetry_Groups( { symA, symB } ) );
+   //   SymmetryGroup symA( Icosahedron().map( {0,1,2}, { 5,4,8} ), Perm( { 5,4,2,3,1,0,6,7,8,9 } ) );
+   //   SymmetryGroup symB( Icosahedron().map( {0,1,2}, {11,7,3} ), Perm( { 5,1,3,2,4,0,6,7,8,9 } ) );
+   //   SymmetryGroup symC( Icosahedron().map( {0,1,2}, { 1,2,0} ), Perm( { 1,2,0,5,3,4,6,7,8,9 } ) );
+   //   SymmetryGroup symD( Icosahedron().map( {0,1,2}, { 0,2,3} ), Perm( { 0,2,3,4,5,1,6,7,8,9 } ) );
+   //   std::shared_ptr<IGraphSymmetry> sym( new GraphSymmetry_Groups( { symA, symB, symC, symD } ) );
 
    //   _DualGraph.reset( new DualGraph( sym, shape ) );
-   //   _DualGraph->addVertex( 0, XYZ( 0, 0, 0 ) );
-   //   _DualGraph->addVertex( 3, XYZ( 1.5, 1, 0 ) );
-
-   //   _DualGraph->toggleEdge( _DualGraph->vertexWithName( "0-180" ), _DualGraph->vertexWithName( "1-180" ) );
-   //   _DualGraph->toggleEdge( _DualGraph->vertexWithName( "0-180" ), _DualGraph->vertexWithName( "1-161" ) );
-   //   _DualGraph->toggleEdge( _DualGraph->vertexWithName( "0-180" ), _DualGraph->vertexWithName( "0-161" ) );
-   //   _DualGraph->toggleEdge( _DualGraph->vertexWithName( "0-180" ), _DualGraph->vertexWithName( "1-160" ) );
-   //   _DualGraph->toggleEdge( _DualGraph->vertexWithName( "0-180" ), _DualGraph->vertexWithName( "1-179" ) );
-   //   _DualGraph->toggleEdge( _DualGraph->vertexWithName( "1-180" ), _DualGraph->vertexWithName( "1-161" ) );
+   //   _DualGraph->addVertex( 0, Icosahedron()[0] );
+   //   _DualGraph->addVertex( 5, (Icosahedron()[0]*3 + Icosahedron()[1] + Icosahedron()[2]*.7).normalized() );
+   //   _DualGraph->toggleEdge( _DualGraph->vertexWithId( 0 ), _DualGraph->vertexWithId( 1 ) );
+   //   _DualGraph->toggleEdge( _DualGraph->vertexWithId( 1 ), _DualGraph->vertexWithId( 3 ) );
+   //   _DualGraph->toggleEdge( _DualGraph->vertexWithId( 1 ), _DualGraph->vertexWithId( 11 ) );
+   //   _DualGraph->toggleEdge( _DualGraph->vertexWithId( 1 ), _DualGraph->vertexWithId( 13 ) );
    //}
+
+   {
+      std::shared_ptr<IGraphShape> shape( new GraphShapePlane );
+
+      SymmetryGroup symA( Matrix4x4::translation( XYZ( 0, 2, 0 ) ), Perm( { 1,2,3,4,5,6,0,7,8,9 } ), -1, 2 );
+      SymmetryGroup symB( Matrix4x4::translation( XYZ( 3, 0, 0 ) ), Perm( { 1,2,3,4,5,6,0,7,8,9 } ).pow( 5 ), -1, 2 );
+      std::shared_ptr<IGraphSymmetry> sym( new GraphSymmetry_Groups( { symA, symB } ) );
+
+      _DualGraph.reset( new DualGraph( sym, shape ) );
+      _DualGraph->addVertex( 0, XYZ( 0, 0, 0 ) );
+      _DualGraph->addVertex( 3, XYZ( 1.5, 1, 0 ) );
+
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 272 ), _DualGraph->vertexWithId( 273 ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 272 ), _DualGraph->vertexWithId( 241 ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 272 ), _DualGraph->vertexWithId( 240 ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 272 ), _DualGraph->vertexWithId( 239 ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 272 ), _DualGraph->vertexWithId( 271 ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 239 ), _DualGraph->vertexWithId( 271 ) );
+   }
 
 
 
