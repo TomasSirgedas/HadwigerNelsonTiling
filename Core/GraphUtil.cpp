@@ -87,22 +87,22 @@ std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
    for ( const DualGraph::VertexPtr& c : pr.second )
       graph->_Vertices[pr.first]._Tiles.push_back( TileGraph::TilePtr( graph.get(), c.index(), c.matrix() ) );
 
-   //// populate vertex `_Neighbors`
-   //for ( const TileGraph::VertexPtr& a : graph->rawVertices() )
-   //{
-   //   std::vector<TileGraph::TilePtr> tiles = a.tiles();
-   //   for ( int i = 0; i < (int) tiles.size(); i++ )
-   //   {
-   //      const TileGraph::TilePtr& tile = tiles[i];
-   //      const TileGraph::TilePtr& nextTile = tiles[(i+1)%tiles.size()];
-   //      const TileGraph::VertexPtr v0 = tile.next( a );
-   //      const TileGraph::VertexPtr v1 = nextTile.prev( a );
+   // populate vertex `_Neighbors`
+   for ( const TileGraph::VertexPtr& a : graph->rawVertices() )
+   {
+      std::vector<TileGraph::TilePtr> tiles = a.tiles();
+      for ( int i = 0; i < (int) tiles.size(); i++ )
+      {
+         const TileGraph::TilePtr& tile = tiles[i];
+         const TileGraph::TilePtr& nextTile = tiles[(i+1)%tiles.size()];
+         const TileGraph::VertexPtr v0 = tile.next( a );
+         const TileGraph::VertexPtr v1 = nextTile.prev( a );
 
-   //      graph->_Vertices[a.index()]._Neighbors.push_back( v0 );
-   //      if ( v0 != v1 )
-   //         graph->_Vertices[a.index()]._Neighbors.push_back( v1 );
-   //   }
-   //}
+         graph->_Vertices[a.index()]._Neighbors.push_back( v0 );
+         if ( v0 != v1 )
+            graph->_Vertices[a.index()]._Neighbors.push_back( v1 );
+      }
+   }
 
    //   for ( const Graph::VertexPtr& a : graph->allVertices() )
    //      for ( const Graph::VertexPtr& b : graph->neighbors( a ) )
