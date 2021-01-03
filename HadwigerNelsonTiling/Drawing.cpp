@@ -110,7 +110,17 @@ QImage Drawing::makeImage( const QSize& size, const DualGraph& dual, const TileG
          {
             drawTextCentered( painter, toBitmap( a.pos() ) + QPointF( 0, -7 ), a.name() );
          }
+
+
+         //// tile label(?) -- same as dual graph vertex label
+         //painter.setPen( Qt::black );
+         //for ( const TileGraph::TilePtr& tile : graph.allTiles() ) if ( isVisible( tile.avgPos() ) )
+         //{
+         //   XYZ p = tile.avgPos();
+         //   drawTextCentered( painter, toBitmap( tile.avgPos() ), "[" + tile.name() + "]" );
+         //}
       }
+
    }
 
    return image;

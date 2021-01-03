@@ -52,6 +52,15 @@ void TileGraph::TilePtr::updateCache()
    _SectorId = _Graph->_GraphSymmetry->sectorId( _Matrix );
 }
 
+XYZ TileGraph::TilePtr::avgPos() const
+{
+   XYZ sum;
+   for ( const VertexPtr& a : vertices() )
+      sum += a.pos();
+   return _Graph->_GraphShape->toSurfaceFrom3D( sum / vertices().size() );
+}
+
+
 
 
 TileGraph::Vertex& TileGraph::addVertex( const XYZ& pos )

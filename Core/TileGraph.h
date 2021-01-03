@@ -65,6 +65,9 @@ public:
       CORE_API const Tile& baseTile() const { return _Graph->_Tiles[_Index]; }
       CORE_API int color() const { return _Graph->_GraphSymmetry->toSector( _SectorId, baseTile()._Color ); }
       CORE_API std::vector<VertexPtr> vertices() const;
+      CORE_API XYZ avgPos() const;
+      CORE_API int id() const { return isValid() ? _Graph->_Tiles.size() * _SectorId + _Index : -1; }
+      CORE_API std::string name() const { return std::to_string( id() ); }
 
    public:
       void updateCache();
