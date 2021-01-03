@@ -54,6 +54,14 @@ void DualGraph::addVertex( int color, const XYZ& pos )
 }
 
 
+std::vector<DualGraph::VertexPtr> DualGraph::rawVertices() const
+{
+   std::vector<VertexPtr> ret;
+   for ( const Vertex& vtx : _Vertices )
+      ret.push_back( vtx.toVertexPtr( this ) );
+   return ret;
+}
+
 std::vector<DualGraph::VertexPtr> DualGraph::allVisibleVertices() const
 {
    std::vector<VertexPtr> ret;

@@ -133,6 +133,7 @@ public:
    CORE_API VertexPtr vertexWithId( int id ) const { for ( const VertexPtr& a : allVisibleVertices() ) if ( a.id() == id ) return a; return VertexPtr(); }
 
    CORE_API std::vector<VertexPtr> allVisibleVertices() const;
+   CORE_API std::vector<VertexPtr> rawVertices() const;
 
    CORE_API void addVertex( int color, const XYZ& pos );
    CORE_API VertexPtr vertexAt( const XYZ& pos, double maxDist ) const;

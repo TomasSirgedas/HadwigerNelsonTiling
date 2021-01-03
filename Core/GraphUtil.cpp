@@ -4,7 +4,43 @@
 
 #include <map>
 #include <set>
+#include <functional>
 
+class PolyToVertexMap
+{
+public:
+   PolyToVertexMap( DualGraph& dual ) : _Dual( dual )
+   {
+   }
+
+   TileGraph::VertexPtr createOrFindTileGraphVertex( const std::vector<DualGraph::VertexPtr>& poly, std::function<TileGraph::VertexPtr(const XYZ&)> createVertexFunc )
+   {
+      // check cache
+      for ( const Matrix4x4& sector : _Dual._GraphSymmetry->allSectors() )
+      {
+         std::set<int> polyAsSet;
+         for ( const DualGraph::VertexPtr& c : poly )
+            polyAsSet.insert( c.premul( sector ).id() );
+         if ( _DualPolygonToTileVertex.count( polyAsSet ) )
+            return _DualPolygonToTileVertex.at(polyAsSet).premul( sector.inverted() );
+      }
+
+      // create new
+      std::set<int> polyAsSet;
+      for ( const DualGraph::VertexPtr& c : poly )
+         polyAsSet.insert( c.id() );
+
+      XYZ sum;
+      for ( const DualGraph::VertexPtr& c : poly )
+         sum += c.pos();
+
+      return _DualPolygonToTileVertex[polyAsSet] = createVertexFunc( sum / poly.size() );
+   }
+
+public:
+   DualGraph& _Dual;
+   std::map<std::set<int>, TileGraph::VertexPtr> _DualPolygonToTileVertex;
+};
 
 std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
 {
@@ -14,13 +50,12 @@ std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
    graph->_GraphShape = dual._GraphShape;
    graph->_GraphSymmetry = dual._GraphSymmetry;
 
-   std::map<std::set<int>, TileGraph::VertexPtr> dualPolygonToTileVertex;
+   //std::map<std::set<int>, TileGraph::VertexPtr> dualPolygonToTileVertex;
+   PolyToVertexMap dualPolygonToTileVertexMap( dual );
    std::map<int, std::vector<DualGraph::VertexPtr>> polyMap;
 
-   for ( const DualGraph::Vertex& aa : dual._Vertices )
+   for ( const DualGraph::VertexPtr& a : dual.rawVertices() )
    {
-      DualGraph::VertexPtr a = aa.toVertexPtr( &dual );
-
       TileGraph::Tile tile;
       tile._Index = (int) graph->_Tiles.size();
       tile._Color = a.color();
@@ -29,39 +64,18 @@ std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
       for ( const DualGraph::VertexPtr& b : a.neighbors() )
       {
          std::vector<DualGraph::VertexPtr> poly = a.polygon( b );
-
-         TileGraph::VertexPtr tileVertex;
-         std::set<int> polyAsSet;
-         for ( const DualGraph::VertexPtr& c : poly )
-            polyAsSet.insert( c.id() );
-
-         // find TileGraph vertex if it was already created
-         {            
-            for ( const Matrix4x4& sector : dual._GraphSymmetry->allSectors() )
-            {
-               std::set<int> polyAsSet;
-               for ( const DualGraph::VertexPtr& c : poly )
-                  polyAsSet.insert( c.premul( sector ).id() );
-               if ( dualPolygonToTileVertex.count( polyAsSet ) )
-               {
-                  tileVertex = dualPolygonToTileVertex.at(polyAsSet).premul( sector.inverted() );
-                  break;
-               }
-            }
-         }         
-
-         if ( !tileVertex.isValid() && !poly.empty() ) // create it if needed
+         if ( poly.empty() )
          {
-            XYZ sum;
-            for ( const DualGraph::VertexPtr& c : poly )
-               sum += c.pos();
-
-            TileGraph::Vertex& v = graph->addVertex( graph->_GraphShape->toSurfaceFrom3D( sum / poly.size() ) * radius );
-            tileVertex = v.toVertexPtr( graph.get() );
-            dualPolygonToTileVertex[polyAsSet] = tileVertex;
-            polyMap[v._Index] = poly; // used to populate tile neighbors later
+            continue;
          }
 
+         TileGraph::VertexPtr tileVertex = dualPolygonToTileVertexMap.createOrFindTileGraphVertex( poly, [&]( const XYZ& pos ) {
+            TileGraph::Vertex& v = graph->addVertex( graph->_GraphShape->toSurfaceFrom3D( pos ) );
+            polyMap[v._Index] = poly; // used to populate tile neighbors later
+            return v.toVertexPtr( graph.get() );
+         } );
+
+         assert( tileVertex.isValid() );
          if ( tileVertex.isValid() )
          {
             tile._Vertices.push_back( tileVertex );
