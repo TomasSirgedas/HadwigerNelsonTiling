@@ -14,6 +14,7 @@ class TileGraph
 {
 public:
    class Tile;
+   class TilePtr;
    class Vertex;
 
    class VertexPtr
@@ -27,7 +28,8 @@ public:
       }
       CORE_API bool isValid() const { return _Graph != nullptr; }
       CORE_API VertexPtr premul( const Matrix4x4& mtx ) const { return VertexPtr( _Graph, _Index, mtx * _Matrix ); }
-      CORE_API bool operator==( const VertexPtr& rhs ) const;
+      CORE_API bool operator==( const VertexPtr& rhs ) const { return _Graph == rhs._Graph && _Index == rhs._Index && _SectorId == rhs._SectorId; }
+      CORE_API bool operator!=( const VertexPtr& rhs ) const { return !(*this == rhs); }
       //uint64_t id() const;
 
       CORE_API const Vertex& baseVertex() const { return _Graph->_Vertices[_Index]; }
@@ -37,6 +39,8 @@ public:
       CORE_API std::string name() const { return std::to_string( id() ); }
       CORE_API const Matrix4x4& matrix() const { return _Matrix; }
       CORE_API int index() const { return _Index; }
+      CORE_API std::vector<TilePtr> tiles() const;
+      CORE_API std::vector<VertexPtr> neighbors() const;
 
    public:
       void updateCache();
@@ -68,6 +72,8 @@ public:
       CORE_API XYZ avgPos() const;
       CORE_API int id() const { return isValid() ? _Graph->_Tiles.size() * _SectorId + _Index : -1; }
       CORE_API std::string name() const { return std::to_string( id() ); }
+      CORE_API VertexPtr next( const VertexPtr& a ) const { return baseTile().next( a.premul( _Matrix.inverted() ) ).premul( _Matrix ); }
+      CORE_API VertexPtr prev( const VertexPtr& a ) const { return baseTile().prev( a.premul( _Matrix.inverted() ) ).premul( _Matrix ); }
 
    public:
       void updateCache();
@@ -89,14 +95,20 @@ public:
       Vertex( int idx, const XYZ& pos ) : _Index(idx), _Pos(pos) {}
       int _Index;
       XYZ _Pos;
-      //std::vector<VertexPtr> _Neighbors;
-      //std::vector<TilePtr> _Tiles;
+      std::vector<VertexPtr> _Neighbors;
+      std::vector<TilePtr> _Tiles;
       std::shared_ptr<SectorSymmetryForVertex> _Symmetry;
    };
    class Tile
    {
    public:
       TilePtr toTilePtr( const TileGraph* graph ) const { return TilePtr( graph, _Index, Matrix4x4() ); }
+
+      VertexPtr next( const VertexPtr& a ) const { return _Vertices[mod(verticesIndexOf(a)+1, (int)_Vertices.size())]; }
+      VertexPtr prev( const VertexPtr& a ) const { return _Vertices[mod(verticesIndexOf(a)-1, (int)_Vertices.size())]; }
+
+   private:
+      int verticesIndexOf( const VertexPtr& a ) const { for ( int i = 0; i < (int) _Vertices.size(); i++ ) if ( _Vertices[i] == a ) return i; throw 777; return -1; }
 
    public:
       int _Index;
@@ -135,6 +147,7 @@ public:
    CORE_API Vertex& addVertex( const XYZ& pos );
 
    CORE_API std::vector<TilePtr> rawTiles() const;
+   CORE_API std::vector<VertexPtr> rawVertices() const;
    CORE_API std::vector<TilePtr> allTiles() const;
    CORE_API std::vector<VertexPtr> allVertices() const;
 

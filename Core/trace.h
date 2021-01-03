@@ -2,7 +2,9 @@
 
 #include <iostream>
 
+#include "CoreMacros.h"
+
 namespace std
 {
-   extern std::basic_ostream<char, std::char_traits<char>> trace;
+   CORE_API extern std::basic_ostream<char, std::char_traits<char>> trace;
 }

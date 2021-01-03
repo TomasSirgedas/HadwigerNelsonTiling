@@ -16,6 +16,7 @@ std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
    graph->_GraphSymmetry = dual._GraphSymmetry;
 
    std::map<std::set<int>, TileGraph::VertexPtr> dualPolygonToTileVertex;
+   std::map<int, std::vector<DualGraph::VertexPtr>> polyMap;
 
    for ( const DualGraph::Vertex& aa : dual._Vertices )
    {
@@ -59,19 +60,38 @@ std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
             TileGraph::Vertex& v = graph->addVertex( graph->_GraphShape->toSurfaceFrom3D( sum / poly.size() ) * radius );
             tileVertex = v.toVertexPtr( graph.get() );
             dualPolygonToTileVertex[polyAsSet] = tileVertex;
+            polyMap[v._Index] = poly; // used to populate tile neighbors later
          }
 
          if ( tileVertex.isValid() )
-            tile._Vertices.push_back( tileVertex );         
+         {
+            tile._Vertices.push_back( tileVertex );
+         }
       }
       graph->_Tiles.push_back( tile );
-      //for ( const TileGraph::VertexPtr& vtx : tile._Vertices )
-      //   if ( tile._SymmetryMap->isReal( vtx._Mtx ) ) // only add one copy
-      //      graph->_Vertices[vtx._Index]._Tiles.push_back( TileGraph::TilePtr( tile._Index, vtx._Mtx.inverted() ) );
-      //for ( int i = 0; i < (int) tile._Vertices.size(); i++ )
-      //   graph->addNeighbor( tile._Vertices[i], tile._Vertices[(i+1)%tile._Vertices.size()] );
    }
 
+   // populate vertex `_Tiles`
+   for ( auto& pr : polyMap )
+   for ( const DualGraph::VertexPtr& c : pr.second )
+      graph->_Vertices[pr.first]._Tiles.push_back( TileGraph::TilePtr( graph.get(), c.index(), c.matrix() ) );
+
+   // populate vertex `_Neighbors`
+   for ( const TileGraph::VertexPtr& a : graph->rawVertices() )
+   {
+      std::vector<TileGraph::TilePtr> tiles = a.tiles();
+      for ( int i = 0; i < (int) tiles.size(); i++ )
+      {
+         const TileGraph::TilePtr& tile = tiles[i];
+         const TileGraph::TilePtr& nextTile = tiles[(i+1)%tiles.size()];
+         const TileGraph::VertexPtr v0 = tile.next( a );
+         const TileGraph::VertexPtr v1 = nextTile.prev( a );
+
+         graph->_Vertices[a.index()]._Neighbors.push_back( v0 );
+         if ( v0 != v1 )
+            graph->_Vertices[a.index()]._Neighbors.push_back( v1 );
+      }
+   }
 
    //   for ( const Graph::VertexPtr& a : graph->allVertices() )
    //      for ( const Graph::VertexPtr& b : graph->neighbors( a ) )
@@ -81,3 +101,5 @@ std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
 }
 
 std::ostream& operator<<( std::ostream& os, const DualGraph::VertexPtr& a ) { return os << a.name(); }
+std::ostream& operator<<( std::ostream& os, const TileGraph::VertexPtr& a ) { return os << a.name(); }
+std::ostream& operator<<( std::ostream& os, const TileGraph::TilePtr& a ) { return os << a.name(); }

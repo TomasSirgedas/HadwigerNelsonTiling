@@ -3,6 +3,7 @@
 
 #include <Core/DataTypes.h>
 #include <Core/GraphUtil.h>
+#include <Core/Util.h>
 
 #include <QShortcut>
 #include <QMouseEvent>
@@ -210,6 +211,12 @@ void GraphUI::handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isCli
          _DragDualVtx = dualVertexAtMouse( 8. );
       else
          _DragTileVtx = tileVertexAtMouse( 8. );
+
+      if ( _DragTileVtx.isValid() )
+      {
+         std::trace << "_DragTileVtx.tiles() = " << _DragTileVtx.tiles() << std::endl;
+         std::trace << "_DragTileVtx.neighbors() = " << _DragTileVtx.neighbors() << std::endl;
+      }
    }
 
    if ( isKeyDown( 'E' ) && isClick )

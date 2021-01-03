@@ -64,6 +64,8 @@ public:
          }
       }
       CORE_API int id() const { return isValid() ? _Graph->_Vertices.size() * _SectorId + _Index : -1; }
+      CORE_API int index() const { return isValid() ? _Index : -1; }
+      CORE_API Matrix4x4 matrix() const { return _Matrix; }
 
    public:
       void updateCache();

@@ -24,6 +24,14 @@ std::vector<TileGraph::VertexPtr> TileGraph::allVertices() const
    return ret;
 }
 
+std::vector<TileGraph::VertexPtr> TileGraph::rawVertices() const
+{
+   std::vector<VertexPtr> ret;
+   for ( const Vertex& a : _Vertices )
+      ret.push_back( a.toVertexPtr( this ) );
+   return ret;
+}
+
 std::vector<TileGraph::TilePtr> TileGraph::rawTiles() const
 {
    std::vector<TilePtr> ret;
@@ -37,6 +45,21 @@ void TileGraph::VertexPtr::updateCache()
    _SectorId = _Graph->_GraphSymmetry->sectorId( _Matrix );
 }
 
+std::vector<TileGraph::TilePtr> TileGraph::VertexPtr::tiles() const
+{
+   std::vector<TilePtr> ret;
+   for ( const TilePtr& tile : baseVertex()._Tiles )
+      ret.push_back( tile.premul( matrix() ) );
+   return ret;
+}
+
+std::vector<TileGraph::VertexPtr> TileGraph::VertexPtr::neighbors() const
+{
+   std::vector<VertexPtr> ret;
+   for ( const VertexPtr& vtx : baseVertex()._Neighbors )
+      ret.push_back( vtx.premul( matrix() ) );
+   return ret;
+}
 
 
 std::vector<TileGraph::VertexPtr> TileGraph::TilePtr::vertices() const
