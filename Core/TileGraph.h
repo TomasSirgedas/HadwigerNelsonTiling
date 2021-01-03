@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <cassert>
 
+static const int MAX_TILEGRAPH_VERTICES = 1000;
+
 class TileGraph
 {
 public:
@@ -35,9 +37,9 @@ public:
       CORE_API const Vertex& baseVertex() const { return _Graph->_Vertices[_Index]; }
       CORE_API VertexPtr toVertexPtr( const TileGraph* graph ) const { return VertexPtr( graph, _Index, Matrix4x4() ); }
       CORE_API XYZ pos() const { return _Matrix * baseVertex()._Pos; }
-      CORE_API int id() const { return isValid() ? _Graph->_Vertices.size() * _SectorId + _Index : -1; }
-      //CORE_API std::string name() const { return std::to_string( id() ); }
-      CORE_API std::string name() const { return std::to_string( _Index ) + "-" + std::to_string( _SectorId ); }
+      CORE_API int id() const { return isValid() ? MAX_TILEGRAPH_VERTICES * _SectorId + _Index : -1; }
+      CORE_API std::string name() const { return std::to_string( id() ); }
+      //CORE_API std::string name() const { return std::to_string( _Index ) + "-" + std::to_string( _SectorId ); }
       CORE_API const Matrix4x4& matrix() const { return _Matrix; }
       CORE_API int index() const { return _Index; }
       CORE_API std::vector<TilePtr> tiles() const;
@@ -71,7 +73,7 @@ public:
       CORE_API int color() const { return _Graph->_GraphSymmetry->toSector( _SectorId, baseTile()._Color ); }
       CORE_API std::vector<VertexPtr> vertices() const;
       CORE_API XYZ avgPos() const;
-      CORE_API int id() const { return isValid() ? _Graph->_Tiles.size() * _SectorId + _Index : -1; }
+      CORE_API int id() const { return isValid() ? MAX_TILEGRAPH_VERTICES * _SectorId + _Index : -1; }
       //CORE_API std::string name() const { return std::to_string( id() ); }
       CORE_API std::string name() const { return std::to_string( _Index ) + "-" + std::to_string( _SectorId ); }
       CORE_API VertexPtr next( const VertexPtr& a ) const { return baseTile().next( a.premul( _Matrix.inverted() ) ).premul( _Matrix ); }

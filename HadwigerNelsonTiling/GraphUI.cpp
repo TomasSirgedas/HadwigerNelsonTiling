@@ -31,9 +31,9 @@ namespace
          dual->addVertex( 0, Icosahedron()[0] );
          dual->addVertex( 5, (Icosahedron()[0]*3 + Icosahedron()[1] + Icosahedron()[2]*.7).normalized() );
          dual->toggleEdge( dual->vertexWithId( 0 ), dual->vertexWithId( 1 ) );
-         dual->toggleEdge( dual->vertexWithId( 1 ), dual->vertexWithId( 3 ) );
-         dual->toggleEdge( dual->vertexWithId( 1 ), dual->vertexWithId( 11 ) );
-         dual->toggleEdge( dual->vertexWithId( 1 ), dual->vertexWithId( 13 ) );
+         dual->toggleEdge( dual->vertexWithId( 1 ), dual->vertexWithId( 5001 ) );
+         dual->toggleEdge( dual->vertexWithId( 1 ), dual->vertexWithId( 1001 ) );
+         dual->toggleEdge( dual->vertexWithId( 1 ), dual->vertexWithId( 6001 ) );
       }
 
       if ( index == 2 )
@@ -48,12 +48,12 @@ namespace
          dual->addVertex( 0, XYZ( 0, 0, 0 ) );
          dual->addVertex( 3, XYZ( 1.5, 1, 0 ) );
 
-         dual->toggleEdge( dual->vertexWithId( 272 ), dual->vertexWithId( 273 ) );
-         dual->toggleEdge( dual->vertexWithId( 272 ), dual->vertexWithId( 241 ) );
-         dual->toggleEdge( dual->vertexWithId( 272 ), dual->vertexWithId( 240 ) );
-         dual->toggleEdge( dual->vertexWithId( 272 ), dual->vertexWithId( 239 ) );
-         dual->toggleEdge( dual->vertexWithId( 272 ), dual->vertexWithId( 271 ) );
-         dual->toggleEdge( dual->vertexWithId( 239 ), dual->vertexWithId( 271 ) );
+         dual->toggleEdge( dual->vertexWithId( 0 ), dual->vertexWithId( 1 ) );
+         dual->toggleEdge( dual->vertexWithId( 0 ), dual->vertexWithId( 16000 ) );
+         dual->toggleEdge( dual->vertexWithId( 0 ), dual->vertexWithId( 240001 ) );
+         dual->toggleEdge( dual->vertexWithId( 0 ), dual->vertexWithId( 255001 ) );
+         dual->toggleEdge( dual->vertexWithId( 0 ), dual->vertexWithId( 15001 ) );
+         dual->toggleEdge( dual->vertexWithId( 15001 ), dual->vertexWithId( 255001 ) );
       }
 
 
@@ -94,16 +94,16 @@ namespace
          dual->addVertex( 7, XYZ( .5, -1, 0 ) );
          dual->addVertex( 2, XYZ( 1, 0, 0 ) );
 
-         dual->toggleEdge( dual->vertexWithId( 40 ), dual->vertexWithId( 43 ) );
-         dual->toggleEdge( dual->vertexWithId( 40 ), dual->vertexWithId( 44 ) );
-         dual->toggleEdge( dual->vertexWithId( 40 ), dual->vertexWithId( 48 ) );
-         dual->toggleEdge( dual->vertexWithId( 44 ), dual->vertexWithId( 41 ) );
-         dual->toggleEdge( dual->vertexWithId( 44 ), dual->vertexWithId( 43 ) );
-         dual->toggleEdge( dual->vertexWithId( 44 ), dual->vertexWithId( 36 ) );
-         dual->toggleEdge( dual->vertexWithId( 44 ), dual->vertexWithId( 48 ) );
-         dual->toggleEdge( dual->vertexWithId( 41 ), dual->vertexWithId( 47 ) );
-         dual->toggleEdge( dual->vertexWithId( 41 ), dual->vertexWithId( 48 ) );
-         dual->toggleEdge( dual->vertexWithId( 42 ), dual->vertexWithId( 47 ) );
+         dual->toggleEdge( 0, 4 );
+         dual->toggleEdge( 0, 3 );
+         dual->toggleEdge( 0, 1003 );
+         dual->toggleEdge( 4, 1003 );
+         dual->toggleEdge( 4, 1 );
+         dual->toggleEdge( 4, 3 );
+         dual->toggleEdge( 4, 15001 );
+         dual->toggleEdge( 1, 1002 );
+         dual->toggleEdge( 1, 1003 );
+         dual->toggleEdge( 2, 1002 );
       }
 
       return dual;

@@ -92,7 +92,11 @@ void GraphSymmetry_Groups::initAllSectorGroupIndexes( int i, std::vector<int>& g
       _AllSectorGroupIndexes.push_back( groupIndexes );
       return;
    }
+   std::vector<int> indexes;
    for ( int k = _Groups[i].loIndex(); k < _Groups[i].hiIndex(); k++ )
+      indexes.push_back( k );
+   std::sort( indexes.begin(), indexes.end(), []( int a, int b ) { return (uint32_t) a < (uint32_t) b; } );
+   for ( int k : indexes )
    {
       groupIndexes[i] = k;
       initAllSectorGroupIndexes( i+1, groupIndexes );

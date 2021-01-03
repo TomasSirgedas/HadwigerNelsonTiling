@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cassert>
 
+static const int MAX_DUALGRAPH_VERTICES = 1000;
 
 class DualGraph
 {
@@ -63,7 +64,7 @@ public:
             ret.push_back( c );
          }
       }
-      CORE_API int id() const { return isValid() ? _Graph->_Vertices.size() * _SectorId + _Index : -1; }
+      CORE_API int id() const { return isValid() ? MAX_DUALGRAPH_VERTICES * _SectorId + _Index : -1; }
       CORE_API int index() const { return isValid() ? _Index : -1; }
       CORE_API Matrix4x4 matrix() const { return _Matrix; }
 
@@ -140,6 +141,7 @@ public:
    CORE_API void setVertexColor( const VertexPtr& vtx, int color );
    CORE_API void setVertexPos( const VertexPtr& vtx, const XYZ& pos );
 
+   CORE_API void toggleEdge( int idA, int idB );   
    CORE_API void toggleEdge( const VertexPtr& a, const VertexPtr& b );   
    CORE_API void sortNeighbors();
 
