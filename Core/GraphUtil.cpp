@@ -63,21 +63,19 @@ std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
 
       for ( const DualGraph::VertexPtr& b : a.neighbors() )
       {
-         std::vector<DualGraph::VertexPtr> poly = a.polygon( b );
-         if ( poly.empty() )
-         {
-            continue;
-         }
+         std::vector<std::vector<DualGraph::VertexPtr>> polys = { a.polygon( b ) };
+         if ( polys[0].empty() )
+            polys = { { a, b }, { a, a.next( b ) } };
 
-         TileGraph::VertexPtr tileVertex = dualPolygonToTileVertexMap.createOrFindTileGraphVertex( poly, [&]( const XYZ& pos ) {
-            TileGraph::Vertex& v = graph->addVertex( graph->_GraphShape->toSurfaceFrom3D( pos ) );
-            polyMap[v._Index] = poly; // used to populate tile neighbors later
-            return v.toVertexPtr( graph.get() );
-         } );
-
-         assert( tileVertex.isValid() );
-         if ( tileVertex.isValid() )
+         for ( std::vector<DualGraph::VertexPtr>& poly : polys )
          {
+            TileGraph::VertexPtr tileVertex = dualPolygonToTileVertexMap.createOrFindTileGraphVertex( poly, [&]( const XYZ& pos ) {
+               TileGraph::Vertex& v = graph->addVertex( graph->_GraphShape->toSurfaceFrom3D( pos ) );
+               polyMap[v._Index] = poly; // used to populate tile neighbors later
+               return v.toVertexPtr( graph.get() );
+            } );
+
+            assert( tileVertex.isValid() );
             tile._Vertices.push_back( tileVertex );
          }
       }
@@ -89,22 +87,22 @@ std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
    for ( const DualGraph::VertexPtr& c : pr.second )
       graph->_Vertices[pr.first]._Tiles.push_back( TileGraph::TilePtr( graph.get(), c.index(), c.matrix() ) );
 
-   // populate vertex `_Neighbors`
-   for ( const TileGraph::VertexPtr& a : graph->rawVertices() )
-   {
-      std::vector<TileGraph::TilePtr> tiles = a.tiles();
-      for ( int i = 0; i < (int) tiles.size(); i++ )
-      {
-         const TileGraph::TilePtr& tile = tiles[i];
-         const TileGraph::TilePtr& nextTile = tiles[(i+1)%tiles.size()];
-         const TileGraph::VertexPtr v0 = tile.next( a );
-         const TileGraph::VertexPtr v1 = nextTile.prev( a );
+   //// populate vertex `_Neighbors`
+   //for ( const TileGraph::VertexPtr& a : graph->rawVertices() )
+   //{
+   //   std::vector<TileGraph::TilePtr> tiles = a.tiles();
+   //   for ( int i = 0; i < (int) tiles.size(); i++ )
+   //   {
+   //      const TileGraph::TilePtr& tile = tiles[i];
+   //      const TileGraph::TilePtr& nextTile = tiles[(i+1)%tiles.size()];
+   //      const TileGraph::VertexPtr v0 = tile.next( a );
+   //      const TileGraph::VertexPtr v1 = nextTile.prev( a );
 
-         graph->_Vertices[a.index()]._Neighbors.push_back( v0 );
-         if ( v0 != v1 )
-            graph->_Vertices[a.index()]._Neighbors.push_back( v1 );
-      }
-   }
+   //      graph->_Vertices[a.index()]._Neighbors.push_back( v0 );
+   //      if ( v0 != v1 )
+   //         graph->_Vertices[a.index()]._Neighbors.push_back( v1 );
+   //   }
+   //}
 
    //   for ( const Graph::VertexPtr& a : graph->allVertices() )
    //      for ( const Graph::VertexPtr& b : graph->neighbors( a ) )
