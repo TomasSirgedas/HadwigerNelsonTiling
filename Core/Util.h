@@ -44,3 +44,5 @@ public:
 private:
    std::vector<XYZ> v;
 };
+
+CORE_API double signedArea( const std::vector<XYZ>& v );

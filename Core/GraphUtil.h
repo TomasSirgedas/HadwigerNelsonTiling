@@ -15,3 +15,7 @@ CORE_API std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radiu
 CORE_API std::ostream& operator<<( std::ostream& os, const DualGraph::VertexPtr& a );
 CORE_API std::ostream& operator<<( std::ostream& os, const TileGraph::VertexPtr& a );
 CORE_API std::ostream& operator<<( std::ostream& os, const TileGraph::TilePtr& a );
+
+CORE_API std::vector<XYZ> positionsOf( const std::vector<TileGraph::VertexPtr>& v );
+CORE_API std::vector<XYZ> positionsOf( const std::vector<DualGraph::VertexPtr>& v );
+CORE_API double signedArea( const std::vector<TileGraph::VertexPtr>& v );

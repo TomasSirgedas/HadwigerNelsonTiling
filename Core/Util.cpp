@@ -83,3 +83,15 @@ XYZ operator*( const Matrix4x4& m, const XYZ& p )
 {
    return (m * XYZW( p )).toXYZ();
 }
+
+double signedArea( const std::vector<XYZ>& v )
+{
+   if ( v.empty() )
+      return 0;
+   double area2 = v[0].x * v.back().y - v.back().x * v[0].y;
+
+   for ( int i = 0; i+1 < v.size(); i++ )
+      area2 += v[i+1].x * v[i].y - v[i].x * v[i+1].y;
+
+   return area2 / 2;
+}

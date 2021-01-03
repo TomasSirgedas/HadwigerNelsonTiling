@@ -64,7 +64,7 @@ std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
       for ( const DualGraph::VertexPtr& b : a.neighbors() )
       {
          std::vector<std::vector<DualGraph::VertexPtr>> polys = { a.polygon( b ) };
-         if ( polys[0].empty() )
+         if ( polys[0].empty() || !dual._GraphShape->isValidWinding( positionsOf( polys[0] ) ) )
             polys = { { a, b }, { a, a.next( b ) } };
 
          for ( std::vector<DualGraph::VertexPtr>& poly : polys )
@@ -114,3 +114,23 @@ std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
 std::ostream& operator<<( std::ostream& os, const DualGraph::VertexPtr& a ) { return os << a.name(); }
 std::ostream& operator<<( std::ostream& os, const TileGraph::VertexPtr& a ) { return os << a.name(); }
 std::ostream& operator<<( std::ostream& os, const TileGraph::TilePtr& a ) { return os << a.name(); }
+
+std::vector<XYZ> positionsOf( const std::vector<TileGraph::VertexPtr>& v )
+{
+   std::vector<XYZ> positions;
+   for ( const TileGraph::VertexPtr& a : v )
+      positions.push_back( a.pos() );
+   return positions;
+}
+std::vector<XYZ> positionsOf( const std::vector<DualGraph::VertexPtr>& v )
+{
+   std::vector<XYZ> positions;
+   for ( const DualGraph::VertexPtr& a : v )
+      positions.push_back( a.pos() );
+   return positions;
+}
+
+double signedArea( const std::vector<TileGraph::VertexPtr>& v )
+{
+   return signedArea( positionsOf( v ) );
+}
