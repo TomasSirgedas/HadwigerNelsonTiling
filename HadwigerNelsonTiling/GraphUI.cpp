@@ -61,26 +61,51 @@ GraphUI::GraphUI( QWidget *parent )
    //}
 
 
+   //{
+   //   std::shared_ptr<IGraphShape> shape( new GraphShapePlane );
+
+   //   std::shared_ptr<IGraphSymmetry> sym( new GraphSymmetry_Groups( {} ) );
+
+   //   _DualGraph.reset( new DualGraph( sym, shape ) );
+   //   _DualGraph->addVertex( 0, XYZ( 0, 0, 0 ) );
+   //   _DualGraph->addVertex( 1, XYZ( 1.5, 1, 0 ) );
+   //   _DualGraph->addVertex( 2, XYZ( 2, -1, 0 ) );
+   //   _DualGraph->addVertex( 3, XYZ( .5, -1, 0 ) );
+   //   _DualGraph->addVertex( 4, XYZ( 1, 0, 0 ) );
+
+   //   _DualGraph->toggleEdge( _DualGraph->vertexWithId( 0 ), _DualGraph->vertexWithId( 1 ) );
+   //   _DualGraph->toggleEdge( _DualGraph->vertexWithId( 1 ), _DualGraph->vertexWithId( 2 ) );
+   //   _DualGraph->toggleEdge( _DualGraph->vertexWithId( 2 ), _DualGraph->vertexWithId( 3 ) );
+   //   _DualGraph->toggleEdge( _DualGraph->vertexWithId( 3 ), _DualGraph->vertexWithId( 0 ) );
+   //   _DualGraph->toggleEdge( _DualGraph->vertexWithId( 0 ), _DualGraph->vertexWithId( 4 ) );
+   //   _DualGraph->toggleEdge( _DualGraph->vertexWithId( 1 ), _DualGraph->vertexWithId( 4 ) );
+   //   _DualGraph->toggleEdge( _DualGraph->vertexWithId( 2 ), _DualGraph->vertexWithId( 4 ) );
+   //   _DualGraph->toggleEdge( _DualGraph->vertexWithId( 3 ), _DualGraph->vertexWithId( 4 ) );
+   //}
+
    {
       std::shared_ptr<IGraphShape> shape( new GraphShapePlane );
 
-      std::shared_ptr<IGraphSymmetry> sym( new GraphSymmetry_Groups( {} ) );
+      SymmetryGroup symA( Matrix4x4::translation( XYZ( 0, 2, 0 ) ), Perm( { 1,2,3,4,5,6,0,7,8,9 } ), -1, 2 );
+      std::shared_ptr<IGraphSymmetry> sym( new GraphSymmetry_Groups( { symA } ) );
 
       _DualGraph.reset( new DualGraph( sym, shape ) );
       _DualGraph->addVertex( 0, XYZ( 0, 0, 0 ) );
-      _DualGraph->addVertex( 1, XYZ( 1.5, 1, 0 ) );
-      _DualGraph->addVertex( 2, XYZ( 2, -1, 0 ) );
-      _DualGraph->addVertex( 3, XYZ( .5, -1, 0 ) );
-      _DualGraph->addVertex( 4, XYZ( 1, 0, 0 ) );
+      _DualGraph->addVertex( 4, XYZ( 1.5, 1, 0 ) );
+      _DualGraph->addVertex( 6, XYZ( 2, -1, 0 ) );
+      _DualGraph->addVertex( 7, XYZ( .5, -1, 0 ) );
+      _DualGraph->addVertex( 2, XYZ( 1, 0, 0 ) );
 
-      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 0 ), _DualGraph->vertexWithId( 1 ) );
-      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 1 ), _DualGraph->vertexWithId( 2 ) );
-      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 2 ), _DualGraph->vertexWithId( 3 ) );
-      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 3 ), _DualGraph->vertexWithId( 0 ) );
-      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 0 ), _DualGraph->vertexWithId( 4 ) );
-      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 1 ), _DualGraph->vertexWithId( 4 ) );
-      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 2 ), _DualGraph->vertexWithId( 4 ) );
-      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 3 ), _DualGraph->vertexWithId( 4 ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 40 ), _DualGraph->vertexWithId( 43 ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 40 ), _DualGraph->vertexWithId( 44 ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 40 ), _DualGraph->vertexWithId( 48 ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 44 ), _DualGraph->vertexWithId( 41 ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 44 ), _DualGraph->vertexWithId( 43 ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 44 ), _DualGraph->vertexWithId( 36 ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 44 ), _DualGraph->vertexWithId( 48 ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 41 ), _DualGraph->vertexWithId( 47 ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 41 ), _DualGraph->vertexWithId( 48 ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 42 ), _DualGraph->vertexWithId( 47 ) );
    }
 
 

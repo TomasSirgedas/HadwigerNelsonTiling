@@ -6,7 +6,6 @@
 #include <set>
 
 
-
 std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
 {
    dual.sortNeighbors();
@@ -38,7 +37,7 @@ std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
 
          // find TileGraph vertex if it was already created
          {            
-            for ( const Matrix4x4& sector : dual._GraphSymmetry->allVisibleSectors() )
+            for ( const Matrix4x4& sector : dual._GraphSymmetry->allSectors() )
             {
                std::set<int> polyAsSet;
                for ( const DualGraph::VertexPtr& c : poly )
