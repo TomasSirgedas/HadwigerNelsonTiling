@@ -52,7 +52,7 @@ public:
    Matrix4x4 _ModelToBitmap;
    Matrix4x4 _ModelRotation;
    double _PixelsPerUnit = 100;
-   bool _ShowTileGraph = false;
+   bool _ShowTileGraph = true;
    bool _ShowDualGraph = true;
    bool _ShowLabels = true;
    std::shared_ptr<IGraphShape> _GraphShape;

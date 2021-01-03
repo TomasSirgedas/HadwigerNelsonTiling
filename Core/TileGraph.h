@@ -33,6 +33,8 @@ public:
       CORE_API const Vertex& baseVertex() const { return _Graph->_Vertices[_Index]; }
       CORE_API VertexPtr toVertexPtr( const TileGraph* graph ) const { return VertexPtr( graph, _Index, Matrix4x4() ); }
       CORE_API XYZ pos() const { return _Matrix * baseVertex()._Pos; }
+      CORE_API int id() const { return isValid() ? _Graph->_Vertices.size() * _SectorId + _Index : -1; }
+      CORE_API std::string name() const { return std::to_string( id() ); }
 
    public:
       void updateCache();
@@ -129,6 +131,7 @@ public:
 
    CORE_API std::vector<TilePtr> rawTiles() const;
    CORE_API std::vector<TilePtr> allTiles() const;
+   CORE_API std::vector<VertexPtr> allVertices() const;
 
 public:
    std::vector<Vertex> _Vertices;

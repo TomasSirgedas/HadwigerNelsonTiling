@@ -1,5 +1,6 @@
 #include "TileGraph.h"
 
+#include <unordered_set>
 
 std::vector<TileGraph::TilePtr> TileGraph::allTiles() const
 {   
@@ -7,6 +8,19 @@ std::vector<TileGraph::TilePtr> TileGraph::allTiles() const
    for ( const Tile& tile : _Tiles )
       for ( const Matrix4x4& sector : tile._Symmetry->uniqueSectors() )
          ret.push_back( tile.toTilePtr( this ).premul( sector ) );
+   return ret;
+}
+
+std::vector<TileGraph::VertexPtr> TileGraph::allVertices() const
+{   
+   std::unordered_set<int> usedIds;
+   std::vector<VertexPtr> ret;
+   for ( const TilePtr& tile : allTiles() )
+      for ( const VertexPtr& vtx : tile.vertices() )
+      {
+         if ( !usedIds.insert( vtx.id() ).second ) continue; // already used
+         ret.push_back( vtx );
+      }
    return ret;
 }
 

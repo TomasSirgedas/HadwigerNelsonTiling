@@ -85,8 +85,9 @@ QImage Drawing::makeImage( const QSize& size, const DualGraph& dual, const TileG
       }
    }
 
-   if ( /*_ShowTileGraph &&*/ &graph != nullptr )
+   if ( _ShowTileGraph && &graph != nullptr )
    {
+      // draw tiles
       painter.setPen( Qt::NoPen );
       for ( const TileGraph::TilePtr& tile : graph.allTiles() ) // if ( isVisible( a.pos() ) )
       {
@@ -101,6 +102,15 @@ QImage Drawing::makeImage( const QSize& size, const DualGraph& dual, const TileG
          painter.drawPolygon( poly );
       }
 
+      // draw labels
+      if ( _ShowLabels )
+      {
+         painter.setPen( Qt::black );
+         for ( const TileGraph::VertexPtr& a : graph.allVertices() ) if ( isVisible( a.pos() ) )
+         {
+            drawTextCentered( painter, toBitmap( a.pos() ) + QPointF( 0, -7 ), a.name() );
+         }
+      }
    }
 
    return image;
