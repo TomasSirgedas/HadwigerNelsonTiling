@@ -41,23 +41,46 @@ GraphUI::GraphUI( QWidget *parent )
    //   _DualGraph->toggleEdge( _DualGraph->vertexWithId( 1 ), _DualGraph->vertexWithId( 13 ) );
    //}
 
+   //{
+   //   std::shared_ptr<IGraphShape> shape( new GraphShapePlane );
+
+   //   SymmetryGroup symA( Matrix4x4::translation( XYZ( 0, 2, 0 ) ), Perm( { 1,2,3,4,5,6,0,7,8,9 } ), -1, 2 );
+   //   SymmetryGroup symB( Matrix4x4::translation( XYZ( 3, 0, 0 ) ), Perm( { 1,2,3,4,5,6,0,7,8,9 } ).pow( 5 ), -1, 2 );
+   //   std::shared_ptr<IGraphSymmetry> sym( new GraphSymmetry_Groups( { symA, symB } ) );
+
+   //   _DualGraph.reset( new DualGraph( sym, shape ) );
+   //   _DualGraph->addVertex( 0, XYZ( 0, 0, 0 ) );
+   //   _DualGraph->addVertex( 3, XYZ( 1.5, 1, 0 ) );
+
+   //   _DualGraph->toggleEdge( _DualGraph->vertexWithId( 272 ), _DualGraph->vertexWithId( 273 ) );
+   //   _DualGraph->toggleEdge( _DualGraph->vertexWithId( 272 ), _DualGraph->vertexWithId( 241 ) );
+   //   _DualGraph->toggleEdge( _DualGraph->vertexWithId( 272 ), _DualGraph->vertexWithId( 240 ) );
+   //   _DualGraph->toggleEdge( _DualGraph->vertexWithId( 272 ), _DualGraph->vertexWithId( 239 ) );
+   //   _DualGraph->toggleEdge( _DualGraph->vertexWithId( 272 ), _DualGraph->vertexWithId( 271 ) );
+   //   _DualGraph->toggleEdge( _DualGraph->vertexWithId( 239 ), _DualGraph->vertexWithId( 271 ) );
+   //}
+
+
    {
       std::shared_ptr<IGraphShape> shape( new GraphShapePlane );
 
-      SymmetryGroup symA( Matrix4x4::translation( XYZ( 0, 2, 0 ) ), Perm( { 1,2,3,4,5,6,0,7,8,9 } ), -1, 2 );
-      SymmetryGroup symB( Matrix4x4::translation( XYZ( 3, 0, 0 ) ), Perm( { 1,2,3,4,5,6,0,7,8,9 } ).pow( 5 ), -1, 2 );
-      std::shared_ptr<IGraphSymmetry> sym( new GraphSymmetry_Groups( { symA, symB } ) );
+      std::shared_ptr<IGraphSymmetry> sym( new GraphSymmetry_Groups( {} ) );
 
       _DualGraph.reset( new DualGraph( sym, shape ) );
       _DualGraph->addVertex( 0, XYZ( 0, 0, 0 ) );
-      _DualGraph->addVertex( 3, XYZ( 1.5, 1, 0 ) );
+      _DualGraph->addVertex( 1, XYZ( 1.5, 1, 0 ) );
+      _DualGraph->addVertex( 2, XYZ( 2, -1, 0 ) );
+      _DualGraph->addVertex( 3, XYZ( .5, -1, 0 ) );
+      _DualGraph->addVertex( 4, XYZ( 1, 0, 0 ) );
 
-      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 272 ), _DualGraph->vertexWithId( 273 ) );
-      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 272 ), _DualGraph->vertexWithId( 241 ) );
-      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 272 ), _DualGraph->vertexWithId( 240 ) );
-      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 272 ), _DualGraph->vertexWithId( 239 ) );
-      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 272 ), _DualGraph->vertexWithId( 271 ) );
-      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 239 ), _DualGraph->vertexWithId( 271 ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 0 ), _DualGraph->vertexWithId( 1 ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 1 ), _DualGraph->vertexWithId( 2 ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 2 ), _DualGraph->vertexWithId( 3 ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 3 ), _DualGraph->vertexWithId( 0 ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 0 ), _DualGraph->vertexWithId( 4 ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 1 ), _DualGraph->vertexWithId( 4 ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 2 ), _DualGraph->vertexWithId( 4 ) );
+      _DualGraph->toggleEdge( _DualGraph->vertexWithId( 3 ), _DualGraph->vertexWithId( 4 ) );
    }
 
 
@@ -149,6 +172,9 @@ bool GraphUI::getMousePos( XYZ& mousePos ) const
 
 DualGraph::VertexPtr GraphUI::dualVertexAtMouse( double maxPixelDist ) const
 {
+   if ( !_DualGraph )
+      return DualGraph::VertexPtr();
+
    XYZ mousePos;
    if ( !getMousePos( mousePos ) )
       return DualGraph::VertexPtr();
@@ -158,6 +184,9 @@ DualGraph::VertexPtr GraphUI::dualVertexAtMouse( double maxPixelDist ) const
 
 TileGraph::VertexPtr GraphUI::tileVertexAtMouse( double maxPixelDist ) const
 {
+   if ( !_TileGraph )
+      return TileGraph::VertexPtr();
+
    XYZ mousePos;
    if ( !getMousePos( mousePos ) )
       return TileGraph::VertexPtr();
@@ -207,7 +236,9 @@ void GraphUI::handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isCli
 
    if ( isClick )
    {
-      if ( isKeyDown( 'M' ) )
+      if ( isKeyDown( 'E' ) )
+         _DragDualEdgeStartVtx = dualVertexAtMouse( 12. );
+      else if ( isKeyDown( 'M' ) )
          _DragDualVtx = dualVertexAtMouse( 8. );
       else
          _DragTileVtx = tileVertexAtMouse( 8. );
@@ -217,11 +248,6 @@ void GraphUI::handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isCli
          std::trace << "_DragTileVtx.tiles() = " << _DragTileVtx.tiles() << std::endl;
          std::trace << "_DragTileVtx.neighbors() = " << _DragTileVtx.neighbors() << std::endl;
       }
-   }
-
-   if ( isKeyDown( 'E' ) && isClick )
-   {
-      _DragDualEdgeStartVtx = dualVertexAtMouse( 12. );
    }
 
    if ( isMove )
