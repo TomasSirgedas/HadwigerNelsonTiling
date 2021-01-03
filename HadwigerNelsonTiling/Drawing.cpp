@@ -27,15 +27,21 @@ Drawing::~Drawing()
 {
 }
 
-void Drawing::resizeEvent( QResizeEvent *event )
+void Drawing::refresh()
 {
+   if ( _GraphShape && _GraphShape->modelSize() > 0 )
+      _PixelsPerUnit = height() / 2.* .99 / _GraphShape->modelSize();
+   else
+      _PixelsPerUnit = 100;
+
    _ModelToBitmap = Matrix4x4::translation( XYZ( width()/2, height()/2, 0. ) )
                   * Matrix4x4::scale( XYZ( _PixelsPerUnit, _PixelsPerUnit, 1 ) )
                   * Matrix4x4::scale( XYZ( 1, -1, 1 ) );
+}
 
-   if ( _GraphShape && _GraphShape->modelSize() > 0 )
-      _PixelsPerUnit = height() / 2.* .99 / _GraphShape->modelSize();
-
+void Drawing::resizeEvent( QResizeEvent *event )
+{
+   refresh();
    emit resized();
 }
 

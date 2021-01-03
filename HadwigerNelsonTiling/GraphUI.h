@@ -23,6 +23,8 @@ public:
    DualGraph::VertexPtr dualVertexAtMouse( double maxPixelDist ) const;
    TileGraph::VertexPtr tileVertexAtMouse( double maxPixelDist ) const;
 
+   void loadHardcodedGraph( int index );
+
 private:
    Ui::GraphUI ui;
 

@@ -29,7 +29,8 @@ public:
 
    bool isVisible( const XYZ& pos ) const;
    QImage makeImage( const QSize& size, const DualGraph& dual, const TileGraph& graph );
-
+   void refresh();
+   void setGraphShape( std::shared_ptr<IGraphShape> graphShape ) { _GraphShape = graphShape; refresh(); }
 
 private:
    void resizeEvent( QResizeEvent *event ) override;
@@ -51,9 +52,11 @@ private:
 public:
    Matrix4x4 _ModelToBitmap;
    Matrix4x4 _ModelRotation;
-   double _PixelsPerUnit = 100;
+   double _PixelsPerUnit = -1;
    bool _ShowTileGraph = true;
    bool _ShowDualGraph = true;
    bool _ShowLabels = true;
+
+private:
    std::shared_ptr<IGraphShape> _GraphShape;
 };
