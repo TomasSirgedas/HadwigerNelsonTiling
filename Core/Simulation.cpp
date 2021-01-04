@@ -24,6 +24,19 @@ void Simulation::init( std::shared_ptr<TileGraph> tileGraph )
 
 }
 
+void Simulation::setRadius( double radius )
+{
+   _Radius = radius;
+   if ( _DualGraph )
+   {
+      if ( _DualGraph->_GraphShape )
+         _DualGraph->_GraphShape->setRadius( radius );
+      _DualGraph->normalizeVertices();
+      if ( _TileGraph )
+         _TileGraph->normalizeVertices();
+   }
+}
+
 double Simulation::step( double& paddingError )
 {   
    if ( !_TileGraph )

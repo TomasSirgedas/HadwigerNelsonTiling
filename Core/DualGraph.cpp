@@ -144,3 +144,9 @@ void DualGraph::sortNeighbors()
       sort( vtx.neighbors.begin(), vtx.neighbors.end(), [&]( const VertexPtr& a, const VertexPtr& b ) { return angleOf( a.pos() ) < angleOf( b.pos() ); } );
    }
 }
+
+void DualGraph::normalizeVertices()
+{
+   for ( Vertex& a : _Vertices )
+      a.pos = _GraphShape->toSurfaceFrom3D( a.pos );
+}

@@ -26,6 +26,7 @@ public:
    TileGraph::VertexPtr tileVertexAtMouse( double maxPixelDist ) const;
 
    void loadHardcodedGraph( int index );
+   void setRadius( double radius );
 
 private:
    Ui::GraphUI ui;

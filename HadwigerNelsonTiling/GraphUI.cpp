@@ -9,6 +9,7 @@
 #include <QShortcut>
 #include <QMouseEvent>
 #include <QDebug>
+#include <QValidator>
 
 
 namespace
@@ -132,7 +133,11 @@ GraphUI::GraphUI( QWidget *parent )
    //_DualGraph->addVertex( 5, XYZ(0,0,0) );
    //_DualGraph->addVertex( 1, XYZ(1,0,0) );
 
-
+   ui.radiusLineEdit->setValidator( new QDoubleValidator( .3, 100., 1000, this ) );
+      
+   connect( ui.radiusLineEdit, &QLineEdit::editingFinished, [&]() {
+      setRadius( ui.radiusLineEdit->text().toDouble() );
+   } );
 
    connect( ui.playButton, &QPushButton::clicked, [&]() {  
       _Simulation->step( 1 );
@@ -215,6 +220,12 @@ GraphUI::~GraphUI()
 {
 }
 
+void GraphUI::setRadius( double radius )
+{
+   ui.radiusLineEdit->setText( QString::number( radius ) );
+   _Simulation->setRadius( ui.radiusLineEdit->text().toDouble() );
+   ui.drawing->refresh();
+}
 
 void GraphUI::loadHardcodedGraph( int index )
 {
@@ -224,6 +235,7 @@ void GraphUI::loadHardcodedGraph( int index )
    _DragDualEdgeStartVtx   = DualGraph::VertexPtr();
    _DragTileVtx            = TileGraph::VertexPtr();
    ui.drawing->setGraphShape( _Simulation->_DualGraph->shape() );
+   setRadius( _Simulation->_DualGraph->shape()->radius() );
    updateDrawing();
 }
 

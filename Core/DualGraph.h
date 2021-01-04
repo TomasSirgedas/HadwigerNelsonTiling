@@ -144,6 +144,8 @@ public:
    CORE_API void toggleEdge( const VertexPtr& a, const VertexPtr& b );   
    CORE_API void sortNeighbors();
 
+   CORE_API void normalizeVertices();
+
 
    CORE_API std::shared_ptr<IGraphShape> shape() { return _GraphShape; }
 

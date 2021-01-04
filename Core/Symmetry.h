@@ -140,6 +140,8 @@ public:
    virtual XYZ normalAt( const XYZ& p ) const = 0;
    virtual bool isVisible( const XYZ& pos, const Matrix4x4& rotationMatrix ) const = 0;
    virtual bool isValidWinding( const std::vector<XYZ>& v ) const { return true; }
+   virtual double radius() const { return 1.; }
+   virtual void setRadius( double radius ) {}
 };
 
 class GraphShapeSphere : public IGraphShape
@@ -158,6 +160,8 @@ public:
    double modelSize() const override { return _Radius; }
    XYZ normalAt( const XYZ& p ) const override { return p.normalized(); }
    bool isVisible( const XYZ& pos, const Matrix4x4& rotationMatrix ) const override { return (rotationMatrix * pos).z <= 0; }
+   double radius() const override { return _Radius; }
+   void setRadius( double radius ) override { _Radius = radius; }
 
 private:
    double _Radius;

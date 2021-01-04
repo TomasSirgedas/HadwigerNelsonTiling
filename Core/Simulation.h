@@ -10,6 +10,7 @@ public:
    CORE_API void normalizeVertices();
    CORE_API double step( double& paddingError );
    CORE_API double step( int numSteps );
+   CORE_API void setRadius( double radius );
 
 public:
    double _Radius = 1;

@@ -194,7 +194,7 @@ std::vector<TileGraph::KeepCloseFar> TileGraph::calcKeepCloseFars() const
    return ret;
 }
 
-CORE_API void TileGraph::normalizeVertices()
+void TileGraph::normalizeVertices()
 {
    for ( Vertex& a : _Vertices )
       a._Pos = _GraphShape->toSurfaceFrom3D( a._Pos );
