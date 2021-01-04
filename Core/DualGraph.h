@@ -3,14 +3,13 @@
 #include "CoreMacros.h"
 #include "DataTypes.h"
 #include "Symmetry.h"
+#include "Defs.h"
 
 #include <vector>
 #include <memory>
 #include <string>
 #include <algorithm>
 #include <cassert>
-
-static const int MAX_DUALGRAPH_VERTICES = 1000;
 
 class DualGraph
 {
@@ -64,7 +63,7 @@ public:
             ret.push_back( c );
          }
       }
-      CORE_API int id() const { return isValid() ? MAX_DUALGRAPH_VERTICES * _SectorId + _Index : -1; }
+      CORE_API int id() const { return isValid() ? MAX_VERTICES * _SectorId + _Index : -1; }
       CORE_API int index() const { return isValid() ? _Index : -1; }
       CORE_API Matrix4x4 matrix() const { return _Matrix; }
 

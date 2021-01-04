@@ -33,6 +33,13 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
+      <widget class="QPushButton" name="playButton">
+       <property name="text">
+        <string>Play</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="dualToTileButton">
        <property name="text">
         <string>Dual-&gt;Tile</string>

@@ -6,6 +6,8 @@
 #include <Core/DualGraph.h>
 #include <Core/TileGraph.h>
 
+class Simulation;
+
 class GraphUI : public QWidget
 {
    Q_OBJECT
@@ -28,8 +30,7 @@ public:
 private:
    Ui::GraphUI ui;
 
-   std::shared_ptr<DualGraph> _DualGraph;
-   std::shared_ptr<TileGraph> _TileGraph;
+   std::shared_ptr<Simulation> _Simulation;
    DualGraph::VertexPtr _DragDualVtx;
    DualGraph::VertexPtr _DragDualEdgeStartVtx;
    TileGraph::VertexPtr _DragTileVtx;

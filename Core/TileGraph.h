@@ -3,14 +3,13 @@
 #include "CoreMacros.h"
 #include "DataTypes.h"
 #include "Symmetry.h"
+#include "Defs.h"
 
 #include <vector>
 #include <memory>
 #include <string>
 #include <algorithm>
 #include <cassert>
-
-static const int MAX_TILEGRAPH_VERTICES = 1000;
 
 class TileGraph
 {
@@ -32,18 +31,21 @@ public:
       CORE_API VertexPtr premul( const Matrix4x4& mtx ) const { return VertexPtr( _Graph, _Index, mtx * _Matrix ); }
       CORE_API bool operator==( const VertexPtr& rhs ) const { return _Graph == rhs._Graph && _Index == rhs._Index && _SectorId == rhs._SectorId; }
       CORE_API bool operator!=( const VertexPtr& rhs ) const { return !(*this == rhs); }
+      CORE_API bool operator<( const VertexPtr& rhs ) const { return id() < rhs.id(); }
       //uint64_t id() const;
 
       CORE_API const Vertex& baseVertex() const { return _Graph->_Vertices[_Index]; }
       CORE_API VertexPtr toVertexPtr( const TileGraph* graph ) const { return VertexPtr( graph, _Index, Matrix4x4() ); }
       CORE_API XYZ pos() const { return _Matrix * baseVertex()._Pos; }
-      CORE_API int id() const { return isValid() ? MAX_TILEGRAPH_VERTICES * _SectorId + _Index : -1; }
+      CORE_API int id() const { return isValid() ? MAX_VERTICES * _SectorId + _Index : -1; }
       CORE_API std::string name() const { return std::to_string( id() ); }
       //CORE_API std::string name() const { return std::to_string( _Index ) + "-" + std::to_string( _SectorId ); }
       CORE_API const Matrix4x4& matrix() const { return _Matrix; }
       CORE_API int index() const { return _Index; }
       CORE_API std::vector<TilePtr> tiles() const;
+      CORE_API TileGraph::TilePtr tileWithColor( int color ) const;
       CORE_API std::vector<VertexPtr> neighbors() const;
+      CORE_API std::vector<VertexPtr> neighbors( int depth ) const;
 
    public:
       void updateCache();
@@ -67,13 +69,14 @@ public:
       }
       CORE_API TilePtr premul( const Matrix4x4& mtx ) const { return TilePtr( _Graph, _Index, mtx * _Matrix ); }
       CORE_API bool isValid() const { return _Graph != nullptr; }
-      //bool operator==( const TilePtr& rhs ) const;
+      bool operator==( const TilePtr& rhs ) const { return id() == rhs.id(); }
+      bool operator!=( const TilePtr& rhs ) const { return !(*this == rhs); }
 
       CORE_API const Tile& baseTile() const { return _Graph->_Tiles[_Index]; }
       CORE_API int color() const { return _Graph->_GraphSymmetry->toSector( _SectorId, baseTile()._Color ); }
       CORE_API std::vector<VertexPtr> vertices() const;
       CORE_API XYZ avgPos() const;
-      CORE_API int id() const { return isValid() ? MAX_TILEGRAPH_VERTICES * _SectorId + _Index : -1; }
+      CORE_API int id() const { return isValid() ? MAX_VERTICES * _SectorId + _Index : -1; }
       //CORE_API std::string name() const { return std::to_string( id() ); }
       CORE_API std::string name() const { return std::to_string( _Index ) + "-" + std::to_string( _SectorId ); }
       CORE_API VertexPtr next( const VertexPtr& a ) const { return baseTile().next( a.premul( _Matrix.inverted() ) ).premul( _Matrix ); }
@@ -119,16 +122,6 @@ public:
       int _Color;
       std::vector<VertexPtr> _Vertices;
       std::shared_ptr<SectorSymmetryForVertex> _Symmetry;
-
-      //bool _IsSymmetrical = false;
-      //std::shared_ptr<MatrixSymmetryMap> _SymmetryMap;
-
-      //bool hasVertex( const VertexPtr& a ) const { 
-      //   for ( const VertexPtr& b : _Vertices )
-      //      if ( a._Index == b._Index && fuzzyCompare( a._Mtx, b._Mtx ) )
-      //         return true;
-      //   return false;
-      //}
    };
    struct KeepCloseFar
    {
@@ -137,7 +130,7 @@ public:
       bool keepClose;
       bool keepFar;
    };
-   // these two shouldn't get too close together
+   // these two shouldn't get too close together:
    // - line[a0,a1] curves centered on curveCenter
    // - vertex b
    struct LineVertexConstraint
@@ -147,6 +140,7 @@ public:
       VertexPtr curveCenter;
       VertexPtr b;
    };
+   struct VertexPtrHash { size_t operator() (const TileGraph::VertexPtr& a) const { return a.id(); } };
 
    CORE_API Vertex& addVertex( const XYZ& pos );
 
@@ -157,6 +151,11 @@ public:
 
    CORE_API VertexPtr vertexAt( const XYZ& pos, double maxDist ) const;
    CORE_API void setVertexPos( const VertexPtr& vtx, const XYZ& pos );
+
+   CORE_API std::vector<KeepCloseFar> calcKeepCloseFars() const;
+   CORE_API bool mustBeClose( const VertexPtr& a, const VertexPtr& b ) const;
+   CORE_API bool mustBeFar( const VertexPtr& a, const VertexPtr& b ) const;
+   CORE_API void normalizeVertices();
 
 public:
    std::vector<Vertex> _Vertices;

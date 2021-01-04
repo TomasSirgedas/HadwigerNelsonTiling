@@ -53,12 +53,46 @@ std::vector<TileGraph::TilePtr> TileGraph::VertexPtr::tiles() const
    return ret;
 }
 
+TileGraph::TilePtr TileGraph::VertexPtr::tileWithColor( int color ) const
+{
+   std::vector<TilePtr> ret;
+   for ( const TilePtr& tile : tiles() )
+      if ( tile.color() == color )
+         return tile;
+   return TileGraph::TilePtr();
+}
+
 std::vector<TileGraph::VertexPtr> TileGraph::VertexPtr::neighbors() const
 {
    std::vector<VertexPtr> ret;
    for ( const VertexPtr& vtx : baseVertex()._Neighbors )
       ret.push_back( vtx.premul( matrix() ) );
    return ret;
+}
+
+namespace
+{
+   void calcNeighbors( const TileGraph::VertexPtr& vtx, int depth, std::unordered_set<TileGraph::VertexPtr, TileGraph::VertexPtrHash>& st )
+   {
+      if ( !st.insert( vtx ).second )
+         return;
+
+      if ( depth <= 0 )
+         return;
+
+      std::vector<TileGraph::VertexPtr> ret;
+
+      for ( const TileGraph::VertexPtr& neighb : vtx.neighbors() )
+         calcNeighbors( neighb, depth-1, st );
+   }
+}
+
+std::vector<TileGraph::VertexPtr> TileGraph::VertexPtr::neighbors( int depth ) const
+{
+   std::unordered_set<VertexPtr, VertexPtrHash> st;
+   calcNeighbors( *this, depth, st );
+   st.erase( *this );
+   return std::vector<TileGraph::VertexPtr>( st.begin(), st.end() );
 }
 
 
@@ -115,4 +149,53 @@ TileGraph::VertexPtr TileGraph::vertexAt( const XYZ& pos, double maxDist ) const
 void TileGraph::setVertexPos( const VertexPtr& vtx, const XYZ& pos )
 {
    _Vertices[vtx.index()]._Pos = vtx.matrix().inverted() * pos;
+}
+
+
+bool TileGraph::mustBeFar( const VertexPtr& a, const VertexPtr& b ) const
+{   
+   for ( const TilePtr& tileA : a.tiles() ) if ( tileA.color() != BLANK_COLOR )
+   {
+      TilePtr tileB = b.tileWithColor( tileA.color() );
+      if ( tileA != tileB )
+         return true;
+   }
+   return false;
+}
+
+bool TileGraph::mustBeClose( const VertexPtr& a, const VertexPtr& b ) const
+{
+   for ( const TilePtr& tileA : a.tiles() )
+   {
+      TilePtr tileB = b.tileWithColor( tileA.color() );
+      if ( tileA == tileB )
+         return true;
+   }
+   return false;
+}
+
+
+std::vector<TileGraph::KeepCloseFar> TileGraph::calcKeepCloseFars() const
+{
+   std::vector<KeepCloseFar> ret;
+   for ( const VertexPtr& vtx : rawVertices() )
+   {      
+      for ( const VertexPtr& neighb : vtx.neighbors( 5/*search depth*/ ) )
+      {
+         KeepCloseFar kcf;
+         kcf.a = vtx;
+         kcf.b = neighb;
+         kcf.keepClose = mustBeClose( vtx, neighb );
+         kcf.keepFar = mustBeFar( vtx, neighb );
+         if ( kcf.keepClose || kcf.keepFar )
+            ret.push_back( kcf );
+      }
+   }
+   return ret;
+}
+
+CORE_API void TileGraph::normalizeVertices()
+{
+   for ( Vertex& a : _Vertices )
+      a._Pos = _GraphShape->toSurfaceFrom3D( a._Pos );
 }

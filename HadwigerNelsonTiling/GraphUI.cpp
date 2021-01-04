@@ -4,6 +4,7 @@
 #include <Core/DataTypes.h>
 #include <Core/GraphUtil.h>
 #include <Core/Util.h>
+#include <Core/Simulation.h>
 
 #include <QShortcut>
 #include <QMouseEvent>
@@ -116,11 +117,11 @@ GraphUI::GraphUI( QWidget *parent )
 {
    ui.setupUi( this );
 
-
-
    //SymmetryGroup g5( Matrix4x4::rotation( XYZ(0,0,1), 2*PI/5 ), Perm( { 1,2,3,4,0,5,6,7,8,9 } ) );
    //SymmetryGroup g3( Matrix4x4::rotation( XYZ(0,0,1), 2*PI/3 ) * Matrix4x4::translation( XYZ(3,0,0) ), Perm( { 1,2,0,3,4,5,6,7,8,9 } ) );   
    //std::shared_ptr<IGraphSymmetry> sym( new GraphSymmetry_Groups( { g3, g5 } ) );
+
+   _Simulation.reset( new Simulation );
 
    loadHardcodedGraph( 2 );
 
@@ -133,8 +134,14 @@ GraphUI::GraphUI( QWidget *parent )
 
 
 
+   connect( ui.playButton, &QPushButton::clicked, [&]() {  
+      _Simulation->step( 1 );
+      updateDrawing();
+   } );
+
    connect( ui.dualToTileButton, &QPushButton::clicked, [&](){  
-      _TileGraph = makeTileGraph( *_DualGraph, 1. );
+      _Simulation->_TileGraph = makeTileGraph( *_Simulation->_DualGraph, 1. );
+      _Simulation->init( _Simulation->_TileGraph );
       updateDrawing();
    } );
 
@@ -211,12 +218,12 @@ GraphUI::~GraphUI()
 
 void GraphUI::loadHardcodedGraph( int index )
 {
-   _DualGraph = hardcodedDualGraph( index );
-   _TileGraph              = nullptr;
+   _Simulation->_DualGraph = hardcodedDualGraph( index );
+   _Simulation->_TileGraph = nullptr;
    _DragDualVtx            = DualGraph::VertexPtr();
    _DragDualEdgeStartVtx   = DualGraph::VertexPtr();
    _DragTileVtx            = TileGraph::VertexPtr();
-   ui.drawing->setGraphShape( _DualGraph->shape() );
+   ui.drawing->setGraphShape( _Simulation->_DualGraph->shape() );
    updateDrawing();
 }
 
@@ -227,26 +234,26 @@ bool GraphUI::getMousePos( XYZ& mousePos ) const
 
 DualGraph::VertexPtr GraphUI::dualVertexAtMouse( double maxPixelDist ) const
 {
-   if ( !_DualGraph )
+   if ( !_Simulation->_DualGraph )
       return DualGraph::VertexPtr();
 
    XYZ mousePos;
    if ( !getMousePos( mousePos ) )
       return DualGraph::VertexPtr();
 
-   return _DualGraph->vertexAt( mousePos, ui.drawing->toModel( maxPixelDist ) );
+   return _Simulation->_DualGraph->vertexAt( mousePos, ui.drawing->toModel( maxPixelDist ) );
 }
 
 TileGraph::VertexPtr GraphUI::tileVertexAtMouse( double maxPixelDist ) const
 {
-   if ( !_TileGraph )
+   if ( !_Simulation->_TileGraph )
       return TileGraph::VertexPtr();
 
    XYZ mousePos;
    if ( !getMousePos( mousePos ) )
       return TileGraph::VertexPtr();
 
-   return _TileGraph->vertexAt( mousePos, ui.drawing->toModel( maxPixelDist ) );
+   return _Simulation->_TileGraph->vertexAt( mousePos, ui.drawing->toModel( maxPixelDist ) );
 }
 
 void GraphUI::addVertex( int color )
@@ -254,20 +261,20 @@ void GraphUI::addVertex( int color )
    DualGraph::VertexPtr vtx = dualVertexAtMouse( 6 );
    if ( vtx.isValid() ) // change vtx color
    {
-      _DualGraph->setVertexColor( vtx, color );
+      _Simulation->_DualGraph->setVertexColor( vtx, color );
    }
    else                 // add vtx
    {
       XYZ mousePos;
       if ( getMousePos( mousePos ) )
-         _DualGraph->addVertex( color, mousePos );
+         _Simulation->_DualGraph->addVertex( color, mousePos );
    }
    updateDrawing();
 }
 
 void GraphUI::updateDrawing()
 {
-   ui.drawing->updateDrawing( *_DualGraph, *_TileGraph );
+   ui.drawing->updateDrawing( *_Simulation->_DualGraph, *_Simulation->_TileGraph );
 }
 
 void GraphUI::handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isClick, bool isUnclick )
@@ -280,7 +287,7 @@ void GraphUI::handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isCli
    {
       if ( isKeyDown( 'E' ) )
       {
-         _DualGraph->toggleEdge( _DragDualEdgeStartVtx, dualVertexAtMouse( 30. ) );
+         _Simulation->_DualGraph->toggleEdge( _DragDualEdgeStartVtx, dualVertexAtMouse( 30. ) );
          updateDrawing();
       }
 
@@ -311,7 +318,7 @@ void GraphUI::handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isCli
       {
          if ( _DragDualVtx.isValid() )
          {
-            _DualGraph->setVertexPos( _DragDualVtx, mousePos );
+            _Simulation->_DualGraph->setVertexPos( _DragDualVtx, mousePos );
             updateDrawing();
          }
       }
@@ -319,7 +326,7 @@ void GraphUI::handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isCli
       {
          if ( _DragTileVtx.isValid() )
          {
-            _TileGraph->setVertexPos( _DragTileVtx, mousePos );
+            _Simulation->_TileGraph->setVertexPos( _DragTileVtx, mousePos );
             updateDrawing();
          }
       }
