@@ -49,7 +49,7 @@ DualGraph::DualGraph( std::shared_ptr<IGraphSymmetry> graphSymmetry, std::shared
 
 void DualGraph::addVertex( int color, const XYZ& pos )
 {
-   _Vertices.push_back( Vertex( (int) _Vertices.size(), color, pos ) );
+   _Vertices.push_back( Vertex( (int) _Vertices.size(), color, _GraphShape->toSurfaceFrom3D( pos ) ) );
    _Vertices.back().symmetry = _GraphSymmetry->calcSectorSymmetry( pos );
 }
 

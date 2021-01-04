@@ -20,7 +20,7 @@ namespace
       // ico-symmetry sphere
       if ( index == 1 )
       {
-         std::shared_ptr<IGraphShape> shape( new GraphShapeSphere( 1. ) );
+         std::shared_ptr<IGraphShape> shape( new GraphShapeSphere( 2.5 ) );
 
          SymmetryGroup symA( Icosahedron().map( {0,1,2}, { 5,4,8} ), Perm( { 5,4,2,3,1,0,6,7,8,9 } ) );
          SymmetryGroup symB( Icosahedron().map( {0,1,2}, {11,7,3} ), Perm( { 5,1,3,2,4,0,6,7,8,9 } ) );
