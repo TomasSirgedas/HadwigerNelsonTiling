@@ -157,7 +157,7 @@ bool TileGraph::mustBeFar( const VertexPtr& a, const VertexPtr& b ) const
    for ( const TilePtr& tileA : a.tiles() ) if ( tileA.color() != BLANK_COLOR )
    {
       TilePtr tileB = b.tileWithColor( tileA.color() );
-      if ( tileA != tileB )
+      if ( tileB.isValid() && tileA != tileB )
          return true;
    }
    return false;

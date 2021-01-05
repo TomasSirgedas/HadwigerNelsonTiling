@@ -140,7 +140,7 @@ double Simulation::step( double& paddingError )
 
 
    // apply velocities
-   for ( int i = 0; i < (int)vel.size(); i++ ) if ( !_TileGraph->_Vertices[i]._Symmetry->hasSymmetry() )
+   for ( int i = 0; i < (int)vel.size(); i++ ) if ( !_TileGraph->_Vertices[i]._Symmetry->hasSymmetry() ) if ( i != _FixedVertex.index() )
    {
       _TileGraph->_Vertices[i]._Pos += vel[i];
    }

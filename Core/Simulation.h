@@ -10,12 +10,13 @@ public:
    CORE_API void normalizeVertices();
    CORE_API double step( double& paddingError );
    CORE_API double step( int numSteps );
-   CORE_API void setRadius( double radius );
+   CORE_API void setRadius( double radius );   
 
 public:
    double _Radius = 1;
    double _Padding = .0001;
    double _PaddingError = 0;
+   TileGraph::VertexPtr _FixedVertex;
    std::shared_ptr<TileGraph> _TileGraph;
    std::shared_ptr<DualGraph> _DualGraph;
    std::vector<TileGraph::KeepCloseFar> _KeepCloseFars;

@@ -140,7 +140,22 @@ GraphUI::GraphUI( QWidget *parent )
    } );
 
    connect( ui.playButton, &QPushButton::clicked, [&]() {  
-      _Simulation->step( 1 );
+      if ( _Timer.isActive() )
+      {
+         _Timer.stop();
+         ui.playButton->setText( "Play" );
+      }
+      else
+      {
+         _Timer.start( 50 );
+         ui.playButton->setText( "Pause" );
+      }
+   } );
+
+   connect( &_Timer, &QTimer::timeout, [this]() {
+      double error = _Simulation->step( 500 );
+      ui.errorLabel->setText( "Err:" + QString::number( error ) );
+      ui.paddingErrorLabel->setText( "Pad:" + QString::number( _Simulation->_PaddingError ) );      
       updateDrawing();
    } );
 
@@ -304,8 +319,8 @@ void GraphUI::handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isCli
       }
 
       _DragDualVtx = DualGraph::VertexPtr();
-      _DragDualEdgeStartVtx = DualGraph::VertexPtr();
-      _DragTileVtx = TileGraph::VertexPtr();
+      _DragDualEdgeStartVtx = DualGraph::VertexPtr();      
+      _Simulation->_FixedVertex = _DragTileVtx = TileGraph::VertexPtr();
    }
 
    if ( isClick )
@@ -315,7 +330,7 @@ void GraphUI::handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isCli
       else if ( isKeyDown( 'M' ) )
          _DragDualVtx = dualVertexAtMouse( 8. );
       else
-         _DragTileVtx = tileVertexAtMouse( 8. );
+         _Simulation->_FixedVertex = _DragTileVtx = tileVertexAtMouse( 8. );
 
       if ( _DragTileVtx.isValid() )
       {

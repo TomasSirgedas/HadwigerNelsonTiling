@@ -33,6 +33,20 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
+      <widget class="QLabel" name="errorLabel">
+       <property name="text">
+        <string>Err:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="paddingErrorLabel">
+       <property name="text">
+        <string>Pad:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="playButton">
        <property name="text">
         <string>Play</string>

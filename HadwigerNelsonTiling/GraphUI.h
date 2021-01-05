@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QWidget>
+#include <QTimer>
 #include "ui_GraphUI.h"
 
 #include <Core/DualGraph.h>
@@ -31,6 +32,7 @@ public:
 private:
    Ui::GraphUI ui;
 
+   QTimer _Timer;
    std::shared_ptr<Simulation> _Simulation;
    DualGraph::VertexPtr _DragDualVtx;
    DualGraph::VertexPtr _DragDualEdgeStartVtx;
