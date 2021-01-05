@@ -43,9 +43,12 @@ public:
       CORE_API const Matrix4x4& matrix() const { return _Matrix; }
       CORE_API int index() const { return _Index; }
       CORE_API std::vector<TilePtr> tiles() const;
-      CORE_API TileGraph::TilePtr tileWithColor( int color ) const;
+      CORE_API TilePtr tileWithColor( int color ) const;
       CORE_API std::vector<VertexPtr> neighbors() const;
       CORE_API std::vector<VertexPtr> neighbors( int depth ) const;
+      CORE_API VertexPtr calcCurve( const VertexPtr& b ) const;
+      CORE_API bool hasTile( const TilePtr& tile ) const;
+      CORE_API bool hasColor( int color ) const;
 
    public:
       void updateCache();
@@ -75,12 +78,13 @@ public:
       CORE_API const Tile& baseTile() const { return _Graph->_Tiles[_Index]; }
       CORE_API int color() const { return _Graph->_GraphSymmetry->toSector( _SectorId, baseTile()._Color ); }
       CORE_API std::vector<VertexPtr> vertices() const;
+      CORE_API std::vector<std::pair<TileGraph::VertexPtr,TileGraph::VertexPtr>> edges() const { return toEdges( vertices() ); }
       CORE_API XYZ avgPos() const;
       CORE_API int id() const { return isValid() ? MAX_VERTICES * _SectorId + _Index : -1; }
       //CORE_API std::string name() const { return std::to_string( id() ); }
       CORE_API std::string name() const { return std::to_string( _Index ) + "-" + std::to_string( _SectorId ); }
       CORE_API VertexPtr next( const VertexPtr& a ) const { return baseTile().next( a.premul( _Matrix.inverted() ) ).premul( _Matrix ); }
-      CORE_API VertexPtr prev( const VertexPtr& a ) const { return baseTile().prev( a.premul( _Matrix.inverted() ) ).premul( _Matrix ); }
+      CORE_API VertexPtr prev( const VertexPtr& a ) const { return baseTile().prev( a.premul( _Matrix.inverted() ) ).premul( _Matrix ); }      
 
    public:
       void updateCache();
@@ -156,6 +160,8 @@ public:
    CORE_API bool mustBeClose( const VertexPtr& a, const VertexPtr& b ) const;
    CORE_API bool mustBeFar( const VertexPtr& a, const VertexPtr& b ) const;
    CORE_API void normalizeVertices();
+
+   CORE_API std::vector<TilePtr> tilesAt( const VertexPtr& a, const VertexPtr& b ) const;
 
 public:
    std::vector<Vertex> _Vertices;

@@ -53,6 +53,15 @@ std::vector<TileGraph::TilePtr> TileGraph::VertexPtr::tiles() const
    return ret;
 }
 
+bool TileGraph::VertexPtr::hasTile( const TilePtr& tile ) const
+{
+   std::vector<TilePtr> ret;
+   for ( const TilePtr& a : tiles() )
+      if ( a == tile )
+         return true;
+   return false;
+}
+
 TileGraph::TilePtr TileGraph::VertexPtr::tileWithColor( int color ) const
 {
    std::vector<TilePtr> ret;
@@ -67,6 +76,37 @@ std::vector<TileGraph::VertexPtr> TileGraph::VertexPtr::neighbors() const
    std::vector<VertexPtr> ret;
    for ( const VertexPtr& vtx : baseVertex()._Neighbors )
       ret.push_back( vtx.premul( matrix() ) );
+   return ret;
+}
+
+TileGraph::VertexPtr TileGraph::VertexPtr::calcCurve( const VertexPtr& b ) const
+{
+   std::vector<TilePtr> tiles = _Graph->tilesAt( *this, b );
+   if ( tiles.size() != 2 )
+      return VertexPtr();
+
+   for ( int tileIdx = 0; tileIdx < 2; tileIdx++ )
+   {
+      int otherTileColor = tiles[1-tileIdx].color();
+      if ( otherTileColor == BLANK_COLOR )
+         continue;
+      for ( const VertexPtr& vtx : tiles[tileIdx].vertices() )
+      {
+         if ( vtx == *this ) continue;
+         if ( vtx == b ) continue;
+         if ( vtx.hasColor( otherTileColor ) )
+            return vtx;
+      }
+   }
+   return VertexPtr();
+}
+
+std::vector<TileGraph::TilePtr> TileGraph::tilesAt( const VertexPtr& a, const VertexPtr& b ) const
+{
+   std::vector<TilePtr> ret;
+   for ( const TilePtr& tile : a.tiles() )
+      if ( b.hasTile( tile ) )
+         ret.push_back( tile );
    return ret;
 }
 
@@ -102,6 +142,14 @@ std::vector<TileGraph::VertexPtr> TileGraph::TilePtr::vertices() const
    for ( const VertexPtr& a : baseTile()._Vertices )
       ret.push_back( a.premul( _Matrix ) );
    return ret;
+}
+
+bool TileGraph::VertexPtr::hasColor( int color ) const
+{
+   for ( const TilePtr& a : tiles() )
+      if ( a.color() == color )
+         return true;
+   return false;
 }
 
 void TileGraph::TilePtr::updateCache()

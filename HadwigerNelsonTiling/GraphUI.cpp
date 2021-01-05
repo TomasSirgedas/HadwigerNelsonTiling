@@ -71,15 +71,20 @@ namespace
          dual->addVertex( 2, XYZ( 2, -1, 0 ) );
          dual->addVertex( 3, XYZ( .5, -1, 0 ) );
          dual->addVertex( 4, XYZ( 1, 0, 0 ) );
+         dual->addVertex( 0, XYZ( 1, -1.5, 0 ) );
+         dual->addVertex( 1, XYZ( .5, -1.5, 0 ) );
 
-         dual->toggleEdge( dual->vertexWithId( 0 ), dual->vertexWithId( 1 ) );
-         dual->toggleEdge( dual->vertexWithId( 1 ), dual->vertexWithId( 2 ) );
-         dual->toggleEdge( dual->vertexWithId( 2 ), dual->vertexWithId( 3 ) );
-         dual->toggleEdge( dual->vertexWithId( 3 ), dual->vertexWithId( 0 ) );
-         dual->toggleEdge( dual->vertexWithId( 0 ), dual->vertexWithId( 4 ) );
-         dual->toggleEdge( dual->vertexWithId( 1 ), dual->vertexWithId( 4 ) );
-         dual->toggleEdge( dual->vertexWithId( 2 ), dual->vertexWithId( 4 ) );
-         dual->toggleEdge( dual->vertexWithId( 3 ), dual->vertexWithId( 4 ) );
+         dual->toggleEdge( 0, 1 );
+         dual->toggleEdge( 1, 2 );
+         dual->toggleEdge( 2, 3 );
+         dual->toggleEdge( 3, 0 );
+         dual->toggleEdge( 0, 4 );
+         dual->toggleEdge( 1, 4 );
+         dual->toggleEdge( 2, 4 );
+         dual->toggleEdge( 3, 4 );
+         dual->toggleEdge( 3, 6 );
+         dual->toggleEdge( 2, 5 );
+         dual->toggleEdge( 5, 6 );
       }
 
       if ( index == 4 )
@@ -124,7 +129,7 @@ GraphUI::GraphUI( QWidget *parent )
 
    _Simulation.reset( new Simulation );
 
-   loadHardcodedGraph( 2 );
+   loadHardcodedGraph( 3 );
 
 
 

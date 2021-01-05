@@ -143,5 +143,3 @@ Matrix4x4 SectorSymmetryForVertex::canonicalizedSector( const Matrix4x4& sector 
 
    return _EquivalentSectors[_GraphSymmetry->sectorId( sector )][0];
 }
-
-

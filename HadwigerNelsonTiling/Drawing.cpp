@@ -13,6 +13,106 @@ namespace
    {
       painter.drawText( QRectF( p + QPointF( -1000, -1000 ), QSizeF( 2000, 2000 ) ), QString::fromStdString( str ), QTextOption( Qt::AlignCenter ) );
    }
+   std::vector<XYZ> calcCurvePlanar( const XYZ& p0_, const XYZ& p1_, const XYZ& center, double maxDistance, bool addP0 )
+   {
+      XYZ p0 = p0_ - center;
+      XYZ p1 = p1_ - center;
+      if ( p0.dist2(p1) < 1e-14 )
+         return {};
+      XYZ axis = XYZ(0,0,-1); // axis
+
+      XYZ v = (axis^p0).normalized();
+      XYZ u = v^axis;
+      double angle = atan2( p1*v, p1*u );
+      int dir = angle > 0 ? 1 : -1;
+      angle *= dir;
+      if ( angle < 0 )
+         angle += PI*2;
+
+      double radius0 = p0 * u;
+      double radius1 = sqrt((p1*u)*(p1*u) + (p1*v)*(p1*v));
+      double dist = radius0 * angle;
+      int numSegments = (int) ceil( dist / maxDistance );
+
+      std::vector<XYZ> ret;
+      if ( addP0 )
+         ret.push_back( p0 );
+      for ( int i = 1; i <= numSegments; i++ )
+      {
+         double t = (double)i / numSegments;
+         double radius = radius0 * (1-t) + radius1 * t;
+         double zDist = (p0*axis)*(1-t) + (p1*axis)*t;
+         ret.push_back( center + axis*zDist + u*radius*cos(dir*angle*t) + v*radius*sin(dir*angle*t) );
+      }
+      return ret;
+   }
+   // dir == 1, dir == -1 --> curve direction
+   // dir == 0 --> pick shorter curve direction
+   std::vector<XYZ> calcCurve( const XYZ& p0, const XYZ& p1, const XYZ& center, double maxDistance, int dir, bool addP0 )
+   {
+      if ( p0.dist2(p1) < 1e-14 )
+         return {};
+      XYZ a = center.len2() < 1e-14 ? (p0^p1).normalized() : center.normalized();
+      if ( (a^p0).len2() < 1e-14 )
+         return {}; // p is on the axis
+
+      XYZ v = (a^p0).normalized();
+      XYZ u = v^a;
+      double angle = atan2( p1*v, p1*u );
+      if ( dir == 0 ) dir = angle > 0 ? 1 : -1;
+      angle *= dir;
+      if ( angle < 0 )
+         angle += PI*2;
+
+      double radius0 = p0 * u;
+      double radius1 = sqrt((p1*u)*(p1*u) + (p1*v)*(p1*v));
+      double dist = radius0 * angle;
+      int numSegments = (int) ceil( dist / maxDistance );
+
+      std::vector<XYZ> ret;
+      if ( addP0 )
+         ret.push_back( p0 );
+      for ( int i = 1; i <= numSegments; i++ )
+      {
+         double t = (double)i / numSegments;
+         double radius = radius0 * (1-t) + radius1 * t;
+         double zDist = (p0*a)*(1-t) + (p1*a)*t;
+         ret.push_back( a*zDist + u*radius*cos(dir*angle*t) + v*radius*sin(dir*angle*t) );
+      }
+      return ret;
+   }
+
+   std::vector<XYZ> calcTileOutline( std::shared_ptr<IGraphShape> shape, const TileGraph::TilePtr& tile, double maxSpacing )
+   {
+      std::vector<XYZ> ret;
+
+      for ( const auto& edge : tile.edges() )
+      {
+         const TileGraph::VertexPtr& a = edge.first;
+         const TileGraph::VertexPtr& b = edge.second;
+         if ( maxSpacing >= 1 ) { ret.push_back( b.pos() ); continue; }
+
+         TileGraph::VertexPtr c = a.calcCurve( b ); // c = center of curve
+         std::vector<XYZ> curve;
+         if ( c.isValid() )
+         {
+            if ( shape->isCurved() )
+               curve = calcCurve( a.pos(), b.pos(), c.pos(), maxSpacing, 0, false );
+            else
+               curve = calcCurvePlanar( a.pos(), b.pos(), c.pos(), maxSpacing, false );
+         }
+         else
+         {
+            if ( shape->isCurved() )
+               curve = calcCurve( a.pos(), b.pos(), XYZ(), maxSpacing, 1, false );
+            else
+               curve = { b.pos() };
+         }
+         ret.insert( ret.end(), curve.begin(), curve.end() );
+      }
+
+      return ret;
+   }
 }
 
 
@@ -100,9 +200,13 @@ QImage Drawing::makeImage( const QSize& size, std::shared_ptr<const Simulation> 
       painter.setPen( Qt::NoPen );
       for ( const TileGraph::TilePtr& tile : graph.allTiles() ) // if ( isVisible( a.pos() ) )
       {
+         std::vector<XYZ> outline = calcTileOutline( _GraphShape, tile, 10/_PixelsPerUnit/*max curve spacing*/ );
          QPolygonF poly;
-         for ( const TileGraph::VertexPtr& a : tile.vertices() )
-            poly.append( toBitmap( a.pos() ) );
+         for ( const XYZ& a : outline )
+            poly.append( toBitmap( a ) );
+
+         //for ( const TileGraph::VertexPtr& a : tile.vertices() )
+         //   poly.append( toBitmap( a.pos() ) );
 
          if ( signedArea( poly ) > 0 )
             continue;
@@ -121,15 +225,6 @@ QImage Drawing::makeImage( const QSize& size, std::shared_ptr<const Simulation> 
             XYZ a = pr.a.pos();
             XYZ b = pr.b.pos();
 
-            //if ( _DrawCurves )
-            //{
-            //   if ( pr.keepClose && pr.keepFar && ( isVisible( a ) || isVisible( b ) ) )
-            //   {
-            //      vector<XYZ> line = calcCurve2( a, b, XYZ(), .1, 0, true );
-            //      painter.drawPath( outlineToQPainterPath( modelToBitmap * line, toBitmapNoRotate, false/*don't close path*/ ) );
-            //   }
-            //}
-            //else
             {
                if ( pr.keepClose && pr.keepFar && isVisible( a ) && isVisible( b )  )
                   painter.drawLine( toBitmap( a ), toBitmap( b ) );

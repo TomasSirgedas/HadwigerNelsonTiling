@@ -46,3 +46,13 @@ private:
 };
 
 CORE_API double signedArea( const std::vector<XYZ>& v );
+
+template<class T>
+std::vector<std::pair<T, T>> toEdges( const std::vector<T>& v )
+{
+   std::vector<std::pair<T, T>> ret;
+   for ( int i = 0; i+1 < (int) v.size(); i++ )
+      ret.push_back( { v[i], v[i+1] } );
+   ret.push_back( { v.back(), v[0] } );
+   return ret;
+}
