@@ -4,6 +4,7 @@
 
 #include <Core/DualGraph.h>
 #include <Core/TileGraph.h>
+#include <Core/Simulation.h>
 
 
 namespace
@@ -50,8 +51,10 @@ bool Drawing::isVisible( const XYZ& pos ) const
    return _GraphShape->isVisible( pos, _ModelRotation );
 }
 
-QImage Drawing::makeImage( const QSize& size, const DualGraph& dual, const TileGraph& graph )
-{
+QImage Drawing::makeImage( const QSize& size, std::shared_ptr<const Simulation> simulation )
+{   
+   const DualGraph& dual = *simulation->_DualGraph;
+   const TileGraph& graph = *simulation->_TileGraph;
    QImage image( size, QImage::Format_RGB888 );
 
    QPainter painter( &image );
@@ -108,6 +111,32 @@ QImage Drawing::makeImage( const QSize& size, const DualGraph& dual, const TileG
          painter.drawPolygon( poly );
       }
 
+
+      if ( _ShowRigids )
+      {
+         painter.setPen( QPen( QColor(0,0,0,96), 2.5 ) );
+         painter.setBrush( Qt::NoBrush );
+         for ( const auto& pr : simulation->_KeepCloseFars ) if ( pr.a.id() < pr.b.id() )
+         {  
+            XYZ a = pr.a.pos();
+            XYZ b = pr.b.pos();
+
+            //if ( _DrawCurves )
+            //{
+            //   if ( pr.keepClose && pr.keepFar && ( isVisible( a ) || isVisible( b ) ) )
+            //   {
+            //      vector<XYZ> line = calcCurve2( a, b, XYZ(), .1, 0, true );
+            //      painter.drawPath( outlineToQPainterPath( modelToBitmap * line, toBitmapNoRotate, false/*don't close path*/ ) );
+            //   }
+            //}
+            //else
+            {
+               if ( pr.keepClose && pr.keepFar && isVisible( a ) && isVisible( b )  )
+                  painter.drawLine( toBitmap( a ), toBitmap( b ) );
+            }
+         }
+      }    
+
       // draw labels
       if ( _ShowLabels )
       {
@@ -132,9 +161,9 @@ QImage Drawing::makeImage( const QSize& size, const DualGraph& dual, const TileG
    return image;
 }
 
-void Drawing::updateDrawing( const DualGraph& dual, const TileGraph& tileGraph )
+void Drawing::updateDrawing( std::shared_ptr<const Simulation> simulation )
 {  
-   ui.label->setPixmap( QPixmap::fromImage( makeImage( size(), dual, tileGraph ) ) );
+   ui.label->setPixmap( QPixmap::fromImage( makeImage( size(), simulation ) ) );
 }
 
 bool Drawing::getModelPos( const QPointF& bitmapPos, XYZ& modelPos ) const 

@@ -153,7 +153,7 @@ GraphUI::GraphUI( QWidget *parent )
    } );
 
    connect( &_Timer, &QTimer::timeout, [this]() {
-      double error = _Simulation->step( 500 );
+      double error = _Simulation->step( 50 );
       ui.errorLabel->setText( "Err:" + QString::number( error ) );
       ui.paddingErrorLabel->setText( "Pad:" + QString::number( _Simulation->_PaddingError ) );      
       updateDrawing();
@@ -162,6 +162,12 @@ GraphUI::GraphUI( QWidget *parent )
    connect( ui.dualToTileButton, &QPushButton::clicked, [&](){  
       _Simulation->_TileGraph = makeTileGraph( *_Simulation->_DualGraph, 1. );
       _Simulation->init( _Simulation->_TileGraph );
+      updateDrawing();
+   } );
+
+   
+   connect( ui.showTileGraphCheckBox, &QCheckBox::toggled, [&]() {
+      ui.drawing->_ShowRigids = ui.showRigidsCheckBox->isChecked();
       updateDrawing();
    } );
 
@@ -301,7 +307,7 @@ void GraphUI::addVertex( int color )
 
 void GraphUI::updateDrawing()
 {
-   ui.drawing->updateDrawing( *_Simulation->_DualGraph, *_Simulation->_TileGraph );
+   ui.drawing->updateDrawing( _Simulation );
 }
 
 void GraphUI::handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isClick, bool isUnclick )
