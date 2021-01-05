@@ -6,12 +6,18 @@
 #include <Core/TileGraph.h>
 #include <Core/Simulation.h>
 
+#include <unordered_set>
+
 
 namespace
 {
    void drawTextCentered( QPainter& painter, const QPointF& p, const std::string& str )
    {
       painter.drawText( QRectF( p + QPointF( -1000, -1000 ), QSizeF( 2000, 2000 ) ), QString::fromStdString( str ), QTextOption( Qt::AlignCenter ) );
+   }
+   uint64_t edgeId( const TileGraph::VertexPtr& a, const TileGraph::VertexPtr& b )
+   {
+      return ( (uint64_t) std::max( a.id(), b.id() ) << 32 ) + std::min( a.id(), b.id() );
    }
    std::vector<XYZ> calcCurvePlanar( const XYZ& p0_, const XYZ& p1_, const XYZ& center, double maxDistance, bool addP0 )
    {
@@ -220,10 +226,16 @@ QImage Drawing::makeImage( const QSize& size, std::shared_ptr<const Simulation> 
       {
          painter.setPen( QPen( QColor(0,0,0,96), 2.5 ) );
          painter.setBrush( Qt::NoBrush );
-         for ( const auto& pr : simulation->_KeepCloseFars ) if ( pr.a.id() < pr.b.id() )
+         std::unordered_set<uint64_t> usedEdges;
+         for ( const Matrix4x4& m : simulation->_TileGraph->_GraphSymmetry->allVisibleSectors() )
+         for ( const auto& pr : simulation->_KeepCloseFars )
          {  
-            XYZ a = pr.a.pos();
-            XYZ b = pr.b.pos();
+            TileGraph::VertexPtr aa = pr.a.premul( m );
+            TileGraph::VertexPtr bb = pr.b.premul( m );
+            if ( !usedEdges.insert( edgeId( aa, bb ) ).second )
+               continue;
+            XYZ a = m * pr.a.pos();
+            XYZ b = m * pr.b.pos();
 
             {
                if ( pr.keepClose && pr.keepFar && isVisible( a ) && isVisible( b )  )

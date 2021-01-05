@@ -171,7 +171,7 @@ GraphUI::GraphUI( QWidget *parent )
    } );
 
    
-   connect( ui.showTileGraphCheckBox, &QCheckBox::toggled, [&]() {
+   connect( ui.showRigidsCheckBox, &QCheckBox::toggled, [&]() {
       ui.drawing->_ShowRigids = ui.showRigidsCheckBox->isChecked();
       updateDrawing();
    } );
