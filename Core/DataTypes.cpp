@@ -51,3 +51,11 @@ bool Matrix4x4::eq( const Matrix4x4& rhs, double tolerance ) const
          return false;
    return true;
 }
+
+Json XYZ::toJson() const { return JsonArray( {x,y,z} ); }
+Json XYZW::toJson() const { return JsonArray( {x,y,z,w} ); }
+
+Json Matrix4x4::toJson() const
+{
+   return JsonArray( {m[0].toJson(),m[1].toJson(),m[2].toJson(),m[3].toJson()} );
+}

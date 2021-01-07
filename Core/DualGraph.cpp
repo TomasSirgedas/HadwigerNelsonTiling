@@ -150,3 +150,26 @@ void DualGraph::normalizeVertices()
    for ( Vertex& a : _Vertices )
       a.pos = _GraphShape->toSurfaceFrom3D( a.pos );
 }
+
+Json DualGraph::toJson() const
+{
+   JsonArray vertices;
+   for ( const auto& a : _Vertices )
+      vertices.push_back( a.toJson() );
+
+   return JsonObj { { "symmetry", _GraphSymmetry->toJson() }, { "shape", _GraphShape->toJson() }, { "vertices", vertices } };
+}
+
+Json DualGraph::Vertex::toJson() const
+{
+   JsonArray neighborsJson;
+   for ( const auto& a : neighbors )
+      neighborsJson.push_back( a.toJson() );
+
+   return JsonObj { {"index", index}, {"color", color}, {"pos", pos.toJson()}, {"neighbors", neighborsJson} };
+}
+
+Json DualGraph::VertexPtr::toJson() const
+{
+   return JsonObj { {"index", index()}, {"sectorId", _SectorId} };
+}

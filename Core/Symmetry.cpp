@@ -31,6 +31,19 @@ void SymmetryGroup::init( int visibleLoIndexHint, int visibleHiIndexHint )
    }
 }
 
+Json SymmetryGroup::toJson() const
+{
+   Json ret;
+   ret["matrix"] = _Matrix.toJson();
+   ret["colorPerm"] = _ColorPerm.toJson();
+   ret["loIndex"] = _LoIndex;
+   ret["hiIndex"] = _HiIndex;
+   ret["visibleLoIndex"] = _VisibleLoIndex;
+   ret["visibleHiIndex"] = _VisibleHiIndex;
+   ret["isFinite"] = _IsFinite;
+   return ret;
+}
+
 GraphSymmetry_Groups::GraphSymmetry_Groups( const std::vector<SymmetryGroup>& groups ) : _Groups( groups )
 {
    int N = (int) _Groups.size();
@@ -104,6 +117,13 @@ void GraphSymmetry_Groups::initAllSectorGroupIndexes( int i, std::vector<int>& g
    }
 }
 
+Json GraphSymmetry_Groups::toJson() const
+{
+   Json ret;
+   for ( const SymmetryGroup& g : _Groups )
+      ret.push_back( g.toJson() );
+   return ret;
+}
 
 
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMacros.h"
+#include "Json.h"
 #include <cmath>
 #include <vector>
 
@@ -42,6 +43,8 @@ public:
    //QPointF toPointF() const { return QPointF( x, y ); }
    //QVector3D toQVector3D() const { return QVector3D( x, y, z ); }
 
+   Json toJson() const;
+
 public:
    double x, y, z;
 };
@@ -76,6 +79,8 @@ public:
    //QVector3D toQVector3D() const { return toXYZ().toQVector3D(); }
 
    bool eq( const XYZW& rhs, double tolerance = 1e-8 ) const;
+
+   Json toJson() const;
 
 public:
    double x, y, z, w;
@@ -114,6 +119,8 @@ public:
    Matrix4x4 pow( int p ) const;
 
    bool eq( const Matrix4x4& rhs, double tolerance = 1e-8 ) const;
+
+   Json toJson() const;
 
 public:
    XYZW m[4];
@@ -173,6 +180,8 @@ public:
    //         return false;
    //   return true;
    //}
+
+   Json toJson() const { return Json( v ); }
 
 public:
    std::vector<int> v;

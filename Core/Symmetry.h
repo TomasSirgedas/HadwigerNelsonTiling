@@ -3,6 +3,7 @@
 #include "CoreMacros.h"
 #include "DataTypes.h"
 #include "Util.h"
+#include "Json.h"
 
 #include <vector>
 #include <string>
@@ -57,6 +58,8 @@ public:
    virtual std::vector<Matrix4x4> allSectors() const = 0;
    virtual bool isSectorIdVisible( int sectorId ) const = 0;
 
+   virtual Json toJson() const = 0;
+
    std::shared_ptr<SectorSymmetryForVertex> calcSectorSymmetry( const XYZ& pos ) const { return std::shared_ptr<SectorSymmetryForVertex>( new SectorSymmetryForVertex( this, pos ) ); }
 };
 
@@ -87,6 +90,8 @@ public:
    //   return 999999;
    //}
 
+   CORE_API Json toJson() const;
+
 private:
    void init( int visibleLoIndex, int visibleHiIndex );
 
@@ -103,7 +108,6 @@ private:
 class GraphSymmetry_Groups : public IGraphSymmetry
 {
 public:
-
    CORE_API GraphSymmetry_Groups( const std::vector<SymmetryGroup>& groups );
    CORE_API int numSectors() const override { int ret = 1; for ( const SymmetryGroup& g : _Groups ) ret *= g.size(); return ret; }
    CORE_API int sectorId( const Matrix4x4& sector ) const override { return  _SectorHashToId.count( matrixHash( sector ) ) ? _SectorHashToId.at( matrixHash( sector ) ) : -1; }
@@ -114,13 +118,14 @@ public:
    CORE_API std::vector<Matrix4x4> allSectors() const override { return _SectorIdToMatrix; }
    CORE_API bool isSectorIdVisible( int sectorId ) const override { return _SectorIdIsVisible[sectorId]; }
 
+   CORE_API Json toJson() const override;
+
 private:
    void initAllSectorGroupIndexes( int i, std::vector<int>& groupIndexes );
 
 public:
    std::vector<SymmetryGroup> _Groups;
    std::unordered_map<uint64_t, int> _SectorHashToId;
-   //std::vector<Matrix4x4> _AllVisibleSectors;
    std::vector<std::vector<int>> _AllSectorGroupIndexes;
    std::vector<Matrix4x4> _SectorIdToMatrix;
    std::vector<bool> _SectorIdIsVisible;
@@ -143,6 +148,7 @@ public:
    virtual double radius() const { return 1.; }
    virtual void setRadius( double radius ) {}
    virtual bool isCurved() const = 0;
+   virtual Json toJson() const = 0;
 };
 
 class GraphShapeSphere : public IGraphShape
@@ -164,6 +170,7 @@ public:
    double radius() const override { return _Radius; }
    void setRadius( double radius ) override { _Radius = radius; }
    bool isCurved() const override { return true; }
+   virtual Json toJson() const override { return JsonObj { { "type", "sphere" }, { "radius", _Radius } }; }
 
 private:
    double _Radius;
@@ -185,4 +192,5 @@ public:
    bool isVisible( const XYZ& pos, const Matrix4x4& rotationMatrix ) const override { return true; }
    bool isValidWinding( const std::vector<XYZ>& v ) const override { return signedArea( v ) <= 0; }
    bool isCurved() const override { return false; }
+   virtual Json toJson() const override { return JsonObj { { "type", "plane" } }; }
 };

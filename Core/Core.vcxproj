@@ -162,6 +162,7 @@
     <ClCompile Include="GraphUtil.cpp" />
     <ClCompile Include="DataTypes.cpp" />
     <ClCompile Include="DualGraph.cpp" />
+    <ClCompile Include="Json.cpp" />
     <ClCompile Include="Simulation.cpp" />
     <ClCompile Include="Symmetry.cpp" />
     <ClCompile Include="TileGraph.cpp" />
@@ -175,6 +176,7 @@
     <ClInclude Include="CoreMacros.h" />
     <ClInclude Include="DataTypes.h" />
     <ClInclude Include="DualGraph.h" />
+    <ClInclude Include="Json.h" />
     <ClInclude Include="Simulation.h" />
     <ClInclude Include="Symmetry.h" />
     <ClInclude Include="TileGraph.h" />

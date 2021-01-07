@@ -66,6 +66,9 @@ public:
       CORE_API int id() const { return isValid() ? MAX_VERTICES * _SectorId + _Index : -1; }
       CORE_API int index() const { return isValid() ? _Index : -1; }
       CORE_API Matrix4x4 matrix() const { return _Matrix; }
+      CORE_API int sectorId() const { return _SectorId; }
+
+      CORE_API Json toJson() const;
 
    public:
       void updateCache();
@@ -117,6 +120,7 @@ public:
          int indexOfA = neighborIndexOf( a );
          return indexOfA == -1 ? VertexPtr() : neighbors[(indexOfA+1)%(int)neighbors.size()];
       }
+      Json toJson() const;
 
    public:
       int index;
@@ -146,8 +150,9 @@ public:
 
    CORE_API void normalizeVertices();
 
-
    CORE_API std::shared_ptr<IGraphShape> shape() { return _GraphShape; }
+
+   CORE_API Json toJson() const;
 
 public:
    std::vector<Vertex> _Vertices;

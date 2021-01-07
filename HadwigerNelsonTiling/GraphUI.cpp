@@ -10,10 +10,39 @@
 #include <QMouseEvent>
 #include <QDebug>
 #include <QValidator>
-
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QFileDialog>
 
 namespace
 {
+   QJsonValue toQJsonValue( const Json& j )
+   {
+      QJsonValue ret;
+      switch ( j.type() )
+      {
+      case Json::OBJECT: { QJsonObject obj; for ( const auto& e : j.toMap() ) obj[QString::fromStdString(e.first)] = toQJsonValue( e.second ); ret = obj; break; }
+      case Json::ARRAY: { QJsonArray arr; for ( const Json& e : j.toArray() ) arr.append( toQJsonValue( e ) ); ret = arr; break; }
+      case Json::STRING: { ret = QString::fromStdString( j.toString() ); break; }
+      case Json::NUMBER: { ret = j.toDouble(); break; }
+      case Json::BOOL: { ret = j.toBool(); break; }
+      }
+      return ret;
+   }
+   void saveDual( const QString& filename, const DualGraph& dual )
+   {
+      if ( filename.isEmpty() )
+         return;
+
+      QJsonObject graph = toQJsonValue( dual.toJson() ).toObject();
+      {
+         QFile f( filename );
+         f.open(QFile::WriteOnly);
+         f.write(QJsonDocument( graph ).toJson());            
+      }   
+   }
+
    std::shared_ptr<DualGraph> hardcodedDualGraph( int index )
    {
       std::shared_ptr<DualGraph> dual;
@@ -139,6 +168,12 @@ GraphUI::GraphUI( QWidget *parent )
    //_DualGraph->addVertex( 1, XYZ(1,0,0) );
 
    ui.radiusLineEdit->setValidator( new QDoubleValidator( .3, 100., 1000, this ) );
+
+
+   connect( ui.saveButton, &QPushButton::clicked, [&]() {
+      QString filename = QFileDialog::getSaveFileName( this, "Save Graph", QString(), "*.dual" );
+      saveDual( filename, *_Simulation->_DualGraph );
+   } );
       
    connect( ui.radiusLineEdit, &QLineEdit::editingFinished, [&]() {
       setRadius( ui.radiusLineEdit->text().toDouble() );
