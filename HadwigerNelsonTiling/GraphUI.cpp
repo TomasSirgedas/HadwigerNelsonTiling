@@ -14,6 +14,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QFileDialog>
+#include <QElapsedTimer>
 
 namespace
 {
@@ -226,9 +227,14 @@ GraphUI::GraphUI( QWidget *parent )
    } );
 
    connect( &_Timer, &QTimer::timeout, [this]() {
-      double error = _Simulation->step( 50 );
+      int simSteps = 50;
+      QElapsedTimer t;
+      t.start();
+      double error = _Simulation->step( simSteps );
+      double time = t.nsecsElapsed() * 1e-9;
       ui.errorLabel->setText( "Err:" + QString::number( error ) );
       ui.paddingErrorLabel->setText( "Pad:" + QString::number( _Simulation->_PaddingError ) );      
+      //ui.speedLabel->setText( "Speed(ms): " + QString::number( 1000*time/simSteps ) );
       updateDrawing();
    } );
 
@@ -383,7 +389,13 @@ void GraphUI::addVertex( int color )
 
 void GraphUI::updateDrawing()
 {
+   QElapsedTimer t;
+   t.start();
+
    ui.drawing->updateDrawing( _Simulation );
+
+   double time = t.nsecsElapsed() * 1e-9;   
+   ui.speedLabel->setText( "Speed(ms): " + QString::number( 1000*time ) );
 }
 
 void GraphUI::handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isClick, bool isUnclick )
