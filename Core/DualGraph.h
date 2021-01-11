@@ -31,6 +31,7 @@ public:
          if ( _SectorId < 0 )
             *this = VertexPtr();
       }
+      CORE_API VertexPtr( const Json& json, const DualGraph* graph );
 
       CORE_API bool operator==( const VertexPtr& rhs ) const { return _Graph == rhs._Graph && _Index == rhs._Index && _SectorId == rhs._SectorId; }
       CORE_API bool operator!=( const VertexPtr& rhs ) const { return !(*this == rhs); }
@@ -89,6 +90,7 @@ public:
    {
    public:
       Vertex( int index, int color, const XYZ& pos ) : index(index), color(color), pos(pos) {}
+      Vertex( const Json& json, const DualGraph* graph );
 
       VertexPtr toVertexPtr( const DualGraph* graph ) const { return VertexPtr( graph, index, Matrix4x4() ); }
 
@@ -131,6 +133,7 @@ public:
    };
 
    CORE_API DualGraph( std::shared_ptr<IGraphSymmetry> symmetry, std::shared_ptr<IGraphShape> shape );
+   CORE_API DualGraph( const Json& json );
 
    CORE_API VertexPtr operator[]( int index ) const { return _Vertices[index].toVertexPtr( this ); }
    CORE_API VertexPtr vertexWithName( const std::string& name ) const { for ( const VertexPtr& a : allVisibleVertices() ) if ( a.name() == name ) return a; return VertexPtr(); }

@@ -26,7 +26,7 @@ public:
    DualGraph::VertexPtr dualVertexAtMouse( double maxPixelDist ) const;
    TileGraph::VertexPtr tileVertexAtMouse( double maxPixelDist ) const;
 
-   void loadHardcodedGraph( int index );
+   void loadGraph( std::shared_ptr<DualGraph> dual );
    void setRadius( double radius );
 
 private:

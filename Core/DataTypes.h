@@ -12,6 +12,7 @@ class CORE_API XYZ
 public:
    XYZ( double px, double py, double pz ) { set( px, py, pz ); }
    XYZ() { set( 0, 0, 0 ); }
+   XYZ( const Json& json );
    ~XYZ() {}
    void set( double px, double py, double pz ) { x = px; y = py; z = pz; }
 
@@ -56,6 +57,7 @@ public:
    XYZW( double x, double y, double z, double w ) : x(x),y(y),z(z),w(w) {}
    XYZW( const XYZ& p ) : x(p.x),y(p.y),z(p.z),w(1.) {}
    XYZW() : x(0), y(0), z(0), w(0) {}
+   XYZW( const Json& json );
    ~XYZW() {}
      
    XYZW operator-() const { return XYZW( -x, -y, -z, -w ); }
@@ -95,6 +97,7 @@ public:
               double m10, double m11, double m12, double m13, 
               double m20, double m21, double m22, double m23, 
               double m30, double m31, double m32, double m33 ) { m[0] = XYZW(m00,m10,m20,m30); m[1] = XYZW(m01,m11,m21,m31); m[2] = XYZW(m02,m12,m22,m32); m[3] = XYZW(m03,m13,m23,m33); }
+   Matrix4x4( const Json& json );
    XYZW& operator[]( int idx ) { return m[idx]; }
    XYZW operator[]( int idx ) const { return m[idx]; }
    XYZW operator*( const XYZW& v ) const { return m[0] * v.x + m[1] * v.y + m[2] * v.z + m[3] * v.w; }
@@ -131,7 +134,8 @@ class Perm
 public:
    Perm() {}
    Perm( int n ) { for ( int i = 0; i < n; i++ ) v.push_back( i ); }
-   Perm( const std::vector<int>& v ) : v(v) {}
+   Perm( const std::initializer_list<int>& w ) : v(w.begin(), w.end()) {}
+   Perm( const Json& json ) { for( const Json& j : json.toArray() ) v.push_back( j.toInt() ); }
 
    bool isIdentity() const { return *this == Perm( (int) v.size() ); }
    int operator[]( int idx ) const { if ( idx >= (int) v.size() ) return idx; return v[idx]; }

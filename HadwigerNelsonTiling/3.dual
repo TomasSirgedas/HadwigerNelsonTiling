@@ -1,0 +1,173 @@
+{
+    "shape": {
+        "type": "plane"
+    },
+    "symmetry": null,
+    "vertices": [
+        {
+            "color": 0,
+            "index": 0,
+            "neighbors": [
+                {
+                    "index": 1,
+                    "sectorId": 0
+                },
+                {
+                    "index": 3,
+                    "sectorId": 0
+                },
+                {
+                    "index": 4,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                0,
+                0,
+                0
+            ]
+        },
+        {
+            "color": 1,
+            "index": 1,
+            "neighbors": [
+                {
+                    "index": 0,
+                    "sectorId": 0
+                },
+                {
+                    "index": 2,
+                    "sectorId": 0
+                },
+                {
+                    "index": 4,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                1.5,
+                1,
+                0
+            ]
+        },
+        {
+            "color": 2,
+            "index": 2,
+            "neighbors": [
+                {
+                    "index": 1,
+                    "sectorId": 0
+                },
+                {
+                    "index": 3,
+                    "sectorId": 0
+                },
+                {
+                    "index": 4,
+                    "sectorId": 0
+                },
+                {
+                    "index": 5,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                2,
+                -1,
+                0
+            ]
+        },
+        {
+            "color": 3,
+            "index": 3,
+            "neighbors": [
+                {
+                    "index": 2,
+                    "sectorId": 0
+                },
+                {
+                    "index": 0,
+                    "sectorId": 0
+                },
+                {
+                    "index": 4,
+                    "sectorId": 0
+                },
+                {
+                    "index": 6,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                0.5,
+                -1,
+                0
+            ]
+        },
+        {
+            "color": 4,
+            "index": 4,
+            "neighbors": [
+                {
+                    "index": 0,
+                    "sectorId": 0
+                },
+                {
+                    "index": 1,
+                    "sectorId": 0
+                },
+                {
+                    "index": 2,
+                    "sectorId": 0
+                },
+                {
+                    "index": 3,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                1,
+                0,
+                0
+            ]
+        },
+        {
+            "color": 0,
+            "index": 5,
+            "neighbors": [
+                {
+                    "index": 2,
+                    "sectorId": 0
+                },
+                {
+                    "index": 6,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                1,
+                -1.5,
+                0
+            ]
+        },
+        {
+            "color": 1,
+            "index": 6,
+            "neighbors": [
+                {
+                    "index": 3,
+                    "sectorId": 0
+                },
+                {
+                    "index": 5,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                0.5,
+                -1.5,
+                0
+            ]
+        }
+    ]
+}

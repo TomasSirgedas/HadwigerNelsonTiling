@@ -56,9 +56,11 @@ public:
    virtual std::string sectorName( int sectorId ) const = 0;
    virtual std::vector<Matrix4x4> allVisibleSectors() const = 0;
    virtual std::vector<Matrix4x4> allSectors() const = 0;
+   virtual Matrix4x4 matrix( int sectorId ) const = 0;
    virtual bool isSectorIdVisible( int sectorId ) const = 0;
 
    virtual Json toJson() const = 0;
+   static std::shared_ptr<IGraphSymmetry> fromJson( const Json& json );
 
    std::shared_ptr<SectorSymmetryForVertex> calcSectorSymmetry( const XYZ& pos ) const { return std::shared_ptr<SectorSymmetryForVertex>( new SectorSymmetryForVertex( this, pos ) ); }
 };
@@ -68,6 +70,7 @@ class SymmetryGroup
 public:
    CORE_API SymmetryGroup( const Matrix4x4& matrix, const Perm& colorPerm ) : _Matrix(matrix), _ColorPerm(colorPerm) { init( 0, 0 ); }
    CORE_API SymmetryGroup( const Matrix4x4& matrix, const Perm& colorPerm, int visibleLoIndexHint, int visibleHiIndexHint ) : _Matrix(matrix), _ColorPerm(colorPerm) { init( visibleLoIndexHint, visibleHiIndexHint ); }
+   CORE_API SymmetryGroup( const Json& json );
    CORE_API int visibleLoIndex() const { return _VisibleLoIndex; }
    CORE_API int visibleHiIndex() const { return _VisibleHiIndex; }
    CORE_API int loIndex() const { return _LoIndex; }
@@ -117,6 +120,7 @@ public:
    CORE_API std::vector<Matrix4x4> allVisibleSectors() const override { return _AllVisibleSectors; }
    CORE_API std::vector<Matrix4x4> allSectors() const override { return _SectorIdToMatrix; }
    CORE_API bool isSectorIdVisible( int sectorId ) const override { return _SectorIdIsVisible[sectorId]; }
+   CORE_API Matrix4x4 matrix( int sectorId ) const override { return _SectorIdToMatrix[sectorId]; }
 
    CORE_API Json toJson() const override;
 
@@ -149,6 +153,7 @@ public:
    virtual void setRadius( double radius ) {}
    virtual bool isCurved() const = 0;
    virtual Json toJson() const = 0;
+   static std::shared_ptr<IGraphShape> fromJson( const Json& json );
 };
 
 class GraphShapeSphere : public IGraphShape

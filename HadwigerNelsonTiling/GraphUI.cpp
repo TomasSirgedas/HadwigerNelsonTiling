@@ -30,6 +30,19 @@ namespace
       }
       return ret;
    }
+   Json toJson( const QJsonValue& j )
+   {      
+      Json ret;
+      switch ( j.type() )
+      {
+      case QJsonValue::Object: { QJsonObject obj = j.toObject(); for ( const auto& key : obj.keys() ) ret[key.toStdString()] = toJson( obj[key] ); break; }
+      case QJsonValue::Array: { QJsonArray arr = j.toArray(); for ( const auto& val : arr ) ret.push_back( toJson( val ) ); break; }
+      case QJsonValue::String: { ret = j.toString().toStdString(); break; }
+      case QJsonValue::Double: { ret = j.toDouble(); break; }
+      case QJsonValue::Bool: { ret = j.toBool(); break; }
+      }
+      return ret;
+   }
    void saveDual( const QString& filename, const DualGraph& dual )
    {
       if ( filename.isEmpty() )
@@ -41,6 +54,17 @@ namespace
          f.open(QFile::WriteOnly);
          f.write(QJsonDocument( graph ).toJson());            
       }   
+   }
+   std::shared_ptr<DualGraph> loadDual( const QString& filename )
+   {
+      if ( filename.isEmpty() )
+         return nullptr;
+
+      QFile f( filename );
+      f.open( QFile::ReadOnly );
+      QJsonDocument doc = QJsonDocument::fromJson( f.readAll() );
+      Json j = toJson( doc.object() );
+      return std::shared_ptr<DualGraph>( new DualGraph( j ) );
    }
 
    std::shared_ptr<DualGraph> hardcodedDualGraph( int index )
@@ -158,7 +182,11 @@ GraphUI::GraphUI( QWidget *parent )
 
    _Simulation.reset( new Simulation );
 
-   loadHardcodedGraph( 3 );
+   //loadGraph( hardcodedDualGraph( 3 ) );
+   //loadGraph( loadDual( R"(C:\Users\Tom\Desktop\dual\temp.dual)" ) );
+   loadGraph( loadDual( R"(D:/Proj/HadwigerNelson/HadwigerNelsonTiling/HadwigerNelsonTiling/1.dual)" ) );
+
+      
 
 
 
@@ -173,6 +201,10 @@ GraphUI::GraphUI( QWidget *parent )
    connect( ui.saveButton, &QPushButton::clicked, [&]() {
       QString filename = QFileDialog::getSaveFileName( this, "Save Graph", QString(), "*.dual" );
       saveDual( filename, *_Simulation->_DualGraph );
+   } );
+   connect( ui.loadButton, &QPushButton::clicked, [&]() {
+      QString filename = QFileDialog::getOpenFileName( this, "Save Graph", QString(), "*.dual" );
+      loadGraph( loadDual( filename ) );
    } );
       
    connect( ui.radiusLineEdit, &QLineEdit::editingFinished, [&]() {
@@ -249,10 +281,10 @@ GraphUI::GraphUI( QWidget *parent )
    } );
 
 
-   QObject::connect( new QShortcut(QKeySequence(Qt::Key_F1), this ), &QShortcut::activated, [this]() { loadHardcodedGraph( 1 ); } );
-   QObject::connect( new QShortcut(QKeySequence(Qt::Key_F2), this ), &QShortcut::activated, [this]() { loadHardcodedGraph( 2 ); } );
-   QObject::connect( new QShortcut(QKeySequence(Qt::Key_F3), this ), &QShortcut::activated, [this]() { loadHardcodedGraph( 3 ); } );
-   QObject::connect( new QShortcut(QKeySequence(Qt::Key_F4), this ), &QShortcut::activated, [this]() { loadHardcodedGraph( 4 ); } );
+   QObject::connect( new QShortcut(QKeySequence(Qt::Key_F1), this ), &QShortcut::activated, [this]() { loadGraph( hardcodedDualGraph( 1 ) ); } );
+   QObject::connect( new QShortcut(QKeySequence(Qt::Key_F2), this ), &QShortcut::activated, [this]() { loadGraph( hardcodedDualGraph( 2 ) ); } );
+   QObject::connect( new QShortcut(QKeySequence(Qt::Key_F3), this ), &QShortcut::activated, [this]() { loadGraph( hardcodedDualGraph( 3 ) ); } );
+   QObject::connect( new QShortcut(QKeySequence(Qt::Key_F4), this ), &QShortcut::activated, [this]() { loadGraph( hardcodedDualGraph( 4 ) ); } );
 
    QObject::connect( new QShortcut(QKeySequence(Qt::Key_0), this ), &QShortcut::activated, [this]() { addVertex( 0 ); } );
    QObject::connect( new QShortcut(QKeySequence(Qt::Key_R), this ), &QShortcut::activated, [this]() { addVertex( 0 ); } );
@@ -288,9 +320,12 @@ void GraphUI::setRadius( double radius )
    ui.drawing->refresh();
 }
 
-void GraphUI::loadHardcodedGraph( int index )
+void GraphUI::loadGraph( std::shared_ptr<DualGraph> dual )
 {
-   _Simulation->_DualGraph = hardcodedDualGraph( index );
+   if ( !dual )
+      return;
+
+   _Simulation->_DualGraph = dual;
    _Simulation->_TileGraph = nullptr;
    _DragDualVtx            = DualGraph::VertexPtr();
    _DragDualEdgeStartVtx   = DualGraph::VertexPtr();

@@ -52,10 +52,21 @@ bool Matrix4x4::eq( const Matrix4x4& rhs, double tolerance ) const
    return true;
 }
 
+
+XYZ::XYZ( const Json& json ) { x = json[0].toDouble(); y = json[1].toDouble(); z = json[2].toDouble(); }
+
 Json XYZ::toJson() const { return JsonArray( {x,y,z} ); }
 Json XYZW::toJson() const { return JsonArray( {x,y,z,w} ); }
+XYZW::XYZW( const Json& json ) { x=json[0].toDouble(); y=json[1].toDouble(); z=json[2].toDouble(); w=json[3].toDouble();  }
 
 Json Matrix4x4::toJson() const
 {
    return JsonArray( {m[0].toJson(),m[1].toJson(),m[2].toJson(),m[3].toJson()} );
+}
+Matrix4x4::Matrix4x4( const Json& json )
+{
+   m[0] = XYZW( json[0] );
+   m[1] = XYZW( json[1] );
+   m[2] = XYZW( json[2] );
+   m[3] = XYZW( json[3] );
 }

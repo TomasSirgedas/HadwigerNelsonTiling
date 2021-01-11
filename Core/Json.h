@@ -28,7 +28,12 @@ public:
    void push_back( const Json& json ) { setType( ARRAY ); _Array.push_back( json ); }
    Json& operator[]( const std::string& name ) { setType( OBJECT ); return _Object[name]; }
    const Json& operator[]( const std::string& name ) const { return _Object.count(name) ? _Object.at(name) : emptyStatic(); }
+   Json& operator[]( int index ) { setType( ARRAY ); return _Array[index]; }
+   const Json& operator[]( int index ) const { checkType( ARRAY ); return _Array[index]; }
    static const Json& emptyStatic() { static Json s_emptyStatic; return s_emptyStatic; }
+
+   bool isString() const { return _Type == STRING; }
+   bool operator==( const std::string& str ) const { return isString() && str == _String; }
 
 protected:
    Json( const std::initializer_list<Json>& array ) { _Type = ARRAY; _Array.insert( _Array.end(), array.begin(), array.end() ); }
@@ -37,6 +42,7 @@ protected:
 
 private:
    void setType( Type type ) { if ( _Type != NONE && type != _Type ) throw 777; _Type = type; }
+   void checkType( Type type ) const { if ( type != _Type ) throw 777; }
 
 private:
    Type _Type = NONE;

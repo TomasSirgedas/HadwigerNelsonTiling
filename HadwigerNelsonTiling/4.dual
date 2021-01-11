@@ -1,0 +1,189 @@
+{
+    "shape": {
+        "type": "plane"
+    },
+    "symmetry": [
+        {
+            "colorPerm": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                0,
+                7,
+                8,
+                9
+            ],
+            "hiIndex": 8,
+            "isFinite": false,
+            "loIndex": -8,
+            "matrix": [
+                [
+                    1,
+                    0,
+                    0,
+                    0
+                ],
+                [
+                    0,
+                    1,
+                    0,
+                    0
+                ],
+                [
+                    0,
+                    0,
+                    1,
+                    0
+                ],
+                [
+                    0,
+                    2,
+                    0,
+                    1
+                ]
+            ],
+            "visibleHiIndex": 2,
+            "visibleLoIndex": -1
+        }
+    ],
+    "vertices": [
+        {
+            "color": 0,
+            "index": 0,
+            "neighbors": [
+                {
+                    "index": 4,
+                    "sectorId": 0
+                },
+                {
+                    "index": 3,
+                    "sectorId": 0
+                },
+                {
+                    "index": 3,
+                    "sectorId": 1
+                }
+            ],
+            "pos": [
+                0,
+                0,
+                0
+            ]
+        },
+        {
+            "color": 4,
+            "index": 1,
+            "neighbors": [
+                {
+                    "index": 4,
+                    "sectorId": 0
+                },
+                {
+                    "index": 4,
+                    "sectorId": 1
+                },
+                {
+                    "index": 2,
+                    "sectorId": 1
+                },
+                {
+                    "index": 3,
+                    "sectorId": 1
+                }
+            ],
+            "pos": [
+                1.5,
+                1,
+                0
+            ]
+        },
+        {
+            "color": 6,
+            "index": 2,
+            "neighbors": [
+                {
+                    "index": 1,
+                    "sectorId": 15
+                },
+                {
+                    "index": 2,
+                    "sectorId": 1
+                },
+                {
+                    "index": 2,
+                    "sectorId": 15
+                }
+            ],
+            "pos": [
+                2,
+                -1,
+                0
+            ]
+        },
+        {
+            "color": 7,
+            "index": 3,
+            "neighbors": [
+                {
+                    "index": 0,
+                    "sectorId": 0
+                },
+                {
+                    "index": 0,
+                    "sectorId": 15
+                },
+                {
+                    "index": 4,
+                    "sectorId": 15
+                },
+                {
+                    "index": 4,
+                    "sectorId": 0
+                },
+                {
+                    "index": 1,
+                    "sectorId": 15
+                }
+            ],
+            "pos": [
+                0.5,
+                -1,
+                0
+            ]
+        },
+        {
+            "color": 2,
+            "index": 4,
+            "neighbors": [
+                {
+                    "index": 0,
+                    "sectorId": 0
+                },
+                {
+                    "index": 3,
+                    "sectorId": 1
+                },
+                {
+                    "index": 1,
+                    "sectorId": 0
+                },
+                {
+                    "index": 3,
+                    "sectorId": 0
+                },
+                {
+                    "index": 1,
+                    "sectorId": 15
+                }
+            ],
+            "pos": [
+                1,
+                0,
+                0
+            ]
+        }
+    ]
+}

@@ -169,7 +169,39 @@ Json DualGraph::Vertex::toJson() const
    return JsonObj { {"index", index}, {"color", color}, {"pos", pos.toJson()}, {"neighbors", neighborsJson} };
 }
 
+DualGraph::Vertex::Vertex( const Json& json, const DualGraph* graph )
+{
+   index = json["index"].toInt();
+   color = json["color"].toInt();
+   pos = XYZ( json["pos"] );
+
+   for ( const Json& j : json["neighbors"].toArray() )
+      neighbors.push_back( VertexPtr( j, graph ) );
+}
+
 Json DualGraph::VertexPtr::toJson() const
 {
    return JsonObj { {"index", index()}, {"sectorId", _SectorId} };
+}
+
+DualGraph::VertexPtr::VertexPtr( const Json& json, const DualGraph* graph )
+{
+   _Graph = graph;
+   _Index = json["index"].toInt();
+   _SectorId = json["sectorId"].toInt();
+   _Matrix = graph->_GraphSymmetry->matrix( _SectorId );
+}
+
+
+
+DualGraph::DualGraph( const Json& json )
+{
+   _GraphShape = IGraphShape::fromJson( json["shape"] );
+   _GraphSymmetry = IGraphSymmetry::fromJson( json["symmetry"] );
+
+   for ( const Json& j : json["vertices"].toArray() )
+   {
+      _Vertices.push_back( Vertex( j, this ) );
+      _Vertices.back().symmetry = _GraphSymmetry->calcSectorSymmetry( _Vertices.back().pos );
+   }
 }

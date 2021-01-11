@@ -44,6 +44,17 @@ Json SymmetryGroup::toJson() const
    return ret;
 }
 
+SymmetryGroup::SymmetryGroup( const Json& json )
+{
+   _Matrix           = Matrix4x4( json["matrix"] );
+   _ColorPerm        = Perm( json["colorPerm"] );
+   _LoIndex          = json["loIndex"].toInt();
+   _HiIndex          = json["hiIndex"].toInt();
+   _VisibleLoIndex   = json["visibleLoIndex"].toInt();
+   _VisibleHiIndex   = json["visibleHiIndex"].toInt();
+   _IsFinite         = json["isFinite"].toBool();
+}
+
 GraphSymmetry_Groups::GraphSymmetry_Groups( const std::vector<SymmetryGroup>& groups ) : _Groups( groups )
 {
    int N = (int) _Groups.size();
@@ -125,6 +136,13 @@ Json GraphSymmetry_Groups::toJson() const
    return ret;
 }
 
+std::shared_ptr<IGraphSymmetry> IGraphSymmetry::fromJson( const Json& json )
+{
+   std::vector<SymmetryGroup> symmetryGroups;
+   for ( const Json& e : json.toArray() )
+      symmetryGroups.push_back( SymmetryGroup( e ) );
+   return std::shared_ptr<IGraphSymmetry>( new GraphSymmetry_Groups( symmetryGroups ) );
+}
 
 
 
@@ -162,4 +180,15 @@ Matrix4x4 SectorSymmetryForVertex::canonicalizedSector( const Matrix4x4& sector 
       return sector;
 
    return _EquivalentSectors[_GraphSymmetry->sectorId( sector )][0];
+}
+
+
+std::shared_ptr<IGraphShape> IGraphShape::fromJson( const Json& json )
+{
+   if ( json["type"] == "plane" )
+      return std::shared_ptr<IGraphShape>( new GraphShapePlane() );
+   if ( json["type"] == "sphere" )
+      return std::shared_ptr<IGraphShape>( new GraphShapeSphere( json["radius"].toDouble() ) );
+   throw 777;
+   return nullptr;
 }
