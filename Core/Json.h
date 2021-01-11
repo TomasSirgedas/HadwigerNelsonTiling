@@ -27,12 +27,15 @@ public:
       
    void push_back( const Json& json ) { setType( ARRAY ); _Array.push_back( json ); }
    Json& operator[]( const std::string& name ) { setType( OBJECT ); return _Object[name]; }
-   const Json& operator[]( const std::string& name ) const { return _Object.count(name) ? _Object.at(name) : emptyStatic(); }
+   const Json& operator[]( const std::string& name ) const { return hasMember(name) ? _Object.at(name) : emptyStatic(); }
    Json& operator[]( int index ) { setType( ARRAY ); return _Array[index]; }
    const Json& operator[]( int index ) const { checkType( ARRAY ); return _Array[index]; }
    static const Json& emptyStatic() { static Json s_emptyStatic; return s_emptyStatic; }
 
+   bool hasMember( const std::string& name ) const { return isObject() && _Object.count(name) > 0; }
+
    bool isString() const { return _Type == STRING; }
+   bool isObject() const { return _Type == OBJECT; }
    bool operator==( const std::string& str ) const { return isString() && str == _String; }
 
 protected:

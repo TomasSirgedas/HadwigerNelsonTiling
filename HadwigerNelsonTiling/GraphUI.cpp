@@ -184,7 +184,8 @@ GraphUI::GraphUI( QWidget *parent )
 
    //loadGraph( hardcodedDualGraph( 3 ) );
    //loadGraph( loadDual( R"(C:\Users\Tom\Desktop\dual\temp.dual)" ) );
-   loadGraph( loadDual( R"(D:/Proj/HadwigerNelson/HadwigerNelsonTiling/HadwigerNelsonTiling/1.dual)" ) );
+   //loadGraph( loadDual( R"(D:/Proj/HadwigerNelson/HadwigerNelsonTiling/HadwigerNelsonTiling/1.dual)" ) );
+   loadGraph( loadDual( R"(D:\Proj\HadwigerNelson\SphereColoring\SphereColoring\GP4_3$.dual)" ) );
 
       
 

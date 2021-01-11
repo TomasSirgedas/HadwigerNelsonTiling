@@ -157,6 +157,9 @@ public:
 
    CORE_API Json toJson() const;
 
+private:
+   void initFromIcoJson( const Json& json );
+
 public:
    std::vector<Vertex> _Vertices;
    std::shared_ptr<IGraphSymmetry> _GraphSymmetry;

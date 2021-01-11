@@ -196,6 +196,8 @@ DualGraph::VertexPtr::VertexPtr( const Json& json, const DualGraph* graph )
 
 DualGraph::DualGraph( const Json& json )
 {
+   if ( json.hasMember("edges") ) { initFromIcoJson( json ); return; }
+
    _GraphShape = IGraphShape::fromJson( json["shape"] );
    _GraphSymmetry = IGraphSymmetry::fromJson( json["symmetry"] );
 
@@ -203,5 +205,49 @@ DualGraph::DualGraph( const Json& json )
    {
       _Vertices.push_back( Vertex( j, this ) );
       _Vertices.back().symmetry = _GraphSymmetry->calcSectorSymmetry( _Vertices.back().pos );
+   }
+}
+
+void DualGraph::initFromIcoJson( const Json& json )
+{
+   double radius = 0;
+   {
+      const Json& j = json["vertices"].toArray()[0];
+      radius = XYZ( j["x"].toDouble(), j["y"].toDouble(), j["z"].toDouble() ).len();
+   }
+
+   _GraphShape.reset( new GraphShapeSphere( radius ) );
+
+   SymmetryGroup symA( Icosahedron().map( {0,1,2}, { 5,4,8} ), Perm( { 5,4,2,3,1,0,6,7,8,9 } ) );
+   SymmetryGroup symB( Icosahedron().map( {0,1,2}, {11,7,3} ), Perm( { 5,1,3,2,4,0,6,7,8,9 } ) );
+   SymmetryGroup symC( Icosahedron().map( {0,1,2}, { 1,2,0} ), Perm( { 1,2,0,5,3,4,6,7,8,9 } ) );
+   SymmetryGroup symD( Icosahedron().map( {0,1,2}, { 0,2,3} ), Perm( { 0,2,3,4,5,1,6,7,8,9 } ) );
+   _GraphSymmetry.reset( new GraphSymmetry_Groups( { symA, symB, symC, symD } ) );
+
+   for ( const Json& j : json["vertices"].toArray() )
+   {
+      int color = j["color"].toInt();
+      XYZ pos( j["x"].toDouble(), j["y"].toDouble(), j["z"].toDouble() );
+      addVertex( color, pos );      
+   }
+
+   for ( const Json& j : json["edges"].toArray() )
+   {
+      int a = j[0].toInt();
+      int b = j[1].toInt();
+      int rawSectorId = j[2].toInt();
+      int sectorId = 0;
+      if ( rawSectorId == 0 )
+         sectorId = 0;
+      else if ( rawSectorId == 10 )
+         sectorId = 6;
+      else if ( rawSectorId == 20 )
+         sectorId = 5;
+      else if ( rawSectorId == 30 )
+         sectorId = 4;
+      else
+         continue;
+
+      toggleEdge( VertexPtr( this, a, Matrix4x4() ), VertexPtr( this, b, _GraphSymmetry->matrix( sectorId ) ) );
    }
 }
