@@ -22,25 +22,24 @@ public:
    {
    public:
       VertexPtr() {}
-      VertexPtr( const TileGraph* graph, int idx, const Matrix4x4& mtx ) : _Graph(graph), _Index(idx), _Matrix(mtx) 
+      VertexPtr( const TileGraph* graph, int idx, const SectorId& sectorId ) : _Graph(graph), _Index(idx)
       {
-         _Matrix = baseVertex()._Symmetry->canonicalizedSector( mtx );
-         updateCache();
+         _SectorId = symmetry()->canonicalizedSectorId( sectorId );
       }
       CORE_API bool isValid() const { return _Graph != nullptr; }
-      CORE_API VertexPtr premul( const Matrix4x4& mtx ) const { return VertexPtr( _Graph, _Index, mtx * _Matrix ); }
+      CORE_API VertexPtr premul( const SectorId& sectorId ) const { return VertexPtr( _Graph, _Index, sectorId * _SectorId ); }
       CORE_API bool operator==( const VertexPtr& rhs ) const { return _Graph == rhs._Graph && _Index == rhs._Index && _SectorId == rhs._SectorId; }
       CORE_API bool operator!=( const VertexPtr& rhs ) const { return !(*this == rhs); }
       CORE_API bool operator<( const VertexPtr& rhs ) const { return id() < rhs.id(); }
       //uint64_t id() const;
 
       CORE_API const Vertex& baseVertex() const { return _Graph->_Vertices[_Index]; }
-      CORE_API VertexPtr toVertexPtr( const TileGraph* graph ) const { return VertexPtr( graph, _Index, Matrix4x4() ); }
-      CORE_API XYZ pos() const { return _Matrix * baseVertex()._Pos; }
-      CORE_API int id() const { return isValid() ? MAX_VERTICES * _SectorId + _Index : -1; }
+      //CORE_API VertexPtr toVertexPtr( const TileGraph* graph ) const { return VertexPtr( graph, _Index, Matrix4x4() ); }
+      CORE_API XYZ pos() const { return matrix() * baseVertex()._Pos; }
+      CORE_API int id() const { return isValid() ? MAX_VERTICES * _SectorId.id() + _Index : -1; }
       CORE_API std::string name() const { return std::to_string( id() ); }
       //CORE_API std::string name() const { return std::to_string( _Index ) + "-" + std::to_string( _SectorId ); }
-      CORE_API const Matrix4x4& matrix() const { return _Matrix; }
+      CORE_API Matrix4x4 matrix() const { return _Graph->_GraphSymmetry->matrix( _SectorId.id() ); }
       CORE_API int index() const { return _Index; }
       CORE_API std::vector<TilePtr> tiles() const;
       CORE_API TilePtr tileWithColor( int color ) const;
@@ -49,58 +48,53 @@ public:
       CORE_API VertexPtr calcCurve( const VertexPtr& b ) const;
       CORE_API bool hasTile( const TilePtr& tile ) const;
       CORE_API bool hasColor( int color ) const;
-
-   public:
-      void updateCache();
+      CORE_API const SectorSymmetryForVertex* symmetry() const { return baseVertex()._Symmetry.get(); }
+      CORE_API SectorId sectorId() const { return _SectorId; }
 
    private:
       const TileGraph* _Graph = nullptr;
       int _Index = -1;
-      Matrix4x4 _Matrix;
+      //Matrix4x4 _Matrix;
 
    private:
-      int _SectorId = -1;
+      SectorId _SectorId;
    };
    class TilePtr
    {
    public:
       TilePtr() {}
-      TilePtr( const TileGraph* graph, int idx, const Matrix4x4& mtx ) : _Graph(graph), _Index(idx), _Matrix(mtx) 
+      TilePtr( const TileGraph* graph, int idx, const SectorId& sectorId ) : _Graph(graph), _Index(idx)
       {
-         _Matrix = baseTile()._Symmetry->canonicalizedSector( mtx );
-         updateCache();
+         _SectorId = baseTile()._Symmetry->canonicalizedSectorId( sectorId );
       }
-      CORE_API TilePtr premul( const Matrix4x4& mtx ) const { return TilePtr( _Graph, _Index, mtx * _Matrix ); }
+      CORE_API TilePtr premul( const SectorId& mtx ) const { return TilePtr( _Graph, _Index, mtx * _SectorId ); }
       CORE_API bool isValid() const { return _Graph != nullptr; }
       bool operator==( const TilePtr& rhs ) const { return id() == rhs.id(); }
       bool operator!=( const TilePtr& rhs ) const { return !(*this == rhs); }
 
       CORE_API const Tile& baseTile() const { return _Graph->_Tiles[_Index]; }
-      CORE_API int color() const { return _Graph->_GraphSymmetry->toSector( _SectorId, baseTile()._Color ); }
+      CORE_API int color() const { return _SectorId.mapColor( baseTile()._Color ); }
       CORE_API std::vector<VertexPtr> vertices() const;
       CORE_API std::vector<std::pair<TileGraph::VertexPtr,TileGraph::VertexPtr>> edges() const { return toEdges( vertices() ); }
       CORE_API XYZ avgPos() const;
-      CORE_API int id() const { return isValid() ? MAX_VERTICES * _SectorId + _Index : -1; }
+      CORE_API int id() const { return isValid() ? MAX_VERTICES * _SectorId.id() + _Index : -1; }
       //CORE_API std::string name() const { return std::to_string( id() ); }
-      CORE_API std::string name() const { return std::to_string( _Index ) + "-" + std::to_string( _SectorId ); }
-      CORE_API VertexPtr next( const VertexPtr& a ) const { return baseTile().next( a.premul( _Matrix.inverted() ) ).premul( _Matrix ); }
-      CORE_API VertexPtr prev( const VertexPtr& a ) const { return baseTile().prev( a.premul( _Matrix.inverted() ) ).premul( _Matrix ); }      
-
-   public:
-      void updateCache();
+      CORE_API std::string name() const { return std::to_string( _Index ) + "-" + std::to_string( _SectorId.id() ); }
+      CORE_API VertexPtr next( const VertexPtr& a ) const { return baseTile().next( a.premul( _SectorId.inverted() ) ).premul( _SectorId ); }
+      CORE_API VertexPtr prev( const VertexPtr& a ) const { return baseTile().prev( a.premul( _SectorId.inverted() ) ).premul( _SectorId ); }      
 
    private:
       const TileGraph* _Graph = nullptr;
       int _Index = -1;
-      Matrix4x4 _Matrix;
+      //Matrix4x4 _Matrix;
 
    private: // cached
-      int _SectorId = -1;
+      SectorId _SectorId;
    };
    class Vertex
    {
    public:
-      VertexPtr toVertexPtr( const TileGraph* graph ) const { return VertexPtr( graph, _Index, Matrix4x4() ); }
+      VertexPtr toVertexPtr( const TileGraph* graph ) const { return VertexPtr( graph, _Index, SectorId::identity( graph->_GraphSymmetry.get() ) ); }
 
    public:
       Vertex( int idx, const XYZ& pos ) : _Index(idx), _Pos(pos) {}
@@ -113,7 +107,7 @@ public:
    class Tile
    {
    public:
-      TilePtr toTilePtr( const TileGraph* graph ) const { return TilePtr( graph, _Index, Matrix4x4() ); }
+      TilePtr toTilePtr( const TileGraph* graph ) const { return TilePtr( graph, _Index, SectorId::identity( graph->_GraphSymmetry.get() ) ); }
 
       VertexPtr next( const VertexPtr& a ) const { return _Vertices[mod(verticesIndexOf(a)+1, (int)_Vertices.size())]; }
       VertexPtr prev( const VertexPtr& a ) const { return _Vertices[mod(verticesIndexOf(a)-1, (int)_Vertices.size())]; }

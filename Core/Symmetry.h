@@ -27,22 +27,54 @@ class IGraphSymmetry;
 //};
 
 
+class IGraphSymmetry;
+class CORE_API SectorId
+{
+public:
+   SectorId() {}
+   SectorId( int id, const IGraphSymmetry* graphSymmetry ) : _Id(id), _GraphSymmetry(graphSymmetry) {}
+   static SectorId identity( const IGraphSymmetry* graphSymmetry ) { return SectorId( 0, graphSymmetry ); }
+
+
+   int id() const { return _Id; }
+
+   bool isValid() const { return _Id >= 0; }
+
+   bool operator==( const SectorId& rhs ) const { return _Id == rhs._Id; }
+   bool operator!=( const SectorId& rhs ) const { return !( *this == rhs ); }
+   bool operator<( const SectorId& rhs ) const { return _Id < rhs._Id; }
+
+   SectorId operator*( const SectorId& rhs ) const;
+   SectorId inverted() const;
+   Matrix4x4 matrix() const;
+
+   int mapColor( int color ) const;
+   int unmapColor( int color ) const;
+
+
+private:
+   int _Id = -1;
+   const IGraphSymmetry* _GraphSymmetry = nullptr;
+};
+
+
 class SectorSymmetryForVertex
 {
 public:
    SectorSymmetryForVertex( const IGraphSymmetry* _GraphSymmetry, const XYZ& pos );
 
-   std::vector<Matrix4x4> uniqueSectors() const { return _UniqueSectors; }
-   std::vector<Matrix4x4> sectorEquivalents( int sectorId ) const { return _EquivalentSectors[sectorId]; }
-   std::vector<Matrix4x4> sectorEquivalentsToIdentity() const { return _EquivalentSectors[_IdentitySectorId]; }
-   Matrix4x4 canonicalizedSector( const Matrix4x4& sector ) const;
-   bool hasSymmetry() const { return _EquivalentSectors[0].size() > 1; }
+   std::vector<SectorId> uniqueSectors() const { return _UniqueSectors; }
+   std::vector<SectorId> sectorEquivalents( const SectorId& sectorId ) const { return _EquivalentSectorIds[sectorId.id()]; }
+   std::vector<SectorId> sectorEquivalentsToIdentity() const { return _EquivalentSectorIds[_IdentitySectorId]; }
+   SectorId canonicalizedSectorId( const SectorId& sectorId ) const;
+   //int canonicalizedSectorId( int sectorId ) const;
+   bool hasSymmetry() const { return _EquivalentSectorIds[0].size() > 1; }
 
 private:
    const IGraphSymmetry* _GraphSymmetry = nullptr;
-   std::vector<std::vector<int>> _EquivalentSectorIds;
-   std::vector<std::vector<Matrix4x4>> _EquivalentSectors;
-   std::vector<Matrix4x4> _UniqueSectors;
+   std::vector<std::vector<SectorId>> _EquivalentSectorIds;
+   //std::vector<std::vector<Matrix4x4>> _EquivalentSectors;
+   std::vector<SectorId> _UniqueSectors;
    int _IdentitySectorId = -1;
 };
 
@@ -50,20 +82,23 @@ class IGraphSymmetry
 {
 public:
    virtual int numSectors() const = 0;
-   virtual int sectorId( const Matrix4x4& sector ) const = 0;
    virtual int toSector( int sectorId, int color ) const = 0;
    virtual int fromSector( int sectorId, int color ) const = 0;
+   virtual int sectorId( const Matrix4x4& sector ) const = 0;
    virtual std::string sectorName( int sectorId ) const = 0;
-   virtual std::vector<Matrix4x4> allVisibleSectors() const = 0;
-   virtual std::vector<Matrix4x4> allSectors() const = 0;
+   virtual std::vector<SectorId> allVisibleSectors() const = 0;
+   virtual std::vector<SectorId> allSectors() const = 0;
    virtual Matrix4x4 matrix( int sectorId ) const = 0;
    virtual bool isSectorIdVisible( int sectorId ) const = 0;
+   virtual int mul( int sectorA, int sectorB ) const = 0;
+   virtual int inverted( int sectorId ) const = 0;
 
    virtual Json toJson() const = 0;
    static std::shared_ptr<IGraphSymmetry> fromJson( const Json& json );
 
    std::shared_ptr<SectorSymmetryForVertex> calcSectorSymmetry( const XYZ& pos ) const { return std::shared_ptr<SectorSymmetryForVertex>( new SectorSymmetryForVertex( this, pos ) ); }
 };
+
 
 class SymmetryGroup
 {
@@ -117,10 +152,12 @@ public:
    CORE_API int toSector( int sectorId, int color ) const override { return _SectorIdToColorPerm[sectorId][color]; }
    CORE_API int fromSector( int sectorId, int color ) const override { return _SectorIdToColorPerm[sectorId].inverted()[color]; }
    CORE_API std::string sectorName( int sectorId ) const { return _SectorIdToName[sectorId]; }
-   CORE_API std::vector<Matrix4x4> allVisibleSectors() const override { return _AllVisibleSectors; }
-   CORE_API std::vector<Matrix4x4> allSectors() const override { return _SectorIdToMatrix; }
+   CORE_API std::vector<SectorId> allVisibleSectors() const override { return _AllVisibleSectors; }
+   CORE_API std::vector<SectorId> allSectors() const override { return _AllSectors; }
    CORE_API bool isSectorIdVisible( int sectorId ) const override { return _SectorIdIsVisible[sectorId]; }
    CORE_API Matrix4x4 matrix( int sectorId ) const override { return _SectorIdToMatrix[sectorId]; }
+   CORE_API int mul( int sectorA, int sectorB ) const { return _Mul[sectorA][sectorB]; }
+   CORE_API int inverted( int sectorId ) const { return _Invert[sectorId]; }
 
    CORE_API Json toJson() const override;
 
@@ -133,9 +170,12 @@ public:
    std::vector<std::vector<int>> _AllSectorGroupIndexes;
    std::vector<Matrix4x4> _SectorIdToMatrix;
    std::vector<bool> _SectorIdIsVisible;
-   std::vector<Matrix4x4> _AllVisibleSectors;
+   std::vector<SectorId> _AllSectors;
+   std::vector<SectorId> _AllVisibleSectors;
    std::vector<Perm> _SectorIdToColorPerm;
    std::vector<std::string> _SectorIdToName;
+   std::vector<std::vector<int>> _Mul;
+   std::vector<int> _Invert;
 };
 
 

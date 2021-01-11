@@ -2,8 +2,8 @@
 #include "trace.h"
 
 const DualGraph::Vertex& DualGraph::VertexPtr::baseVertex() const { return _Graph->_Vertices[_Index]; }
-XYZ DualGraph::VertexPtr::pos() const { return _Matrix * baseVertex().pos; };
-int DualGraph::VertexPtr::color() const { return _Graph->_GraphSymmetry->toSector( _SectorId, baseVertex().color ); }
+XYZ DualGraph::VertexPtr::pos() const { return _SectorId.matrix() * baseVertex().pos; };
+int DualGraph::VertexPtr::color() const { return _SectorId.mapColor( baseVertex().color ); }
 std::string DualGraph::VertexPtr::name() const 
 { 
    //std::string sectorName = _Graph->_GraphSymmetry->sectorName( _SectorId );
@@ -17,7 +17,7 @@ std::vector<DualGraph::VertexPtr> DualGraph::VertexPtr::neighbors() const
    std::vector<DualGraph::VertexPtr> ret;
    for ( const DualGraph::VertexPtr& baseNeighb : baseVertex().neighbors )
    {
-      ret.push_back( baseNeighb.premul( _Matrix ) );
+      ret.push_back( baseNeighb.premul( _SectorId ) );
       //DualGraph::VertexPtr neighb = baseNeighb.premul( _Matrix );
       //for ( const Matrix4x4& otherSector : baseVertex().symmetry->sector0Equivalents() )
       //   ret.push_back( neighb.premul( otherSector ) );
@@ -25,19 +25,14 @@ std::vector<DualGraph::VertexPtr> DualGraph::VertexPtr::neighbors() const
    return ret;
 }
 
-void DualGraph::VertexPtr::updateCache()
+DualGraph::VertexPtr DualGraph::VertexPtr::premul( const SectorId& mtx ) const
 {
-   _SectorId = _Graph->_GraphSymmetry->sectorId( _Matrix );
+   return withSectorId( mtx * _SectorId );
 }
 
-DualGraph::VertexPtr DualGraph::VertexPtr::premul( const Matrix4x4& mtx ) const
+DualGraph::VertexPtr DualGraph::VertexPtr::unpremul( const SectorId& mtx ) const
 {
-   return withMatrix( mtx * _Matrix );
-}
-
-DualGraph::VertexPtr DualGraph::VertexPtr::unpremul( const Matrix4x4& mtx ) const
-{
-   return withMatrix( mtx.inverted() * _Matrix );
+   return withSectorId( mtx.inverted() * _SectorId );
 }
 
 
@@ -67,8 +62,8 @@ std::vector<DualGraph::VertexPtr> DualGraph::allVisibleVertices() const
    std::vector<VertexPtr> ret;
 
    for ( const Vertex& vtx : _Vertices )
-      for ( const Matrix4x4& sector : vtx.symmetry->uniqueSectors() )
-         ret.push_back( vtx.toVertexPtr( this ).withMatrix( sector ) );
+      for ( const SectorId& sector : vtx.symmetry->uniqueSectors() )
+         ret.push_back( vtx.toVertexPtr( this ).withSectorId( sector ) );
 
    return ret;
 }
@@ -94,12 +89,12 @@ DualGraph::VertexPtr DualGraph::vertexAt( const XYZ& pos, double maxDist ) const
 
 void DualGraph::setVertexColor( const VertexPtr& vtx, int color )
 {
-   _Vertices[vtx._Index].color = _GraphSymmetry->fromSector( vtx._SectorId, color );
+   _Vertices[vtx._Index].color = vtx._SectorId.unmapColor( color );;
 }
 
 void DualGraph::setVertexPos( const VertexPtr& vtx, const XYZ& pos )
 {
-   _Vertices[vtx._Index].pos = vtx._Matrix.inverted() * pos;
+   _Vertices[vtx._Index].pos = vtx._SectorId.inverted().matrix() * pos;
 }
 
 void DualGraph::toggleEdge( int idA, int idB )
@@ -112,8 +107,8 @@ void DualGraph::toggleEdge( const VertexPtr& a, const VertexPtr& b )
    if ( !a.isValid() || !b.isValid() || a == b )
       return;
 
-   VertexPtr a0 = a.unpremul( b._Matrix );
-   VertexPtr b0 = b.unpremul( a._Matrix );
+   VertexPtr a0 = a.unpremul( b._SectorId );
+   VertexPtr b0 = b.unpremul( a._SectorId );
 
    bool hadEdge = _Vertices[a._Index].hasNeighbor( b0 );
    if ( hadEdge )
@@ -181,15 +176,14 @@ DualGraph::Vertex::Vertex( const Json& json, const DualGraph* graph )
 
 Json DualGraph::VertexPtr::toJson() const
 {
-   return JsonObj { {"index", index()}, {"sectorId", _SectorId} };
+   return JsonObj { {"index", index()}, {"sectorId", _SectorId.id()} };
 }
 
 DualGraph::VertexPtr::VertexPtr( const Json& json, const DualGraph* graph )
 {
    _Graph = graph;
    _Index = json["index"].toInt();
-   _SectorId = json["sectorId"].toInt();
-   _Matrix = graph->_GraphSymmetry->matrix( _SectorId );
+   _SectorId = SectorId( json["sectorId"].toInt(), graph->_GraphSymmetry.get() );
 }
 
 
@@ -248,6 +242,6 @@ void DualGraph::initFromIcoJson( const Json& json )
       else
          continue;
 
-      toggleEdge( VertexPtr( this, a, Matrix4x4() ), VertexPtr( this, b, _GraphSymmetry->matrix( sectorId ) ) );
+      toggleEdge( VertexPtr( this, a, SectorId::identity( _GraphSymmetry.get() ) ), VertexPtr( this, b, SectorId( sectorId, _GraphSymmetry.get() ) ) );
    }
 }

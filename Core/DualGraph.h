@@ -21,14 +21,13 @@ public:
       friend DualGraph;
    public:
       VertexPtr() {}
-      VertexPtr( const DualGraph* graph, int index, const Matrix4x4& matrix ) 
+      VertexPtr( const DualGraph* graph, int index, const SectorId& sectorId ) 
          : _Graph(graph)
          , _Index(index)
-         , _Matrix(matrix)
+         , _SectorId(sectorId)
       {
-         _Matrix = baseVertex().symmetry->canonicalizedSector( matrix );
-         updateCache();
-         if ( _SectorId < 0 )
+         _SectorId = baseVertex().symmetry->canonicalizedSectorId( sectorId );
+         if ( !_SectorId.isValid() )
             *this = VertexPtr();
       }
       CORE_API VertexPtr( const Json& json, const DualGraph* graph );
@@ -43,14 +42,14 @@ public:
       CORE_API int  color() const;
       CORE_API std::string name() const;
 
-      CORE_API VertexPtr              withMatrix( const Matrix4x4& mtx ) const { return VertexPtr( _Graph, _Index, mtx ); }
-      CORE_API VertexPtr              premul( const Matrix4x4& mtx ) const;
-      CORE_API VertexPtr              unpremul( const Matrix4x4& mtx ) const;
+      CORE_API VertexPtr              withSectorId( const SectorId& sectorId ) const { return VertexPtr( _Graph, _Index, sectorId ); }
+      CORE_API VertexPtr              premul( const SectorId& mtx ) const;
+      CORE_API VertexPtr              unpremul( const SectorId& mtx ) const;
       CORE_API std::vector<VertexPtr> neighbors() const;
-      CORE_API bool                   isVisible() const { return _Graph->_GraphSymmetry->isSectorIdVisible( _SectorId ); }
+      CORE_API bool                   isVisible() const { return _Graph->_GraphSymmetry->isSectorIdVisible( _SectorId.id() ); }
 
 
-      CORE_API VertexPtr next( const VertexPtr& a ) const { return baseVertex().next( a.unpremul( _Matrix ) ).premul( _Matrix ); }
+      CORE_API VertexPtr next( const VertexPtr& a ) const { return baseVertex().next( a.unpremul( _SectorId ) ).premul( _SectorId ); }
       CORE_API std::vector<VertexPtr> polygon( const VertexPtr& a ) const
       {
          std::vector<VertexPtr> ret = { a, *this };
@@ -64,15 +63,12 @@ public:
             ret.push_back( c );
          }
       }
-      CORE_API int id() const { return isValid() ? MAX_VERTICES * _SectorId + _Index : -1; }
+      CORE_API int id() const { return isValid() ? MAX_VERTICES * _SectorId.id() + _Index : -1; }
       CORE_API int index() const { return isValid() ? _Index : -1; }
-      CORE_API Matrix4x4 matrix() const { return _Matrix; }
-      CORE_API int sectorId() const { return _SectorId; }
+      //CORE_API Matrix4x4 matrix() const { return _Matrix; }
+      CORE_API SectorId sectorId() const { return _SectorId; }
 
       CORE_API Json toJson() const;
-
-   public:
-      void updateCache();
 
    public:
       const Vertex& baseVertex() const;
@@ -80,10 +76,10 @@ public:
    private:
       const DualGraph* _Graph = nullptr;
       int _Index = -1;
-      Matrix4x4 _Matrix;
+      //Matrix4x4 _Matrix;
 
    private: // cached
-      int _SectorId = -1;
+      SectorId _SectorId;
    };
 
    class Vertex
@@ -92,18 +88,18 @@ public:
       Vertex( int index, int color, const XYZ& pos ) : index(index), color(color), pos(pos) {}
       Vertex( const Json& json, const DualGraph* graph );
 
-      VertexPtr toVertexPtr( const DualGraph* graph ) const { return VertexPtr( graph, index, Matrix4x4() ); }
+      VertexPtr toVertexPtr( const DualGraph* graph ) const { return VertexPtr( graph, index, SectorId::identity( graph->_GraphSymmetry.get() ) ); }
 
       //VertexPtr canonicalizedNeighbor( const VertexPtr& a ) const { return a; /*return a.withMatrix( symmetry->canonicalizedSector( a._Matrix ) );*/ }
       bool hasNeighbor( VertexPtr a ) const { for ( const VertexPtr& neighb : neighbors ) if ( neighb == a ) return true; return false; }
       void addNeighbor( VertexPtr a ) 
       { 
-         for ( const Matrix4x4& premul : symmetry->sectorEquivalentsToIdentity() ) 
+         for ( const SectorId& premul : symmetry->sectorEquivalentsToIdentity() ) 
             neighbors.push_back( a.premul( premul ) ); 
       }
       void removeNeighbor( VertexPtr a ) 
       { 
-         for ( const Matrix4x4& premul : symmetry->sectorEquivalentsToIdentity() ) 
+         for ( const SectorId& premul : symmetry->sectorEquivalentsToIdentity() ) 
          {
             size_t prevCt = neighbors.size();
             neighbors.erase( std::remove_if( neighbors.begin(), neighbors.end(), [&]( const VertexPtr& b ) { return a.premul( premul ) == b; } ), neighbors.end() ); 

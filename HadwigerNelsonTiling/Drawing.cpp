@@ -227,15 +227,15 @@ QImage Drawing::makeImage( const QSize& size, std::shared_ptr<const Simulation> 
          painter.setPen( QPen( QColor(0,0,0,96), 2.5 ) );
          painter.setBrush( Qt::NoBrush );
          std::unordered_set<uint64_t> usedEdges;
-         for ( const Matrix4x4& m : simulation->_TileGraph->_GraphSymmetry->allVisibleSectors() )
+         for ( const SectorId& sectorId : simulation->_TileGraph->_GraphSymmetry->allVisibleSectors() )
          for ( const auto& pr : simulation->_KeepCloseFars )
          {  
-            TileGraph::VertexPtr aa = pr.a.premul( m );
-            TileGraph::VertexPtr bb = pr.b.premul( m );
+            TileGraph::VertexPtr aa = pr.a.premul( sectorId );
+            TileGraph::VertexPtr bb = pr.b.premul( sectorId );
             if ( !usedEdges.insert( edgeId( aa, bb ) ).second )
                continue;
-            XYZ a = m * pr.a.pos();
-            XYZ b = m * pr.b.pos();
+            XYZ a = sectorId.matrix() * pr.a.pos();
+            XYZ b = sectorId.matrix() * pr.b.pos();
 
             {
                if ( pr.keepClose && pr.keepFar && isVisible( a ) && isVisible( b )  )

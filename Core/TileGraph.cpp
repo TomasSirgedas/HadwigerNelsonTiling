@@ -6,7 +6,7 @@ std::vector<TileGraph::TilePtr> TileGraph::allTiles() const
 {   
    std::vector<TilePtr> ret;
    for ( const Tile& tile : _Tiles )
-      for ( const Matrix4x4& sector : tile._Symmetry->uniqueSectors() )
+      for ( const SectorId& sector : tile._Symmetry->uniqueSectors() )
          ret.push_back( tile.toTilePtr( this ).premul( sector ) );
    return ret;
 }
@@ -40,16 +40,11 @@ std::vector<TileGraph::TilePtr> TileGraph::rawTiles() const
    return ret;
 }
 
-void TileGraph::VertexPtr::updateCache()
-{
-   _SectorId = _Graph->_GraphSymmetry->sectorId( _Matrix );
-}
-
 std::vector<TileGraph::TilePtr> TileGraph::VertexPtr::tiles() const
 {
    std::vector<TilePtr> ret;
    for ( const TilePtr& tile : baseVertex()._Tiles )
-      ret.push_back( tile.premul( matrix() ) );
+      ret.push_back( tile.premul( sectorId() ) );
    return ret;
 }
 
@@ -75,7 +70,7 @@ std::vector<TileGraph::VertexPtr> TileGraph::VertexPtr::neighbors() const
 {
    std::vector<VertexPtr> ret;
    for ( const VertexPtr& vtx : baseVertex()._Neighbors )
-      ret.push_back( vtx.premul( matrix() ) );
+      ret.push_back( vtx.premul( sectorId() ) );
    return ret;
 }
 
@@ -140,7 +135,7 @@ std::vector<TileGraph::VertexPtr> TileGraph::TilePtr::vertices() const
 {
    std::vector<VertexPtr> ret;
    for ( const VertexPtr& a : baseTile()._Vertices )
-      ret.push_back( a.premul( _Matrix ) );
+      ret.push_back( a.premul( _SectorId ) );
    return ret;
 }
 
@@ -150,11 +145,6 @@ bool TileGraph::VertexPtr::hasColor( int color ) const
       if ( a.color() == color )
          return true;
    return false;
-}
-
-void TileGraph::TilePtr::updateCache()
-{
-   _SectorId = _Graph->_GraphSymmetry->sectorId( _Matrix );
 }
 
 XYZ TileGraph::TilePtr::avgPos() const

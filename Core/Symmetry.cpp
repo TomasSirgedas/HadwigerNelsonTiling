@@ -74,6 +74,7 @@ GraphSymmetry_Groups::GraphSymmetry_Groups( const std::vector<SymmetryGroup>& gr
       _SectorHashToId[hash] = sectorId;
 
       _SectorIdToMatrix.push_back( m );
+      _AllSectors.push_back( SectorId( sectorId, this ) );
    }
 
    for ( int sectorId = 0; sectorId < (int)_AllSectorGroupIndexes.size(); sectorId++ )
@@ -104,8 +105,20 @@ GraphSymmetry_Groups::GraphSymmetry_Groups( const std::vector<SymmetryGroup>& gr
       for ( int i = 0; i < N; i++ )
          isVisible = isVisible && _Groups[i].isVisible( _AllSectorGroupIndexes[sectorId][i] );
       if ( isVisible )
-         _AllVisibleSectors.push_back( _SectorIdToMatrix[sectorId] );
+         _AllVisibleSectors.push_back( SectorId( sectorId, this ) );
       _SectorIdIsVisible.push_back( isVisible );
+   }
+
+   for ( int sectorId = 0; sectorId < (int)_AllSectorGroupIndexes.size(); sectorId++ )
+   {
+      _Invert.push_back( this->sectorId( matrix( sectorId ).inverted() ) );
+   }
+
+   _Mul.resize( (int)_AllSectorGroupIndexes.size() );
+   for ( int a = 0; a < (int)_AllSectorGroupIndexes.size(); a++ )
+   for ( int b = 0; b < (int)_AllSectorGroupIndexes.size(); b++ )
+   {
+      _Mul[a].push_back( sectorId( matrix( a ) * matrix( b ) ) );
    }
 }
 
@@ -150,38 +163,45 @@ std::shared_ptr<IGraphSymmetry> IGraphSymmetry::fromJson( const Json& json )
 
 SectorSymmetryForVertex::SectorSymmetryForVertex( const IGraphSymmetry* graphSymmetry, const XYZ& pos ) : _GraphSymmetry( graphSymmetry )
 {   
-   std::vector<Matrix4x4> allSectors = _GraphSymmetry->allSectors();
+   std::vector<SectorId> allSectors = _GraphSymmetry->allSectors();
 
    _EquivalentSectorIds.resize( allSectors.size() );
-   _EquivalentSectors.resize( allSectors.size() );
+   //_EquivalentSectors.resize( allSectors.size() );
 
    for ( int a = 0; a < (int)allSectors.size(); a++ )
    for ( int b = 0; b < (int)allSectors.size(); b++ )
    {
-      XYZ posA = allSectors[a] * pos;
-      XYZ posB = allSectors[b] * pos;
+      XYZ posA = allSectors[a].matrix() * pos;
+      XYZ posB = allSectors[b].matrix() * pos;
       if ( posA.dist2( posB ) < 1e-12 )
       {
-         _EquivalentSectorIds[a].push_back( b );
-         _EquivalentSectors[a].push_back( allSectors[b] );
+         _EquivalentSectorIds[a].push_back( SectorId( b, graphSymmetry ) );
+         //_EquivalentSectors[a].push_back( allSectors[b] );
       }
    }
 
    for ( int a = 0; a < (int)allSectors.size(); a++ ) if ( _GraphSymmetry->isSectorIdVisible( a ) )
-      if ( _EquivalentSectorIds[a][0] == a )
+      if ( _EquivalentSectorIds[a][0].id() == a )
          _UniqueSectors.push_back( allSectors[a] );
 
    _IdentitySectorId = graphSymmetry->sectorId( Matrix4x4() );
 }
 
-Matrix4x4 SectorSymmetryForVertex::canonicalizedSector( const Matrix4x4& sector ) const
+//Matrix4x4 SectorSymmetryForVertex::canonicalizedSector( const Matrix4x4& sector ) const
+//{
+//   if ( !hasSymmetry() )
+//      return sector;
+//
+//   return _EquivalentSectors[_GraphSymmetry->sectorId( sector )][0];
+//}
+
+SectorId SectorSymmetryForVertex::canonicalizedSectorId( const SectorId& sectorId ) const
 {
    if ( !hasSymmetry() )
-      return sector;
+      return sectorId;
 
-   return _EquivalentSectors[_GraphSymmetry->sectorId( sector )][0];
+   return _EquivalentSectorIds[sectorId.id()][0];
 }
-
 
 std::shared_ptr<IGraphShape> IGraphShape::fromJson( const Json& json )
 {
@@ -192,3 +212,12 @@ std::shared_ptr<IGraphShape> IGraphShape::fromJson( const Json& json )
    throw 777;
    return nullptr;
 }
+
+
+
+SectorId SectorId::operator*( const SectorId& rhs ) const { return SectorId( _GraphSymmetry->mul( _Id, rhs._Id ), _GraphSymmetry ); }
+SectorId SectorId::inverted() const { return SectorId( _GraphSymmetry->inverted( _Id ), _GraphSymmetry ); }
+Matrix4x4 SectorId::matrix() const { return _GraphSymmetry->matrix( _Id ); }
+
+int SectorId::mapColor( int color ) const { return _GraphSymmetry->toSector( _Id, color ); }
+int SectorId::unmapColor( int color ) const { return _GraphSymmetry->fromSector( _Id, color ); }

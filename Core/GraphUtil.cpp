@@ -16,7 +16,7 @@ public:
    TileGraph::VertexPtr createOrFindTileGraphVertex( const std::vector<DualGraph::VertexPtr>& poly, std::function<TileGraph::VertexPtr(const XYZ&)> createVertexFunc )
    {
       // check cache
-      for ( const Matrix4x4& sector : _Dual._GraphSymmetry->allSectors() )
+      for ( const SectorId& sector : _Dual._GraphSymmetry->allSectors() )
       {
          std::set<int> polyAsSet;
          for ( const DualGraph::VertexPtr& c : poly )
@@ -85,7 +85,7 @@ std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
    // populate vertex `_Tiles`
    for ( auto& pr : polyMap )
    for ( const DualGraph::VertexPtr& c : pr.second )
-      graph->_Vertices[pr.first]._Tiles.push_back( TileGraph::TilePtr( graph.get(), c.index(), c.matrix() ) );
+      graph->_Vertices[pr.first]._Tiles.push_back( TileGraph::TilePtr( graph.get(), c.index(), c.sectorId() ) );
 
    // populate vertex `_Neighbors`
    for ( const TileGraph::VertexPtr& a : graph->rawVertices() )
