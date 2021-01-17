@@ -8,6 +8,7 @@
 #include <Core/TileGraph.h>
 
 class Simulation;
+class DualAnalysis;
 
 class GraphUI : public QWidget
 {
@@ -30,6 +31,8 @@ public:
    void loadGraph( std::shared_ptr<DualGraph> dual );
    void setRadius( double radius );
 
+   void onDualGraphModified();
+
 private:
    Ui::GraphUI ui;
 
@@ -38,4 +41,6 @@ private:
    DualGraph::VertexPtr _DragDualVtx;
    DualGraph::VertexPtr _DragDualEdgeStartVtx;
    TileGraph::VertexPtr _DragTileVtx;
+
+   std::shared_ptr<DualAnalysis> _DualAnalysis;
 };

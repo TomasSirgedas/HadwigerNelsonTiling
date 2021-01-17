@@ -5,6 +5,7 @@
 #include <Core/DualGraph.h>
 #include <Core/TileGraph.h>
 #include <Core/Simulation.h>
+#include <Core/DualAnalysis.h>
 
 #include <unordered_set>
 
@@ -157,7 +158,7 @@ bool Drawing::isVisible( const XYZ& pos ) const
    return _GraphShape->isVisible( pos, _ModelRotation );
 }
 
-QImage Drawing::makeImage( const QSize& size, std::shared_ptr<const Simulation> simulation )
+QImage Drawing::makeImage( const QSize& size, std::shared_ptr<const Simulation> simulation, std::shared_ptr<const DualAnalysis> dualAnalysis )
 {   
    const DualGraph& dual = *simulation->_DualGraph;
    const TileGraph& graph = *simulation->_TileGraph;
@@ -187,6 +188,17 @@ QImage Drawing::makeImage( const QSize& size, std::shared_ptr<const Simulation> 
       {
          painter.setBrush( tileColor( a.color() ) );
          painter.drawEllipse( toBitmap( a.pos() ), 4, 4 );
+      }
+
+      // draw error vertices
+      if ( dualAnalysis )
+      {
+         painter.setPen( QPen( QColor( 255, 0, 0, 128 ), 3. ) );
+         painter.setBrush( Qt::NoBrush );
+         for ( const DualGraph::VertexPtr& a : dualAnalysis->errorVertices() )
+         {
+            painter.drawEllipse( toBitmap( a.pos() ), 6, 6 );
+         }
       }
 
       // draw labels
@@ -265,12 +277,32 @@ QImage Drawing::makeImage( const QSize& size, std::shared_ptr<const Simulation> 
 
    }
 
+   if ( dualAnalysis )
+   {
+      //QFont myFont(fontName, fontSize);
+      //QString str("I wonder how wide this is?");
+
+      QString str = QString::fromStdString( dualAnalysis->errorMessage() );
+
+      QFontMetrics fm( painter.font() );
+      int width = fm.horizontalAdvance( str );
+      int height = fm.height();
+      QRect rect = QRect( 4, size.height()-height-4, width, height );
+
+      painter.setBrush( QColor( 0,0,0,64 ) );
+      painter.setPen( Qt::NoPen );
+      painter.drawRect( rect.adjusted( -1, -1, 1, 1 ) );
+      painter.setPen( QColor( 255,255,255 ) );
+      painter.drawText( QRectF( rect ), str, QTextOption( ) );
+
+   }
+
    return image;
 }
 
-void Drawing::updateDrawing( std::shared_ptr<const Simulation> simulation )
+void Drawing::updateDrawing( std::shared_ptr<const Simulation> simulation, std::shared_ptr<const DualAnalysis> dualAnalysis )
 {  
-   ui.label->setPixmap( QPixmap::fromImage( makeImage( size(), simulation ) ) );
+   ui.label->setPixmap( QPixmap::fromImage( makeImage( size(), simulation, dualAnalysis ) ) );
 }
 
 bool Drawing::getModelPos( const QPointF& bitmapPos, XYZ& modelPos ) const 

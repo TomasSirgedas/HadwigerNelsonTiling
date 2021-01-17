@@ -5,6 +5,7 @@
 #include <Core/GraphUtil.h>
 #include <Core/Util.h>
 #include <Core/Simulation.h>
+#include <Core/DualAnalysis.h>
 
 #include <QShortcut>
 #include <QMouseEvent>
@@ -342,6 +343,7 @@ void GraphUI::loadGraph( std::shared_ptr<DualGraph> dual )
    _DragTileVtx            = TileGraph::VertexPtr();
    ui.drawing->setGraphShape( _Simulation->_DualGraph->shape() );
    setRadius( _Simulation->_DualGraph->shape()->radius() );
+   onDualGraphModified();
    updateDrawing();
 }
 
@@ -387,6 +389,7 @@ void GraphUI::addVertex( int color )
       if ( getMousePos( mousePos ) )
          _Simulation->_DualGraph->addVertex( color, mousePos );
    }
+   onDualGraphModified();
    updateDrawing();
 }
 
@@ -397,6 +400,7 @@ void GraphUI::deleteVertex()
       return;
 
    _Simulation->_DualGraph->deleteVertex( vtx );
+   onDualGraphModified();
    updateDrawing();
 }
 
@@ -405,7 +409,7 @@ void GraphUI::updateDrawing()
    QElapsedTimer t;
    t.start();
 
-   ui.drawing->updateDrawing( _Simulation );
+   ui.drawing->updateDrawing( _Simulation, _DualAnalysis );
 
    double time = t.nsecsElapsed() * 1e-9;   
    ui.speedLabel->setText( "Speed(ms): " + QString::number( 1000*time ) );
@@ -422,8 +426,10 @@ void GraphUI::handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isCli
       if ( isKeyDown( 'E' ) )
       {
          _Simulation->_DualGraph->toggleEdge( _DragDualEdgeStartVtx, dualVertexAtMouse( 30. ) );
+         onDualGraphModified();
          updateDrawing();
       }
+      onDualGraphModified();
 
       _DragDualVtx = DualGraph::VertexPtr();
       _DragDualEdgeStartVtx = DualGraph::VertexPtr();      
@@ -465,4 +471,15 @@ void GraphUI::handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isCli
          }
       }
    }   
+}
+
+void GraphUI::onDualGraphModified()
+{
+   if ( !_Simulation->_DualGraph )
+   {
+      _DualAnalysis.reset();
+      return;
+   }
+
+   _DualAnalysis.reset( new DualAnalysis( *_Simulation->_DualGraph ) );
 }

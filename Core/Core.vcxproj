@@ -159,6 +159,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DualAnalysis.cpp" />
     <ClCompile Include="GraphUtil.cpp" />
     <ClCompile Include="DataTypes.cpp" />
     <ClCompile Include="DualGraph.cpp" />
@@ -172,6 +173,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Defs.h" />
+    <ClInclude Include="DualAnalysis.h" />
     <ClInclude Include="GraphUtil.h" />
     <ClInclude Include="CoreMacros.h" />
     <ClInclude Include="DataTypes.h" />

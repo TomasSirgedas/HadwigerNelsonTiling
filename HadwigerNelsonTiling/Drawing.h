@@ -10,6 +10,7 @@
 
 class Simulation;
 class IGraphShape;
+class DualAnalysis;
 
 class Drawing : public QWidget
 {
@@ -19,7 +20,7 @@ public:
    Drawing( QWidget *parent = Q_NULLPTR );
    ~Drawing();
 
-   void updateDrawing( std::shared_ptr<const Simulation> simulation );
+   void updateDrawing( std::shared_ptr<const Simulation> simulation, std::shared_ptr<const DualAnalysis> dualAnalysis );
 
    QPointF toBitmap( const XYZ& modelPos ) { return toPointF( _ModelToBitmap * _ModelRotation * modelPos ); }
    //XYZ toModelZ0( const QPointF& bitmapPos ) { return ( (_ModelToBitmap * _ModelRotation).inverted() * XYZ( bitmapPos.x(), bitmapPos.y(), 0. ) ).toXYZ(); }
@@ -27,7 +28,7 @@ public:
    double toModel( double bitmapSize ) const { return bitmapSize / _PixelsPerUnit; }
 
    bool isVisible( const XYZ& pos ) const;
-   QImage makeImage( const QSize& size, std::shared_ptr<const Simulation> simulation );
+   QImage makeImage( const QSize& size, std::shared_ptr<const Simulation> simulation, std::shared_ptr<const DualAnalysis> dualAnalysis );
    void refresh();
    void setGraphShape( std::shared_ptr<IGraphShape> graphShape ) { _GraphShape = graphShape; refresh(); }
 
