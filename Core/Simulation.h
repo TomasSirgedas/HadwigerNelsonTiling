@@ -14,7 +14,7 @@ public:
 
 public:
    double _Radius = 1;
-   double _Padding = .0001;
+   double _Padding = .0000;
    double _PaddingError = 0;
    TileGraph::VertexPtr _FixedVertex;
    std::shared_ptr<TileGraph> _TileGraph;
