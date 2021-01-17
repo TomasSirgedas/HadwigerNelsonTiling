@@ -11,7 +11,7 @@ public:
    CORE_API double step( double& paddingError );
    CORE_API double step( int numSteps );
    CORE_API void setRadius( double radius );   
-   CORE_API bool showDistanceVerticesExist() const { return _ShowDistanceVertices.first.exists() && _ShowDistanceVertices.second.exists();  }
+   CORE_API bool showDistanceVerticesExist() const { return _TileGraph && _ShowDistanceVertices.first.exists() && _ShowDistanceVertices.second.exists();  }
 
 public:
    double _Radius = 1;
