@@ -37,13 +37,26 @@ std::vector<DualGraph::VertexPtr> DualGraph::VertexPtr::neighbors() const
 
 std::vector<DualGraph::VertexPtr> DualGraph::VertexPtr::diagonals() const
 {
-   std::vector<DualGraph::VertexPtr> ret;
+   std::vector<VertexPtr> ret;
    for ( const DualGraph::VertexPtr& neighb : neighbors() )
    {
       std::vector<DualGraph::VertexPtr> poly = polygon( neighb );
       if ( poly.size() > 3 && isValidPolygon( _Graph->_GraphShape, poly ) )
          ret.insert( ret.end(), poly.begin() + 3, poly.end() );
    }
+   return ret;
+}
+
+std::vector<std::vector<DualGraph::VertexPtr>> DualGraph::VertexPtr::edgesAndDiagonals() const
+{
+   std::vector<std::vector<VertexPtr>> ret;
+   for ( const DualGraph::VertexPtr& neighb : neighbors() )
+   {
+      std::vector<DualGraph::VertexPtr> poly = polygon( neighb );
+      if ( poly.size() > 2 && isValidPolygon( _Graph->_GraphShape, poly ) )
+         ret.push_back( std::vector<VertexPtr>( poly.begin() + 2, poly.end() ) );
+   }
+   std::reverse( ret.begin(), ret.end() );
    return ret;
 }
 

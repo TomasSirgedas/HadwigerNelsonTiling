@@ -47,6 +47,7 @@ public:
       CORE_API VertexPtr              unpremul( const SectorId& mtx ) const;
       CORE_API std::vector<VertexPtr> neighbors() const;
       CORE_API std::vector<VertexPtr> diagonals() const;
+      CORE_API std::vector<std::vector<DualGraph::VertexPtr>> edgesAndDiagonals() const;
       CORE_API bool                   isVisible() const { return _Graph->_GraphSymmetry->isSectorIdVisible( _SectorId.id() ); }
 
 
