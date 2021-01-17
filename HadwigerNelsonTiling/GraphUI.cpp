@@ -392,7 +392,7 @@ void GraphUI::addVertex( int color )
 
 void GraphUI::deleteVertex()
 {
-   DualGraph::VertexPtr vtx = dualVertexAtMouse( 10 );
+   DualGraph::VertexPtr vtx = dualVertexAtMouse( 100 );
    if ( !vtx.isValid() ) 
       return;
 
