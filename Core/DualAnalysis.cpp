@@ -17,13 +17,13 @@ void DualAnalysis::init( const DualGraph& dual )
 {
    for ( const DualGraph::VertexPtr& a : dual.rawVertices() )
    for ( const DualGraph::VertexPtr& b : a.neighbors() )
-      if ( a.color() == b.color() )
+      if ( a.color() == b.color() && a.color() != BLANK_COLOR )
          return setError( "neighbors " + a + " and " + b + " are the same color", { a, b } );
 
    for ( const DualGraph::VertexPtr& a : dual.rawVertices() )
    for ( const DualGraph::VertexPtr& b : a.neighbors() )
    for ( const DualGraph::VertexPtr& c : a.neighbors() ) if ( b.id() < c.id() )
-      if ( c.color() == b.color() )
+      if ( c.color() == b.color() && c.color() != BLANK_COLOR )
          return setError( b + " and " + c + " share a neighbor and are the same color", { b, c } );
 
 
@@ -37,7 +37,7 @@ void DualAnalysis::init( const DualGraph& dual )
       int direction = -1;
 
       for ( int i = 0; i < 2; i++ )
-      for ( const DualGraph::VertexPtr& d : (i?b:a).diagonals() ) if ( d.color() == (i?a:b).color() )
+      for ( const DualGraph::VertexPtr& d : (i?b:a).diagonals() ) if ( d.color() == (i?a:b).color() && d.color() != BLANK_COLOR )
       {
          if ( diag.isValid() )
             return setError( "edge " + a + " " + b + " is curved to both " + diag + " and " + d, { a, b, diag, d } );
