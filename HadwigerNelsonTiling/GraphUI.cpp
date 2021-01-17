@@ -314,6 +314,8 @@ GraphUI::GraphUI( QWidget *parent )
    QObject::connect( new QShortcut(QKeySequence(Qt::Key_9), this ), &QShortcut::activated, [this]() { addVertex( 9 ); } );
    QObject::connect( new QShortcut(QKeySequence(Qt::Key_N), this ), &QShortcut::activated, [this]() { addVertex( 9 ); } );
 
+   QObject::connect( new QShortcut(QKeySequence(Qt::Key_Delete), this ), &QShortcut::activated, [this]() { deleteVertex(); } );
+
 }
 
 GraphUI::~GraphUI()
@@ -384,6 +386,16 @@ void GraphUI::addVertex( int color )
       if ( getMousePos( mousePos ) )
          _Simulation->_DualGraph->addVertex( color, mousePos );
    }
+   updateDrawing();
+}
+
+void GraphUI::deleteVertex()
+{
+   DualGraph::VertexPtr vtx = dualVertexAtMouse( 10 );
+   if ( !vtx.isValid() ) 
+      return;
+
+   _Simulation->_DualGraph->deleteVertex( vtx );
    updateDrawing();
 }
 

@@ -1,6 +1,15 @@
 #include "DualGraph.h"
 #include "trace.h"
 
+class SwapNum
+{
+public:
+   SwapNum( int a, int b ) : _a(a), _b(b) {}
+   int operator[]( int x ) const { return x == _a ? _b : x == _b ? _a : x; }
+private:
+   int _a, _b;
+};
+
 const DualGraph::Vertex& DualGraph::VertexPtr::baseVertex() const { return _Graph->_Vertices[_Index]; }
 XYZ DualGraph::VertexPtr::pos() const { return _SectorId.matrix() * baseVertex().pos; };
 int DualGraph::VertexPtr::color() const { return _SectorId.mapColor( baseVertex().color ); }
@@ -48,6 +57,28 @@ void DualGraph::addVertex( int color, const XYZ& pos )
    _Vertices.back().symmetry = _GraphSymmetry->calcSectorSymmetry( pos );
 }
 
+void DualGraph::swapVertexIndexes( int a, int b )
+{
+   std::swap( _Vertices[a], _Vertices[b] );
+   std::swap( _Vertices[a].index, _Vertices[b].index );
+   SwapNum swapper( a, b );
+   for ( Vertex& vtx : _Vertices )
+      for ( VertexPtr& neighb : _Vertices[vtx.index].neighbors )
+         neighb._Index = swapper[neighb._Index];
+}
+
+void DualGraph::deleteVertex( const VertexPtr& vtx )
+{
+   if ( !vtx.isValid() )
+      return;
+   int k = (int)_Vertices.size()-1;
+   swapVertexIndexes( vtx.index(), k );
+
+   for ( VertexPtr& neighb : _Vertices[k].neighbors )
+      _Vertices[neighb.index()].eraseEdgesTo( k );
+
+   _Vertices.pop_back();
+}
 
 std::vector<DualGraph::VertexPtr> DualGraph::rawVertices() const
 {

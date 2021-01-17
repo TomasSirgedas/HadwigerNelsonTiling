@@ -19,6 +19,7 @@ public:
 
    void updateDrawing();
    void addVertex( int color );
+   void deleteVertex();
 
    void handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isClick, bool isUnclick );
 

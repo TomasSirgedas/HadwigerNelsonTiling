@@ -118,6 +118,10 @@ public:
          int indexOfA = neighborIndexOf( a );
          return indexOfA == -1 ? VertexPtr() : neighbors[(indexOfA+1)%(int)neighbors.size()];
       }
+      void eraseEdgesTo( int k )
+      {
+         neighbors.erase( std::remove_if( neighbors.begin(), neighbors.end(), [k]( const VertexPtr& neighb ){ return neighb.index() == k; } ), neighbors.end() );
+      }
       Json toJson() const;
 
    public:
@@ -139,6 +143,7 @@ public:
    CORE_API std::vector<VertexPtr> rawVertices() const;
 
    CORE_API void addVertex( int color, const XYZ& pos );
+   CORE_API void deleteVertex( const VertexPtr& vtx );
    CORE_API VertexPtr vertexAt( const XYZ& pos, double maxDist ) const;
    CORE_API void setVertexColor( const VertexPtr& vtx, int color );
    CORE_API void setVertexPos( const VertexPtr& vtx, const XYZ& pos );
@@ -155,6 +160,7 @@ public:
 
 private:
    void initFromIcoJson( const Json& json );
+   void swapVertexIndexes( int a, int b );
 
 public:
    std::vector<Vertex> _Vertices;
