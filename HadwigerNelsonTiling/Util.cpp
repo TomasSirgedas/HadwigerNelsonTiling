@@ -14,6 +14,9 @@ QColor withAlpha( const QColor& color, double alpha ) { return QColor( color.red
 
 double signedArea( const QPolygonF& poly )
 {
+   if ( poly.size() <= 2 )
+      return 0;
+
    double area2 = poly[0].x() * poly.back().y() - poly.back().x() * poly[0].y();
       
    for ( int i = 0; i+1 < poly.size(); i++ )
