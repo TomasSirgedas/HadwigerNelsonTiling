@@ -24,12 +24,12 @@ std::vector<TileGraph::VertexPtr> TileGraph::allVertices() const
    return ret;
 }
 
-bool TileGraph::hasVertex( const VertexPtr& a ) const
+TileGraph::VertexPtr TileGraph::vertexWithId( int id ) const
 {
-   for ( const VertexPtr& b : allVertices() )
-      if ( a == b )
-         return true;
-   return false;
+   for ( const VertexPtr& a : allVertices() )
+      if ( a.id() == id )
+         return a;
+   return VertexPtr();
 }
 
 std::vector<TileGraph::VertexPtr> TileGraph::rawVertices() const

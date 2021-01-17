@@ -11,7 +11,6 @@ public:
    CORE_API double step( double& paddingError );
    CORE_API double step( int numSteps );
    CORE_API void setRadius( double radius );   
-   CORE_API bool showDistanceVerticesExist() const { return _TileGraph && _ShowDistanceVertices.first.exists() && _ShowDistanceVertices.second.exists();  }
 
 public:
    double _Radius = 1;
@@ -22,6 +21,6 @@ public:
    std::shared_ptr<DualGraph> _DualGraph;
    std::vector<TileGraph::KeepCloseFar> _KeepCloseFars;
    std::vector<TileGraph::LineVertexConstraint> _LineVertexConstraints;
-   std::pair<TileGraph::VertexPtr, TileGraph::VertexPtr> _ShowDistanceVertices;
+   std::pair<int, int> _ShowDistanceVertices = {-1,-1};
 };
 

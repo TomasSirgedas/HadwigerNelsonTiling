@@ -306,17 +306,22 @@ QImage Drawing::makeImage( const QSize& size, std::shared_ptr<const Simulation> 
 
    }
 
-   if ( _ShowTileGraph && simulation->showDistanceVerticesExist() )
+   if ( _ShowTileGraph && simulation->_TileGraph )
    {
-      XYZ posA = simulation->_ShowDistanceVertices.first.pos();
-      XYZ posB = simulation->_ShowDistanceVertices.second.pos();
-      double dist = posA.dist( posB );
-      QPen distPen( QColor(255,255,255,128), 3. );
-      distPen.setStyle( Qt::DotLine );
-      painter.setPen( distPen );
-      painter.drawLine( toBitmap( posA ), toBitmap( posB ) );
-      painter.setPen( Qt::black );
-      drawMessage( painter, QPoint( 4, 4 ), "distance = " + std::to_string( dist ) );
+      TileGraph::VertexPtr a = simulation->_TileGraph->vertexWithId( simulation->_ShowDistanceVertices.first );
+      TileGraph::VertexPtr b = simulation->_TileGraph->vertexWithId( simulation->_ShowDistanceVertices.second );
+      if ( a.isValid() && b.isValid() )
+      {
+         XYZ posA = a.pos();
+         XYZ posB = b.pos();
+         double dist = posA.dist( posB );
+         QPen distPen( QColor(255,255,255,128), 3. );
+         distPen.setStyle( Qt::DotLine );
+         painter.setPen( distPen );
+         painter.drawLine( toBitmap( posA ), toBitmap( posB ) );
+         painter.setPen( Qt::black );
+         drawMessage( painter, QPoint( 4, 4 ), "distance = " + std::to_string( dist ) );
+      }
    }
 
    if ( dualAnalysis )

@@ -431,8 +431,8 @@ void GraphUI::handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isCli
       }
       if ( isKeyDown( 'D' ) )
       {
-         _Simulation->_ShowDistanceVertices.first = _DistanceTileVtx;
-         _Simulation->_ShowDistanceVertices.second = tileVertexAtMouse( 30. );
+         _Simulation->_ShowDistanceVertices.first = _DistanceTileVtx.id();
+         _Simulation->_ShowDistanceVertices.second = tileVertexAtMouse( 30. ).id();
          updateDrawing();
       }
       onDualGraphModified();
