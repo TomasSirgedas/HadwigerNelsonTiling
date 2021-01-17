@@ -180,6 +180,21 @@ QImage Drawing::makeImage( const QSize& size, std::shared_ptr<const Simulation> 
             painter.drawLine( toBitmap( a.pos() ), toBitmap( b.pos() ) );
          if ( !b.isVisible() )
             painter.drawLine( toBitmap( a.pos() ), toBitmap( (a.pos()*.8 + b.pos()*.2) ) );
+
+
+         if ( dualAnalysis && dualAnalysis->isCurved( a, b ) )
+         {
+            QPointF p0 = toBitmap( a.pos() );
+            QPointF p1 = toBitmap( b.pos() );
+            if ( dualAnalysis->isCurvedTowardsA( a, b ) )
+               std::swap( p0, p1 );
+            QPointF v = p1-p0;
+            QPointF u = QPointF( -v.y(), v.x() );
+            // draw arrow
+            painter.drawLine( p0 + v*.4 + u*.05, p0 + v*.5 );
+            painter.drawLine( p0 + v*.4 - u*.05, p0 + v*.5 );
+            painter.drawLine( p0 + v*.3        , p0 + v*.5 );
+         }
       }
 
       // draw vertices

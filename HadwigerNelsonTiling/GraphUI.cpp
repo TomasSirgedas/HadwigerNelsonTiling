@@ -481,5 +481,6 @@ void GraphUI::onDualGraphModified()
       return;
    }
 
+   _Simulation->_DualGraph->sortNeighbors();
    _DualAnalysis.reset( new DualAnalysis( *_Simulation->_DualGraph ) );
 }

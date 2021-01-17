@@ -19,3 +19,5 @@ CORE_API std::ostream& operator<<( std::ostream& os, const TileGraph::TilePtr& a
 CORE_API std::vector<XYZ> positionsOf( const std::vector<TileGraph::VertexPtr>& v );
 CORE_API std::vector<XYZ> positionsOf( const std::vector<DualGraph::VertexPtr>& v );
 CORE_API double signedArea( const std::vector<TileGraph::VertexPtr>& v );
+
+CORE_API bool isValidPolygon( const std::shared_ptr<IGraphShape> shape, const std::vector<DualGraph::VertexPtr>& v );

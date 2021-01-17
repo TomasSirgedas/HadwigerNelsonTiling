@@ -134,3 +134,8 @@ double signedArea( const std::vector<TileGraph::VertexPtr>& v )
 {
    return signedArea( positionsOf( v ) );
 }
+
+bool isValidPolygon( const std::shared_ptr<IGraphShape> shape, const std::vector<DualGraph::VertexPtr>& v )
+{
+   return shape->isValidWinding( positionsOf( v ) );
+}

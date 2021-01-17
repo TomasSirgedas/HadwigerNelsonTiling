@@ -1,4 +1,5 @@
 #include "DualGraph.h"
+#include "GraphUtil.h"
 #include "trace.h"
 
 class SwapNum
@@ -30,6 +31,18 @@ std::vector<DualGraph::VertexPtr> DualGraph::VertexPtr::neighbors() const
       //DualGraph::VertexPtr neighb = baseNeighb.premul( _Matrix );
       //for ( const Matrix4x4& otherSector : baseVertex().symmetry->sector0Equivalents() )
       //   ret.push_back( neighb.premul( otherSector ) );
+   }
+   return ret;
+}
+
+std::vector<DualGraph::VertexPtr> DualGraph::VertexPtr::diagonals() const
+{
+   std::vector<DualGraph::VertexPtr> ret;
+   for ( const DualGraph::VertexPtr& neighb : neighbors() )
+   {
+      std::vector<DualGraph::VertexPtr> poly = polygon( neighb );
+      if ( poly.size() > 3 && isValidPolygon( _Graph->_GraphShape, poly ) )
+         ret.insert( ret.end(), poly.begin() + 3, poly.end() );
    }
    return ret;
 }
