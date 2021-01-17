@@ -24,6 +24,14 @@ std::vector<TileGraph::VertexPtr> TileGraph::allVertices() const
    return ret;
 }
 
+bool TileGraph::hasVertex( const VertexPtr& a ) const
+{
+   for ( const VertexPtr& b : allVertices() )
+      if ( a == b )
+         return true;
+   return false;
+}
+
 std::vector<TileGraph::VertexPtr> TileGraph::rawVertices() const
 {
    std::vector<VertexPtr> ret;

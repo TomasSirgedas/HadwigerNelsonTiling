@@ -41,6 +41,7 @@ private:
    DualGraph::VertexPtr _DragDualVtx;
    DualGraph::VertexPtr _DragDualEdgeStartVtx;
    TileGraph::VertexPtr _DragTileVtx;
+   TileGraph::VertexPtr _DistanceTileVtx;
 
    std::shared_ptr<DualAnalysis> _DualAnalysis;
 };

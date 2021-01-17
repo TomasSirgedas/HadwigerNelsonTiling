@@ -27,6 +27,7 @@ public:
          _SectorId = symmetry()->canonicalizedSectorId( sectorId );
       }
       CORE_API bool isValid() const { return _Graph != nullptr; }
+      CORE_API bool exists() const { return isValid() && _Graph->hasVertex( *this ); }
       CORE_API VertexPtr premul( const SectorId& sectorId ) const { return VertexPtr( _Graph, _Index, sectorId * _SectorId ); }
       CORE_API bool operator==( const VertexPtr& rhs ) const { return _Graph == rhs._Graph && _Index == rhs._Index && _SectorId == rhs._SectorId; }
       CORE_API bool operator!=( const VertexPtr& rhs ) const { return !(*this == rhs); }
@@ -146,6 +147,7 @@ public:
    CORE_API std::vector<VertexPtr> rawVertices() const;
    CORE_API std::vector<TilePtr> allTiles() const;
    CORE_API std::vector<VertexPtr> allVertices() const;
+   CORE_API bool hasVertex( const VertexPtr& a ) const;
 
    CORE_API VertexPtr vertexAt( const XYZ& pos, double maxDist ) const;
    CORE_API void setVertexPos( const VertexPtr& vtx, const XYZ& pos );

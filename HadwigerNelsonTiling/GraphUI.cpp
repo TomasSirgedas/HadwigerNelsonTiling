@@ -429,6 +429,12 @@ void GraphUI::handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isCli
          onDualGraphModified();
          updateDrawing();
       }
+      if ( isKeyDown( 'D' ) )
+      {
+         _Simulation->_ShowDistanceVertices.first = _DistanceTileVtx;
+         _Simulation->_ShowDistanceVertices.second = tileVertexAtMouse( 30. );
+         updateDrawing();
+      }
       onDualGraphModified();
 
       _DragDualVtx = DualGraph::VertexPtr();
@@ -442,14 +448,16 @@ void GraphUI::handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isCli
          _DragDualEdgeStartVtx = dualVertexAtMouse( 12. );
       else if ( isKeyDown( 'M' ) )
          _DragDualVtx = dualVertexAtMouse( 8. );
+      else if ( isKeyDown( 'D' ) )
+         _DistanceTileVtx = tileVertexAtMouse( 20. );
       else
          _Simulation->_FixedVertex = _DragTileVtx = tileVertexAtMouse( 8. );
 
-      if ( _DragTileVtx.isValid() )
-      {
-         std::trace << "_DragTileVtx.tiles() = " << _DragTileVtx.tiles() << std::endl;
-         std::trace << "_DragTileVtx.neighbors() = " << _DragTileVtx.neighbors() << std::endl;
-      }
+      //if ( _DragTileVtx.isValid() )
+      //{
+      //   std::trace << "_DragTileVtx.tiles() = " << _DragTileVtx.tiles() << std::endl;
+      //   std::trace << "_DragTileVtx.neighbors() = " << _DragTileVtx.neighbors() << std::endl;
+      //}
    }
 
    if ( isMove )

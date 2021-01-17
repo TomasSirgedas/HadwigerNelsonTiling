@@ -120,6 +120,20 @@ namespace
 
       return ret;
    }
+   void drawMessage( QPainter& painter, const QPoint& pos, const std::string& message_ )
+   {
+      QFontMetrics fm( painter.font() );
+      QString message = QString::fromStdString( message_ );
+      int width = fm.horizontalAdvance( message );
+      int height = fm.height();
+      QRect rect = QRect( pos.x(), pos.y(), width, height );
+
+      painter.setBrush( QColor( 0,0,0,64 ) );
+      painter.setPen( Qt::NoPen );
+      painter.drawRect( rect.adjusted( -1, -1, 1, 1 ) );
+      painter.setPen( QColor( 255,255,255 ) );
+      painter.drawText( QRectF( rect ), message, QTextOption( ) );
+   }
 }
 
 
@@ -292,24 +306,23 @@ QImage Drawing::makeImage( const QSize& size, std::shared_ptr<const Simulation> 
 
    }
 
+   if ( _ShowTileGraph && simulation->showDistanceVerticesExist() )
+   {
+      XYZ posA = simulation->_ShowDistanceVertices.first.pos();
+      XYZ posB = simulation->_ShowDistanceVertices.second.pos();
+      double dist = posA.dist( posB );
+      QPen distPen( QColor(255,255,255,128), 3. );
+      distPen.setStyle( Qt::DotLine );
+      painter.setPen( distPen );
+      painter.drawLine( toBitmap( posA ), toBitmap( posB ) );
+      painter.setPen( Qt::black );
+      drawMessage( painter, QPoint( 4, 4 ), "distance = " + std::to_string( dist ) );
+   }
+
    if ( dualAnalysis )
    {
-      //QFont myFont(fontName, fontSize);
-      //QString str("I wonder how wide this is?");
-
-      QString str = QString::fromStdString( dualAnalysis->errorMessage() );
-
-      QFontMetrics fm( painter.font() );
-      int width = fm.horizontalAdvance( str );
-      int height = fm.height();
-      QRect rect = QRect( 4, size.height()-height-4, width, height );
-
-      painter.setBrush( QColor( 0,0,0,64 ) );
-      painter.setPen( Qt::NoPen );
-      painter.drawRect( rect.adjusted( -1, -1, 1, 1 ) );
-      painter.setPen( QColor( 255,255,255 ) );
-      painter.drawText( QRectF( rect ), str, QTextOption( ) );
-
+      painter.setPen( QPen( Qt::black ) );
+      drawMessage( painter, QPoint( 4, size.height()-12-4 ), dualAnalysis->errorMessage() );
    }
 
    return image;
