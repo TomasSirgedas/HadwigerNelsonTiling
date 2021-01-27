@@ -1,0 +1,65 @@
+{
+    "shape": {
+        "type": "plane"
+    },
+    "symmetry": null,
+    "vertices": [
+        {
+            "color": 3,
+            "index": 0,
+            "neighbors": [
+                {
+                    "index": 1,
+                    "sectorId": 0
+                },
+                {
+                    "index": 2,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                -0.014715177646857702,
+                -0.4304189461705874,
+                0
+            ]
+        },
+        {
+            "color": 1,
+            "index": 1,
+            "neighbors": [
+                {
+                    "index": 2,
+                    "sectorId": 0
+                },
+                {
+                    "index": 0,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                -0.4046673852885865,
+                0.3605218523480138,
+                0
+            ]
+        },
+        {
+            "color": 2,
+            "index": 2,
+            "neighbors": [
+                {
+                    "index": 0,
+                    "sectorId": 0
+                },
+                {
+                    "index": 1,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                0.3605218523480136,
+                0.38627341323001474,
+                0
+            ]
+        }
+    ]
+}

@@ -64,7 +64,8 @@ std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
       for ( const DualGraph::VertexPtr& b : a.neighbors() )
       {
          std::vector<std::vector<DualGraph::VertexPtr>> polys = { a.polygon( b ) };
-         if ( polys[0].empty() || !dual._GraphShape->isValidWinding( positionsOf( polys[0] ) ) )
+         bool onPerimeter = polys[0].empty() || !dual._GraphShape->isValidWinding( positionsOf( polys[0] ) );
+         if ( onPerimeter )
             polys = { { a, b }, { a, a.next( b ) } };
 
          for ( std::vector<DualGraph::VertexPtr>& poly : polys )
@@ -72,6 +73,7 @@ std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
             TileGraph::VertexPtr tileVertex = dualPolygonToTileVertexMap.createOrFindTileGraphVertex( poly, [&]( const XYZ& pos ) {
                TileGraph::Vertex& v = graph->addVertex( graph->_GraphShape->toSurfaceFrom3D( pos ) );
                polyMap[v._Index] = poly; // used to populate tile neighbors later
+               v._OnPerimeter = onPerimeter;
                return v.toVertexPtr( graph.get() );
             } );
 

@@ -28,6 +28,7 @@ public:
    double toModel( double bitmapSize ) const { return bitmapSize / _PixelsPerUnit; }
 
    bool isVisible( const XYZ& pos ) const;
+   QImage makeTransparentImage( const QSize& size, std::shared_ptr<const Simulation> simulation, std::shared_ptr<const DualAnalysis> dualAnalysis );
    QImage makeImage( const QSize& size, std::shared_ptr<const Simulation> simulation, std::shared_ptr<const DualAnalysis> dualAnalysis );
    void refresh();
    void setGraphShape( std::shared_ptr<IGraphShape> graphShape ) { _GraphShape = graphShape; refresh(); }
@@ -53,10 +54,12 @@ public:
    Matrix4x4 _ModelToBitmap;
    Matrix4x4 _ModelRotation;
    double _PixelsPerUnit = -1;
+   double _Zoom = 1;
    bool _ShowRigids = true;
    bool _ShowTileGraph = true;
    bool _ShowDualGraph = true;
    bool _ShowLabels = true;
+   bool _DiskMode = false;
 
 private:
    std::shared_ptr<IGraphShape> _GraphShape;

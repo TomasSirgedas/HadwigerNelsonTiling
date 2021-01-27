@@ -89,7 +89,7 @@ namespace
       return ret;
    }
 
-   std::vector<XYZ> calcTileOutline( std::shared_ptr<IGraphShape> shape, const TileGraph::TilePtr& tile, double maxSpacing )
+   std::vector<XYZ> calcTileOutline( std::shared_ptr<IGraphShape> shape, const TileGraph::TilePtr& tile, double maxSpacing, bool perimeterPopout = false )
    {
       std::vector<XYZ> ret;
 
@@ -98,6 +98,14 @@ namespace
          const TileGraph::VertexPtr& a = edge.first;
          const TileGraph::VertexPtr& b = edge.second;
          if ( maxSpacing >= 1 ) { ret.push_back( b.pos() ); continue; }
+         bool isPerimeterEdge = a.isOnPerimeter() && b.isOnPerimeter();
+         if ( perimeterPopout && isPerimeterEdge )
+         {
+            ret.push_back( a.pos() * 2.5 );
+            ret.push_back( b.pos() * 2.5 );
+            ret.push_back( b.pos() );
+            continue;
+         }
 
          TileGraph::VertexPtr c = a.calcCurve( b ); // c = center of curve
          std::vector<XYZ> curve;
@@ -156,6 +164,8 @@ void Drawing::refresh()
    else
       _PixelsPerUnit = 100;
 
+   _PixelsPerUnit *= _Zoom;
+
    _ModelToBitmap = Matrix4x4::translation( XYZ( width()/2, height()/2, 0. ) )
                   * Matrix4x4::scale( XYZ( _PixelsPerUnit, _PixelsPerUnit, 1 ) )
                   * Matrix4x4::scale( XYZ( 1, -1, 1 ) );
@@ -172,14 +182,14 @@ bool Drawing::isVisible( const XYZ& pos ) const
    return _GraphShape->isVisible( pos, _ModelRotation );
 }
 
-QImage Drawing::makeImage( const QSize& size, std::shared_ptr<const Simulation> simulation, std::shared_ptr<const DualAnalysis> dualAnalysis )
+QImage Drawing::makeTransparentImage( const QSize& size, std::shared_ptr<const Simulation> simulation, std::shared_ptr<const DualAnalysis> dualAnalysis )
 {   
    const DualGraph& dual = *simulation->_DualGraph;
    const TileGraph& graph = *simulation->_TileGraph;
-   QImage image( size, QImage::Format_RGB888 );
+   QImage image( size, QImage::Format_ARGB32_Premultiplied );
 
+   image.fill( Qt::darkGray );
    QPainter painter( &image );
-   painter.fillRect( image.rect(), Qt::darkGray );
    painter.setRenderHint( QPainter::Antialiasing, true );
 
 
@@ -224,7 +234,7 @@ QImage Drawing::makeImage( const QSize& size, std::shared_ptr<const Simulation> 
       {
          painter.setPen( QPen( QColor( 255, 0, 0, 128 ), 3. ) );
          painter.setBrush( Qt::NoBrush );
-         for ( const DualGraph::VertexPtr& a : dualAnalysis->errorVertices() )
+         for ( const DualGraph::VertexPtr& a : dualAnalysis->errorVertices() ) if ( a.isValid() )
          {
             painter.drawEllipse( toBitmap( a.pos() ), 6, 6 );
          }
@@ -245,9 +255,10 @@ QImage Drawing::makeImage( const QSize& size, std::shared_ptr<const Simulation> 
    {
       // draw tiles
       painter.setPen( Qt::NoPen );
+      //painter.setPen( QColor( 0, 0, 0, 32 ) );
       for ( const TileGraph::TilePtr& tile : graph.allTiles() ) // if ( isVisible( a.pos() ) )
       {
-         std::vector<XYZ> outline = calcTileOutline( _GraphShape, tile, 10/_PixelsPerUnit/*max curve spacing*/ );
+         std::vector<XYZ> outline = calcTileOutline( _GraphShape, tile, 10/_PixelsPerUnit/*max curve spacing*/, _DiskMode && simulation->_PerimeterRadius > 0 );
          QPolygonF poly;
          for ( const XYZ& a : outline )
             poly.append( toBitmap( a ) );
@@ -330,7 +341,68 @@ QImage Drawing::makeImage( const QSize& size, std::shared_ptr<const Simulation> 
       drawMessage( painter, QPoint( 4, size.height()-12-4 ), dualAnalysis->errorMessage() );
    }
 
+   if ( simulation->_PerimeterRadius > 0 && !_DiskMode )
+   {
+      painter.setPen( QColor( 0, 0, 0, 64 ) );
+      painter.setBrush( Qt::NoBrush );
+      QPointF center = toBitmap( XYZ( 0, 0, 0 ) );
+      double rx = QLineF( center, toBitmap( XYZ( simulation->_PerimeterRadius, 0, 0 ) ) ).length();
+      double ry = QLineF( center, toBitmap( XYZ( 0, simulation->_PerimeterRadius, 0 ) ) ).length();
+      painter.drawEllipse( center, rx, ry );
+
+      painter.setFont( QFont( "Arial", 24 ) );
+      painter.setPen( QColor( 0, 0, 0, 255 ) );
+      painter.drawText( toBitmap( XYZ( -simulation->_PerimeterRadius, -simulation->_PerimeterRadius, 0 ) ), QString( "r = %1" ).arg( simulation->_PerimeterRadius ) );
+   }
+
    return image;
+}
+
+QImage Drawing::makeImage( const QSize& size, std::shared_ptr<const Simulation> simulation, std::shared_ptr<const DualAnalysis> dualAnalysis )
+{
+   QImage image = makeTransparentImage( size, simulation, dualAnalysis );
+
+   QImage finalImage( size, QImage::Format_RGB32 );   
+
+   // crop to disk
+   if ( simulation->_PerimeterRadius > 0 && _DiskMode )
+   {
+      QPointF center = toBitmap( XYZ( 0, 0, 0 ) );
+      double r = QLineF( center, toBitmap( XYZ( simulation->_PerimeterRadius, 0, 0 ) ) ).length();
+
+      int sx = image.width();
+      int sy = image.height();
+      uint8_t* p = (uint8_t*) image.bits();
+      for ( int y = 0; y < sy; y++ )
+      for ( int x = 0; x < sx; x++, p += 4 )
+      {
+         double d2 = (x+.5 - center.x())*(x+.5 - center.x()) + (y+.5 - center.y())*(y+.5 - center.y());
+         double d = sqrt( d2 );
+         double alpha = r - d + .5;
+         alpha = alpha < 0 ? 0 : alpha > 1 ? 1 : alpha; // clamp to [0,1]
+         if ( alpha == 0 ) { p[0] = 0; p[1] = 0; p[2] = 0; p[3] = 0; }
+         else if ( alpha < 1 )
+         {
+            p[0] = (uint8_t) lround( p[0]*alpha );
+            p[1] = (uint8_t) lround( p[1]*alpha );
+            p[2] = (uint8_t) lround( p[2]*alpha );
+            p[3] = (uint8_t) lround( p[3]*alpha );
+         }
+      }
+   }
+
+   QPainter painter( &finalImage );
+   painter.fillRect( finalImage.rect(), Qt::darkGray );
+   painter.drawImage( QPoint( 0, 0 ), image );
+
+   if ( simulation->_PerimeterRadius > 0 && _DiskMode )
+   {
+      painter.setFont( QFont( "Arial", 24 ) );
+      painter.setPen( QColor( 0, 0, 0, 255 ) );
+      painter.drawText( toBitmap( XYZ( -simulation->_PerimeterRadius, -simulation->_PerimeterRadius, 0 ) ), QString( "r = %1" ).arg( simulation->_PerimeterRadius ) );
+   }
+
+   return finalImage;
 }
 
 void Drawing::updateDrawing( std::shared_ptr<const Simulation> simulation, std::shared_ptr<const DualAnalysis> dualAnalysis )

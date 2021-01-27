@@ -168,6 +168,17 @@ namespace
          dual->toggleEdge( 2, 1002 );
       }
 
+      if ( index == 5 )
+      {
+         std::shared_ptr<IGraphShape> shape( new GraphShapePlane );
+
+         SymmetryGroup symA( Matrix4x4::rotation( XYZ( 0, 0, 1 ), PI*2/5 ), Perm( { 0,4,5,1,2,3,6,7,8,9 } ) );
+         std::shared_ptr<IGraphSymmetry> sym( new GraphSymmetry_Groups( { symA } ) );
+
+         dual.reset( new DualGraph( sym, shape ) );
+         dual->addVertex( 0, XYZ( 0, 0, 0 ) );
+      }
+
       return dual;
    }
 }
@@ -289,11 +300,25 @@ GraphUI::GraphUI( QWidget *parent )
       //handleRightButton( event->pos(), false, false, true );
    } );
 
+   connect( ui.radiusSlider, &QSlider::valueChanged, [this]( int value ) {
+      double r = value / 1000.;
+      ui.radiusLabel->setText( QString("r=%1").arg( r ) );
+      _Simulation->_PerimeterRadius = r;
+      updateDrawing();
+   } );
+   connect( ui.zoomSlider, &QSlider::valueChanged, [this]( int value ) {
+      ui.drawing->_Zoom = exp( ( value / 100. - .5 ) * 5 );
+      ui.drawing->refresh();
+      updateDrawing();
+   } );
+   ui.zoomSlider->valueChanged( ui.zoomSlider->value() );
+
 
    QObject::connect( new QShortcut(QKeySequence(Qt::Key_F1), this ), &QShortcut::activated, [this]() { loadGraph( hardcodedDualGraph( 1 ) ); } );
    QObject::connect( new QShortcut(QKeySequence(Qt::Key_F2), this ), &QShortcut::activated, [this]() { loadGraph( hardcodedDualGraph( 2 ) ); } );
    QObject::connect( new QShortcut(QKeySequence(Qt::Key_F3), this ), &QShortcut::activated, [this]() { loadGraph( hardcodedDualGraph( 3 ) ); } );
    QObject::connect( new QShortcut(QKeySequence(Qt::Key_F4), this ), &QShortcut::activated, [this]() { loadGraph( hardcodedDualGraph( 4 ) ); } );
+   QObject::connect( new QShortcut(QKeySequence(Qt::Key_F5), this ), &QShortcut::activated, [this]() { loadGraph( hardcodedDualGraph( 5 ) ); } );
 
    QObject::connect( new QShortcut(QKeySequence(Qt::Key_0), this ), &QShortcut::activated, [this]() { addVertex( 0 ); } );
    QObject::connect( new QShortcut(QKeySequence(Qt::Key_R), this ), &QShortcut::activated, [this]() { addVertex( 0 ); } );

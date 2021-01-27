@@ -50,6 +50,7 @@ public:
       CORE_API bool hasColor( int color ) const;
       CORE_API const SectorSymmetryForVertex* symmetry() const { return baseVertex()._Symmetry.get(); }
       CORE_API SectorId sectorId() const { return _SectorId; }
+      CORE_API bool isOnPerimeter() const { return baseVertex()._OnPerimeter; }
 
    private:
       const TileGraph* _Graph = nullptr;
@@ -100,6 +101,7 @@ public:
       Vertex( int idx, const XYZ& pos ) : _Index(idx), _Pos(pos) {}
       int _Index;
       XYZ _Pos;
+      bool _OnPerimeter = false;
       std::vector<VertexPtr> _Neighbors;
       std::vector<TilePtr> _Tiles;
       std::shared_ptr<SectorSymmetryForVertex> _Symmetry;

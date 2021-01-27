@@ -137,7 +137,18 @@ double Simulation::step( double& paddingError )
    //   paddingError += (1+pad)-dist;
    //   if ( printErrors && 1-dist > 0 ) qDebug() << "curved line to vertex" << lvc.a0._Index << lvc.a1._Index << lvc.curveCenter._Index << lvc.b._Index << 1-dist;
    //}
+      
+   // perimeter
+   for ( const TileGraph::Vertex& vtx : _TileGraph->_Vertices ) if ( vtx._OnPerimeter )
+   {
+      if ( vtx._Pos.len2() > _PerimeterRadius*_PerimeterRadius )
+         continue;
 
+      double d = vtx._Pos.len();
+      double distError = _PerimeterRadius - d;
+      vel[vtx._Index] += (vtx._Pos/d) * distError * .03;
+      totalError += distError;
+   }
 
    // apply velocities
    for ( int i = 0; i < (int)vel.size(); i++ ) if ( !_TileGraph->_Vertices[i]._Symmetry->hasSymmetry() ) if ( i != _FixedVertex.index() )
