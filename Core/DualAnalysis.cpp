@@ -138,16 +138,22 @@ void DualAnalysis::init( const DualGraph& dual )
 
 }
 
-bool DualAnalysis::isCurved( const DualGraph::VertexPtr& a, const DualGraph::VertexPtr& b ) const
+bool DualAnalysis::isCurved( const DualGraph::VertexPtr& a_, const DualGraph::VertexPtr& b_ ) const
 {
+   DualGraph::VertexPtr a = a_.premul( a_.sectorId().inverted() );
+   DualGraph::VertexPtr b = b_.premul( a_.sectorId().inverted() );
+
    std::pair<int,int> pr( a.id(), b.id() );
    if ( pr.first > pr.second )
       std::swap( pr.first, pr.second );
    return _CurveDirectionForEdge.count( pr ) > 0;
 }
 
-bool DualAnalysis::isCurvedTowardsA( const DualGraph::VertexPtr& a, const DualGraph::VertexPtr& b ) const
+bool DualAnalysis::isCurvedTowardsA( const DualGraph::VertexPtr& a_, const DualGraph::VertexPtr& b_ ) const
 {
+   DualGraph::VertexPtr a = a_.premul( a_.sectorId().inverted() );
+   DualGraph::VertexPtr b = b_.premul( a_.sectorId().inverted() );
+
    std::pair<int,int> pr( a.id(), b.id() );
    bool swappedAB = pr.first > pr.second;
    if ( swappedAB )
