@@ -17,10 +17,10 @@ double signedArea( const QPolygonF& poly )
    if ( poly.size() <= 2 )
       return 0;
 
-   double area2 = poly[0].x() * poly.back().y() - poly.back().x() * poly[0].y();
+   double area2 = poly.back().x() * poly[0].y() - poly[0].x() * poly.back().y();
       
    for ( int i = 0; i+1 < poly.size(); i++ )
-      area2 += poly[i+1].x() * poly[i].y() - poly[i].x() * poly[i+1].y();
+      area2 += poly[i].x() * poly[i+1].y() - poly[i+1].x() * poly[i].y();
 
    return area2 / 2;
 }

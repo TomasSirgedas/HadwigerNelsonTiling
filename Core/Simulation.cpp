@@ -174,3 +174,17 @@ double Simulation::step( int numSteps )
    _PaddingError = totalPaddingError / numSteps;
    return tot / numSteps;
 }
+
+void Simulation::moveDualVerticesToCentroid()
+{
+   if ( !_TileGraph )
+      return;
+
+   for ( const TileGraph::Tile& tile : _TileGraph->_Tiles )
+   {
+      std::vector<XYZ> v;
+      for ( const TileGraph::VertexPtr& vtx : tile._Vertices )
+         v.push_back( vtx.pos() );
+      _DualGraph->_Vertices[tile._Index].pos = centroid( v );
+   }
+}

@@ -46,6 +46,7 @@ private:
 };
 
 CORE_API double signedArea( const std::vector<XYZ>& v );
+CORE_API XYZ centroid( const std::vector<XYZ>& v );
 
 template<class T>
 std::vector<std::pair<T, T>> toEdges( const std::vector<T>& v )

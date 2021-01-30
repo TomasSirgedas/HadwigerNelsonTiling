@@ -266,10 +266,10 @@ QImage Drawing::makeTransparentImage( const QSize& size, std::shared_ptr<const S
          //for ( const TileGraph::VertexPtr& a : tile.vertices() )
          //   poly.append( toBitmap( a.pos() ) );
 
-         if ( signedArea( poly ) > 0 )
+         if ( signedArea( poly ) < 0 )
             continue;
 
-         painter.setBrush( withAlpha( tileColor( tile.color() ), .7 ) );
+         painter.setBrush( withAlpha( tileColor( tile.color() ), .2 ) );
          painter.drawPolygon( poly );
       }
 

@@ -11,6 +11,7 @@ public:
    CORE_API double step( double& paddingError );
    CORE_API double step( int numSteps );
    CORE_API void setRadius( double radius );   
+   CORE_API void moveDualVerticesToCentroid();
 
 public:
    double _Radius = 1;

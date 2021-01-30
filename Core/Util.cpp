@@ -88,10 +88,28 @@ double signedArea( const std::vector<XYZ>& v )
 {
    if ( v.empty() )
       return 0;
-   double area2 = v[0].x * v.back().y - v.back().x * v[0].y;
+   double area2 = v.back().x * v[0].y - v[0].x * v.back().y;
 
    for ( int i = 0; i+1 < (int)v.size(); i++ )
-      area2 += v[i+1].x * v[i].y - v[i].x * v[i+1].y;
+      area2 += v[i].x * v[i+1].y - v[i+1].x * v[i].y;
 
    return area2 / 2;
+}
+
+XYZ centroid( const std::vector<XYZ>& v )
+{
+   if ( v.empty() )
+      return XYZ();
+
+   double A = signedArea( v );
+
+   double sumX = (v.back().x + v[0].x) * (v.back().x * v[0].y - v[0].x * v.back().y);
+   double sumY = (v.back().y + v[0].y) * (v.back().x * v[0].y - v[0].x * v.back().y);
+   for ( int i = 0; i+1 < (int)v.size(); i++ )
+   {
+      sumX += (v[i].x + v[i+1].x) * (v[i].x * v[i+1].y - v[i+1].x * v[i].y);
+      sumY += (v[i].y + v[i+1].y) * (v[i].x * v[i+1].y - v[i+1].x * v[i].y);
+   }
+
+   return XYZ( sumX / (6*A), sumY / (6*A), 0 );
 }

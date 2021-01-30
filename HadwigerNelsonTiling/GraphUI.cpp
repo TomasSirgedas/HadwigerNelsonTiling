@@ -257,6 +257,10 @@ GraphUI::GraphUI( QWidget *parent )
       updateDrawing();
    } );
 
+   connect( ui.centroidButton, &QPushButton::clicked, [&](){  
+      _Simulation->moveDualVerticesToCentroid();
+      updateDrawing();
+   } );   
    
    connect( ui.showRigidsCheckBox, &QCheckBox::toggled, [&]() {
       ui.drawing->_ShowRigids = ui.showRigidsCheckBox->isChecked();

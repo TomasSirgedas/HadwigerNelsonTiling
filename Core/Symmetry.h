@@ -235,7 +235,7 @@ public:
    double modelSize() const override { return 0; }
    XYZ normalAt( const XYZ& p ) const override { return XYZ( 0, 0, -1 ); }
    bool isVisible( const XYZ& pos, const Matrix4x4& rotationMatrix ) const override { return true; }
-   bool isValidWinding( const std::vector<XYZ>& v ) const override { return signedArea( v ) <= 0; }
+   bool isValidWinding( const std::vector<XYZ>& v ) const override { return signedArea( v ) >= 0; }
    bool isCurved() const override { return false; }
    virtual Json toJson() const override { return JsonObj { { "type", "plane" } }; }
 };
