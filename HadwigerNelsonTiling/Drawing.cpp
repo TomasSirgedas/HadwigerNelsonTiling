@@ -392,15 +392,15 @@ QImage Drawing::makeImage( const QSize& size, std::shared_ptr<const Simulation> 
    }
 
    QPainter painter( &finalImage );
-   painter.fillRect( finalImage.rect(), Qt::darkGray );
+   painter.fillRect( finalImage.rect(), _DiskMode ? Qt::white : Qt::darkGray );
    painter.drawImage( QPoint( 0, 0 ), image );
 
-   if ( simulation->_PerimeterRadius > 0 && _DiskMode )
-   {
-      painter.setFont( QFont( "Arial", 24 ) );
-      painter.setPen( QColor( 0, 0, 0, 255 ) );
-      painter.drawText( toBitmap( XYZ( -simulation->_PerimeterRadius, -simulation->_PerimeterRadius, 0 ) ), QString( "r = %1" ).arg( simulation->_PerimeterRadius ) );
-   }
+   //if ( simulation->_PerimeterRadius > 0 && _DiskMode )
+   //{
+   //   painter.setFont( QFont( "Arial", 24 ) );
+   //   painter.setPen( QColor( 0, 0, 0, 255 ) );
+   //   painter.drawText( toBitmap( XYZ( -simulation->_PerimeterRadius, -simulation->_PerimeterRadius, 0 ) ), QString( "r = %1" ).arg( simulation->_PerimeterRadius ) );
+   //}
 
    return finalImage;
 }
