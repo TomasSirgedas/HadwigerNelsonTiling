@@ -17,7 +17,11 @@ public:
    double _Radius = 1;
    double _Padding = .0000;
    double _PaddingError = 0;
-   double _PerimeterRadius = 0;
+   double _OuterRadius = 0;
+   double _InnerRadius = 0;
+   double _StripWidth = 0;
+   double _StripHeight = 0;
+   double _TileDist = 1.;
    TileGraph::VertexPtr _FixedVertex;
    std::shared_ptr<TileGraph> _TileGraph;
    std::shared_ptr<DualGraph> _DualGraph;

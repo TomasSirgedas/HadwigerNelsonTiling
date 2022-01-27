@@ -246,6 +246,7 @@ GraphUI::GraphUI( QWidget *parent )
       double error = _Simulation->step( simSteps );
       double time = t.nsecsElapsed() * 1e-9;
       ui.errorLabel->setText( "Err:" + QString::number( error ) );
+      ui.errorLabel->setText( "Err:" + QString::number( error ) );
       ui.paddingErrorLabel->setText( "Pad:" + QString::number( _Simulation->_PaddingError ) );      
       //ui.speedLabel->setText( "Speed(ms): " + QString::number( 1000*time/simSteps ) );
       updateDrawing();
@@ -304,18 +305,60 @@ GraphUI::GraphUI( QWidget *parent )
       //handleRightButton( event->pos(), false, false, true );
    } );
 
-   connect( ui.radiusSlider, &QSlider::valueChanged, [this]( int value ) {
+   connect( ui.outerRadiusSlider, &QSlider::valueChanged, [this]( int value ) {
       double r = value / 1000.;
-      ui.radiusLabel->setText( QString("r=%1").arg( r ) );
-      _Simulation->_PerimeterRadius = r;
+      ui.outerRadiusEdit->setText( QString("%1").arg( r ) );
+      _Simulation->_OuterRadius = r;
+      updateModelFromUI();
       updateDrawing();
+   } );
+   connect( ui.innerRadiusSlider, &QSlider::valueChanged, [this]( int value ) {
+      double r = value / 1000.;
+      ui.innerRadiusEdit->setText( QString("%1").arg( r ) );
+      _Simulation->_InnerRadius = r;
+      updateModelFromUI();
+      updateDrawing();
+   } );
+   connect( ui.stripWidthSlider, &QSlider::valueChanged, [this]( int value ) {
+      double w = value / 1000.;
+      ui.stripWidthEdit->setText( QString("%1").arg( w ) );
+      _Simulation->_StripWidth = w;
+      updateModelFromUI();
+      updateDrawing();
+   } );
+   connect( ui.stripHeightSlider, &QSlider::valueChanged, [this]( int value ) {
+      double h = value / 1000.;
+      ui.stripHeightEdit->setText( QString("%1").arg( h ) );
+      _Simulation->_StripHeight = h;
+      updateModelFromUI();
+      updateDrawing();
+   } );
+   connect( ui.outerRadiusEdit, &QLineEdit::editingFinished, [this](){
+      ui.outerRadiusSlider->setValue( lround( ui.outerRadiusEdit->text().toDouble()*1000 ) );
+   } );
+   connect( ui.innerRadiusEdit, &QLineEdit::editingFinished, [this](){
+      ui.innerRadiusSlider->setValue( lround( ui.innerRadiusEdit->text().toDouble()*1000 ) );
+   } );
+   connect( ui.stripWidthEdit, &QLineEdit::editingFinished, [this](){
+      ui.stripWidthSlider->setValue( lround( ui.stripWidthEdit->text().toDouble()*1000 ) );
+   } );
+   connect( ui.stripHeightEdit, &QLineEdit::editingFinished, [this](){
+      ui.stripHeightSlider->setValue( lround( ui.stripHeightEdit->text().toDouble()*1000 ) );
    } );
    connect( ui.zoomSlider, &QSlider::valueChanged, [this]( int value ) {
       ui.drawing->_Zoom = exp( ( value / 100. - .5 ) * 5 );
       ui.drawing->refresh();
       updateDrawing();
    } );
+   connect( ui.diskRadioButton, &QAbstractButton::clicked, [this]() { updateModelFromUI(); updateDrawing(); } );
+   connect( ui.stripRadioButton, &QAbstractButton::clicked, [this]() { updateModelFromUI(); updateDrawing(); } );
+   connect( ui.noneRadioButton, &QAbstractButton::clicked, [this]() { updateModelFromUI(); updateDrawing(); } );
    ui.zoomSlider->valueChanged( ui.zoomSlider->value() );
+
+   connect( ui.tileDistEdit, &QLineEdit::editingFinished, [this]() {
+      _Simulation->_TileDist = ui.tileDistEdit->text().toDouble();
+      updateDrawing();
+   } );
 
 
    QObject::connect( new QShortcut(QKeySequence(Qt::Key_F1), this ), &QShortcut::activated, [this]() { loadGraph( hardcodedDualGraph( 1 ) ); } );
@@ -520,4 +563,12 @@ void GraphUI::onDualGraphModified()
 
    _Simulation->_DualGraph->sortNeighbors();
    _DualAnalysis.reset( new DualAnalysis( *_Simulation->_DualGraph ) );
+}
+
+void GraphUI::updateModelFromUI()
+{
+   _Simulation->_OuterRadius = ui.diskRadioButton->isChecked() ? ui.outerRadiusEdit->text().toDouble() : 0;
+   _Simulation->_InnerRadius = ui.diskRadioButton->isChecked() ? ui.innerRadiusEdit->text().toDouble() : 0;
+   _Simulation->_StripWidth  = ui.stripRadioButton->isChecked() ? ui.stripWidthEdit->text().toDouble() : 0;
+   _Simulation->_StripHeight = ui.stripRadioButton->isChecked() ? ui.stripHeightEdit->text().toDouble() : 0;
 }

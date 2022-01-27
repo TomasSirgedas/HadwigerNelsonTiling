@@ -258,7 +258,7 @@ QImage Drawing::makeTransparentImage( const QSize& size, std::shared_ptr<const S
       //painter.setPen( QColor( 0, 0, 0, 32 ) );
       for ( const TileGraph::TilePtr& tile : graph.allTiles() ) // if ( isVisible( a.pos() ) )
       {
-         std::vector<XYZ> outline = calcTileOutline( _GraphShape, tile, 10/_PixelsPerUnit/*max curve spacing*/, _DiskMode && simulation->_PerimeterRadius > 0 );
+         std::vector<XYZ> outline = calcTileOutline( _GraphShape, tile, 10/_PixelsPerUnit/*max curve spacing*/, false );
          QPolygonF poly;
          for ( const XYZ& a : outline )
             poly.append( toBitmap( a ) );
@@ -269,7 +269,7 @@ QImage Drawing::makeTransparentImage( const QSize& size, std::shared_ptr<const S
          if ( signedArea( poly ) < 0 )
             continue;
 
-         painter.setBrush( withAlpha( tileColor( tile.color() ), .2 ) );
+         painter.setBrush( withAlpha( tileColor( tile.color() ), .5 ) );
          painter.drawPolygon( poly );
       }
 
@@ -341,18 +341,44 @@ QImage Drawing::makeTransparentImage( const QSize& size, std::shared_ptr<const S
       drawMessage( painter, QPoint( 4, size.height()-12-4 ), dualAnalysis->errorMessage() );
    }
 
-   if ( simulation->_PerimeterRadius > 0 && !_DiskMode )
+   if ( simulation->_OuterRadius > 0 )
    {
       painter.setPen( QColor( 0, 0, 0, 64 ) );
       painter.setBrush( Qt::NoBrush );
       QPointF center = toBitmap( XYZ( 0, 0, 0 ) );
-      double rx = QLineF( center, toBitmap( XYZ( simulation->_PerimeterRadius, 0, 0 ) ) ).length();
-      double ry = QLineF( center, toBitmap( XYZ( 0, simulation->_PerimeterRadius, 0 ) ) ).length();
+      double rx = QLineF( center, toBitmap( XYZ( simulation->_OuterRadius, 0, 0 ) ) ).length();
+      double ry = QLineF( center, toBitmap( XYZ( 0, simulation->_OuterRadius, 0 ) ) ).length();
       painter.drawEllipse( center, rx, ry );
 
-      painter.setFont( QFont( "Arial", 24 ) );
+      painter.setFont( QFont( "Arial", 12 ) );
       painter.setPen( QColor( 0, 0, 0, 255 ) );
-      painter.drawText( toBitmap( XYZ( -simulation->_PerimeterRadius, -simulation->_PerimeterRadius, 0 ) ), QString( "r = %1" ).arg( simulation->_PerimeterRadius ) );
+      painter.drawText( toBitmap( XYZ( -simulation->_OuterRadius, -simulation->_OuterRadius, 0 ) ), QString( "R = %1" ).arg( simulation->_OuterRadius ) );
+   }
+   if ( simulation->_InnerRadius > 0 )
+   {
+      painter.setPen( QColor( 0, 0, 0, 64 ) );
+      painter.setBrush( Qt::NoBrush );
+      QPointF center = toBitmap( XYZ( 0, 0, 0 ) );
+      double rx = QLineF( center, toBitmap( XYZ( simulation->_InnerRadius, 0, 0 ) ) ).length();
+      double ry = QLineF( center, toBitmap( XYZ( 0, simulation->_InnerRadius, 0 ) ) ).length();
+      painter.drawEllipse( center, rx, ry );
+
+      painter.setFont( QFont( "Arial", 12 ) );
+      painter.setPen( QColor( 0, 0, 0, 255 ) );
+      painter.drawText( toBitmap( XYZ( -simulation->_InnerRadius, -simulation->_InnerRadius, 0 ) ), QString( "r = %1" ).arg( simulation->_InnerRadius ) );
+   }
+   if ( simulation->_StripWidth > 0 && simulation->_StripHeight > 0 )
+   {
+      painter.setPen( QColor( 0, 0, 0, 64 ) );
+      painter.setBrush( Qt::NoBrush );
+      QPointF center = toBitmap( XYZ( 0, 0, 0 ) );
+      QPointF p0 = toBitmap( XYZ( -simulation->_StripWidth/2, -simulation->_StripHeight/2, 0 ) );
+      QPointF p1 = toBitmap( XYZ(  simulation->_StripWidth/2,  simulation->_StripHeight/2, 0 ) );
+      painter.drawRect( QRectF( p0.x(), p0.y(), p1.x()-p0.x(), p1.y()-p0.y() ) );
+
+      painter.setFont( QFont( "Arial", 12 ) );
+      painter.setPen( QColor( 0, 0, 0, 255 ) );
+      painter.drawText( p0, QString( "w = %1" ).arg( simulation->_StripHeight ) );
    }
 
    return image;
@@ -364,35 +390,35 @@ QImage Drawing::makeImage( const QSize& size, std::shared_ptr<const Simulation> 
 
    QImage finalImage( size, QImage::Format_RGB32 );   
 
-   // crop to disk
-   if ( simulation->_PerimeterRadius > 0 && _DiskMode )
-   {
-      QPointF center = toBitmap( XYZ( 0, 0, 0 ) );
-      double r = QLineF( center, toBitmap( XYZ( simulation->_PerimeterRadius, 0, 0 ) ) ).length();
+   //// crop to disk
+   //if ( simulation->_OuterRadius > 0 && _DiskMode )
+   //{
+   //   QPointF center = toBitmap( XYZ( 0, 0, 0 ) );
+   //   double r = QLineF( center, toBitmap( XYZ( simulation->_OuterRadius, 0, 0 ) ) ).length();
 
-      int sx = image.width();
-      int sy = image.height();
-      uint8_t* p = (uint8_t*) image.bits();
-      for ( int y = 0; y < sy; y++ )
-      for ( int x = 0; x < sx; x++, p += 4 )
-      {
-         double d2 = (x+.5 - center.x())*(x+.5 - center.x()) + (y+.5 - center.y())*(y+.5 - center.y());
-         double d = sqrt( d2 );
-         double alpha = r - d + .5;
-         alpha = alpha < 0 ? 0 : alpha > 1 ? 1 : alpha; // clamp to [0,1]
-         if ( alpha == 0 ) { p[0] = 0; p[1] = 0; p[2] = 0; p[3] = 0; }
-         else if ( alpha < 1 )
-         {
-            p[0] = (uint8_t) lround( p[0]*alpha );
-            p[1] = (uint8_t) lround( p[1]*alpha );
-            p[2] = (uint8_t) lround( p[2]*alpha );
-            p[3] = (uint8_t) lround( p[3]*alpha );
-         }
-      }
-   }
+   //   int sx = image.width();
+   //   int sy = image.height();
+   //   uint8_t* p = (uint8_t*) image.bits();
+   //   for ( int y = 0; y < sy; y++ )
+   //   for ( int x = 0; x < sx; x++, p += 4 )
+   //   {
+   //      double d2 = (x+.5 - center.x())*(x+.5 - center.x()) + (y+.5 - center.y())*(y+.5 - center.y());
+   //      double d = sqrt( d2 );
+   //      double alpha = r - d + .5;
+   //      alpha = alpha < 0 ? 0 : alpha > 1 ? 1 : alpha; // clamp to [0,1]
+   //      if ( alpha == 0 ) { p[0] = 0; p[1] = 0; p[2] = 0; p[3] = 0; }
+   //      else if ( alpha < 1 )
+   //      {
+   //         p[0] = (uint8_t) lround( p[0]*alpha );
+   //         p[1] = (uint8_t) lround( p[1]*alpha );
+   //         p[2] = (uint8_t) lround( p[2]*alpha );
+   //         p[3] = (uint8_t) lround( p[3]*alpha );
+   //      }
+   //   }
+   //}
 
    QPainter painter( &finalImage );
-   painter.fillRect( finalImage.rect(), _DiskMode ? Qt::white : Qt::darkGray );
+   painter.fillRect( finalImage.rect(), Qt::darkGray );
    painter.drawImage( QPoint( 0, 0 ), image );
 
    //if ( simulation->_PerimeterRadius > 0 && _DiskMode )

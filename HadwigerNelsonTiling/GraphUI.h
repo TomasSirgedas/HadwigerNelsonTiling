@@ -32,6 +32,7 @@ public:
    void setRadius( double radius );
 
    void onDualGraphModified();
+   void updateModelFromUI();
 
 private:
    Ui::GraphUI ui;

@@ -1,0 +1,548 @@
+{
+    "shape": {
+        "type": "plane"
+    },
+    "symmetry": null,
+    "vertices": [
+        {
+            "color": 0,
+            "index": 0,
+            "neighbors": [
+                {
+                    "index": 2,
+                    "sectorId": 0
+                },
+                {
+                    "index": 1,
+                    "sectorId": 0
+                },
+                {
+                    "index": 19,
+                    "sectorId": 0
+                },
+                {
+                    "index": 18,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                -0.04991176636007994,
+                -1.4768247569321922,
+                0
+            ]
+        },
+        {
+            "color": 1,
+            "index": 1,
+            "neighbors": [
+                {
+                    "index": 3,
+                    "sectorId": 0
+                },
+                {
+                    "index": 19,
+                    "sectorId": 0
+                },
+                {
+                    "index": 0,
+                    "sectorId": 0
+                },
+                {
+                    "index": 2,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                -0.36940692675462194,
+                -0.8998098927528818,
+                0
+            ]
+        },
+        {
+            "color": 2,
+            "index": 2,
+            "neighbors": [
+                {
+                    "index": 4,
+                    "sectorId": 0
+                },
+                {
+                    "index": 3,
+                    "sectorId": 0
+                },
+                {
+                    "index": 1,
+                    "sectorId": 0
+                },
+                {
+                    "index": 0,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                -0.9116585350164536,
+                -1.1721092043648997,
+                0
+            ]
+        },
+        {
+            "color": 3,
+            "index": 3,
+            "neighbors": [
+                {
+                    "index": 4,
+                    "sectorId": 0
+                },
+                {
+                    "index": 5,
+                    "sectorId": 0
+                },
+                {
+                    "index": 1,
+                    "sectorId": 0
+                },
+                {
+                    "index": 2,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                -0.7702714623795226,
+                -0.5631221595294943,
+                0
+            ]
+        },
+        {
+            "color": 4,
+            "index": 4,
+            "neighbors": [
+                {
+                    "index": 6,
+                    "sectorId": 0
+                },
+                {
+                    "index": 5,
+                    "sectorId": 0
+                },
+                {
+                    "index": 3,
+                    "sectorId": 0
+                },
+                {
+                    "index": 2,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                -1.419486013039624,
+                -0.4150731452686218,
+                0
+            ]
+        },
+        {
+            "color": 0,
+            "index": 5,
+            "neighbors": [
+                {
+                    "index": 6,
+                    "sectorId": 0
+                },
+                {
+                    "index": 7,
+                    "sectorId": 0
+                },
+                {
+                    "index": 3,
+                    "sectorId": 0
+                },
+                {
+                    "index": 4,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                -0.9693320210911472,
+                -0.0263770696635794,
+                0
+            ]
+        },
+        {
+            "color": 1,
+            "index": 6,
+            "neighbors": [
+                {
+                    "index": 8,
+                    "sectorId": 0
+                },
+                {
+                    "index": 7,
+                    "sectorId": 0
+                },
+                {
+                    "index": 5,
+                    "sectorId": 0
+                },
+                {
+                    "index": 4,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                -1.3914727408068013,
+                0.5007488820047327,
+                0
+            ]
+        },
+        {
+            "color": 2,
+            "index": 7,
+            "neighbors": [
+                {
+                    "index": 8,
+                    "sectorId": 0
+                },
+                {
+                    "index": 9,
+                    "sectorId": 0
+                },
+                {
+                    "index": 5,
+                    "sectorId": 0
+                },
+                {
+                    "index": 6,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                -0.7745910223575694,
+                0.550330854385014,
+                0
+            ]
+        },
+        {
+            "color": 3,
+            "index": 8,
+            "neighbors": [
+                {
+                    "index": 10,
+                    "sectorId": 0
+                },
+                {
+                    "index": 9,
+                    "sectorId": 0
+                },
+                {
+                    "index": 7,
+                    "sectorId": 0
+                },
+                {
+                    "index": 6,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                -0.8168836759441052,
+                1.2042487640663897,
+                0
+            ]
+        },
+        {
+            "color": 4,
+            "index": 9,
+            "neighbors": [
+                {
+                    "index": 8,
+                    "sectorId": 0
+                },
+                {
+                    "index": 10,
+                    "sectorId": 0
+                },
+                {
+                    "index": 11,
+                    "sectorId": 0
+                },
+                {
+                    "index": 7,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                -0.27499084768513576,
+                0.886040513301324,
+                0
+            ]
+        },
+        {
+            "color": 0,
+            "index": 10,
+            "neighbors": [
+                {
+                    "index": 12,
+                    "sectorId": 0
+                },
+                {
+                    "index": 11,
+                    "sectorId": 0
+                },
+                {
+                    "index": 9,
+                    "sectorId": 0
+                },
+                {
+                    "index": 8,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                0.042189617492614954,
+                1.4531830747623176,
+                0
+            ]
+        },
+        {
+            "color": 1,
+            "index": 11,
+            "neighbors": [
+                {
+                    "index": 10,
+                    "sectorId": 0
+                },
+                {
+                    "index": 12,
+                    "sectorId": 0
+                },
+                {
+                    "index": 13,
+                    "sectorId": 0
+                },
+                {
+                    "index": 9,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                0.2909515352964716,
+                0.8897588166562508,
+                0
+            ]
+        },
+        {
+            "color": 2,
+            "index": 12,
+            "neighbors": [
+                {
+                    "index": 10,
+                    "sectorId": 0
+                },
+                {
+                    "index": 14,
+                    "sectorId": 0
+                },
+                {
+                    "index": 13,
+                    "sectorId": 0
+                },
+                {
+                    "index": 11,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                0.8862912064614078,
+                1.144333074058887,
+                0
+            ]
+        },
+        {
+            "color": 3,
+            "index": 13,
+            "neighbors": [
+                {
+                    "index": 11,
+                    "sectorId": 0
+                },
+                {
+                    "index": 12,
+                    "sectorId": 0
+                },
+                {
+                    "index": 14,
+                    "sectorId": 0
+                },
+                {
+                    "index": 15,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                0.779400678392312,
+                0.5059814167447313,
+                0
+            ]
+        },
+        {
+            "color": 4,
+            "index": 14,
+            "neighbors": [
+                {
+                    "index": 13,
+                    "sectorId": 0
+                },
+                {
+                    "index": 12,
+                    "sectorId": 0
+                },
+                {
+                    "index": 16,
+                    "sectorId": 0
+                },
+                {
+                    "index": 15,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                1.3941992653471678,
+                0.3984128109653976,
+                0
+            ]
+        },
+        {
+            "color": 0,
+            "index": 15,
+            "neighbors": [
+                {
+                    "index": 13,
+                    "sectorId": 0
+                },
+                {
+                    "index": 14,
+                    "sectorId": 0
+                },
+                {
+                    "index": 16,
+                    "sectorId": 0
+                },
+                {
+                    "index": 17,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                0.9379139532096598,
+                -0.0668034423793885,
+                0
+            ]
+        },
+        {
+            "color": 1,
+            "index": 16,
+            "neighbors": [
+                {
+                    "index": 15,
+                    "sectorId": 0
+                },
+                {
+                    "index": 14,
+                    "sectorId": 0
+                },
+                {
+                    "index": 18,
+                    "sectorId": 0
+                },
+                {
+                    "index": 17,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                1.3704175856947183,
+                -0.4967038752054774,
+                0
+            ]
+        },
+        {
+            "color": 2,
+            "index": 17,
+            "neighbors": [
+                {
+                    "index": 15,
+                    "sectorId": 0
+                },
+                {
+                    "index": 16,
+                    "sectorId": 0
+                },
+                {
+                    "index": 18,
+                    "sectorId": 0
+                },
+                {
+                    "index": 19,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                0.7249993363290371,
+                -0.5931681286314392,
+                0
+            ]
+        },
+        {
+            "color": 3,
+            "index": 18,
+            "neighbors": [
+                {
+                    "index": 19,
+                    "sectorId": 0
+                },
+                {
+                    "index": 17,
+                    "sectorId": 0
+                },
+                {
+                    "index": 16,
+                    "sectorId": 0
+                },
+                {
+                    "index": 0,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                0.8203757164391723,
+                -1.2128150051318707,
+                0
+            ]
+        },
+        {
+            "color": 4,
+            "index": 19,
+            "neighbors": [
+                {
+                    "index": 1,
+                    "sectorId": 0
+                },
+                {
+                    "index": 17,
+                    "sectorId": 0
+                },
+                {
+                    "index": 18,
+                    "sectorId": 0
+                },
+                {
+                    "index": 0,
+                    "sectorId": 0
+                }
+            ],
+            "pos": [
+                0.2050235817297441,
+                -0.9300157177728153,
+                0
+            ]
+        }
+    ]
+}

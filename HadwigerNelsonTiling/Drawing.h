@@ -59,7 +59,6 @@ public:
    bool _ShowTileGraph = true;
    bool _ShowDualGraph = true;
    bool _ShowLabels = true;
-   bool _DiskMode = false;
 
 private:
    std::shared_ptr<IGraphShape> _GraphShape;

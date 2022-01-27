@@ -102,6 +102,7 @@ public:
       int _Index;
       XYZ _Pos;
       bool _OnPerimeter = false;
+      bool _OnInnerPerimeter = false;
       std::vector<VertexPtr> _Neighbors;
       std::vector<TilePtr> _Tiles;
       std::shared_ptr<SectorSymmetryForVertex> _Symmetry;

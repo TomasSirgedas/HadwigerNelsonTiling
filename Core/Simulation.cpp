@@ -6,6 +6,11 @@
 
 using namespace std;
 
+namespace
+{
+   int sign( double x ) { return x < 0 ? -1 : x > 0 ? 1 : 0; }
+}
+
 void Simulation::init( std::shared_ptr<TileGraph> tileGraph )
 {
    _TileGraph = tileGraph;
@@ -62,13 +67,13 @@ double Simulation::step( double& paddingError )
          paddingError += dist-(1-pad);
          if ( printErrors && !kcf.keepFar && dist-1 > 0 ) std::trace << "keep close " << kcf.a.id() << " " << kcf.b.id() << " " << dist-1 << std::endl;
       }
-      if ( kcf.keepFar && dist <= 1.+pad )
+      if ( kcf.keepFar && dist <= _TileDist+pad )
       {
-         vel[kcf.a.index()] += (kcf.a.matrix().inverted() * (a-b).normalized()) * ((1+pad)-dist) * .03;
-         vel[kcf.b.index()] += (kcf.b.matrix().inverted() * (b-a).normalized()) * ((1+pad)-dist) * .03;
-         totalError += max(0.,1-dist);
-         paddingError += (1+pad)-dist;
-         if ( printErrors && !kcf.keepClose && 1-dist > 0 ) std::trace << "keep far " << kcf.a.id() << " " << kcf.b.id() << " " << 1-dist << std::endl;
+         vel[kcf.a.index()] += (kcf.a.matrix().inverted() * (a-b).normalized()) * ((_TileDist+pad)-dist) * .03;
+         vel[kcf.b.index()] += (kcf.b.matrix().inverted() * (b-a).normalized()) * ((_TileDist+pad)-dist) * .03;
+         totalError += max(0.,_TileDist-dist);
+         paddingError += (_TileDist+pad)-dist;
+         if ( printErrors && !kcf.keepClose && _TileDist-dist > 0 ) std::trace << "keep far " << kcf.a.id() << " " << kcf.b.id() << " " << _TileDist-dist << std::endl;
       }
    }
    ////static bool s_dolvc = true;
@@ -138,15 +143,46 @@ double Simulation::step( double& paddingError )
    //   if ( printErrors && 1-dist > 0 ) qDebug() << "curved line to vertex" << lvc.a0._Index << lvc.a1._Index << lvc.curveCenter._Index << lvc.b._Index << 1-dist;
    //}
       
-   // perimeter
+   // outer perimeter
    for ( const TileGraph::Vertex& vtx : _TileGraph->_Vertices ) if ( vtx._OnPerimeter )
    {
-      if ( vtx._Pos.len2() > _PerimeterRadius*_PerimeterRadius )
+      if ( vtx._Pos.len2() >= _OuterRadius*_OuterRadius )
          continue;
 
       double d = vtx._Pos.len();
-      double distError = _PerimeterRadius - d;
+      double distError = _OuterRadius - d;
       vel[vtx._Index] += (vtx._Pos/d) * distError * .03;
+      totalError += distError;
+   }
+
+   // inner perimeter
+   if ( _InnerRadius > 0 )
+   for ( const TileGraph::Vertex& vtx : _TileGraph->_Vertices ) if ( vtx._OnInnerPerimeter )
+   {
+      if ( vtx._Pos.len2() <= _InnerRadius*_InnerRadius )
+         continue;
+
+      double d = vtx._Pos.len();
+      double distError = d - _InnerRadius;
+      vel[vtx._Index] += -(vtx._Pos/d) * distError * .03;
+      totalError += distError;
+   }
+
+
+   // strip
+   if ( _StripWidth > 0 && _StripHeight > 0 )
+   for ( const TileGraph::Vertex& vtx : _TileGraph->_Vertices ) if ( vtx._OnPerimeter )
+   {
+      double errX = _StripWidth/2 - abs(vtx._Pos.x);
+      double errY = _StripHeight/2 - abs(vtx._Pos.y);
+      if ( errX < 0 || errY < 0 )
+         continue;
+
+      double distError = max( errX, errY );
+      XYZ dir = errX < errY ? XYZ(1,0,0) * sign( vtx._Pos.x )
+                            : XYZ(0,1,0) * sign( vtx._Pos.y );
+
+      vel[vtx._Index] += dir * distError * .03;
       totalError += distError;
    }
 

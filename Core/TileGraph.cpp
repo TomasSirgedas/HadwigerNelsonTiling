@@ -214,6 +214,8 @@ bool TileGraph::mustBeClose( const VertexPtr& a, const VertexPtr& b ) const
    for ( const TilePtr& tileA : a.tiles() )
    {
       TilePtr tileB = b.tileWithColor( tileA.color() );
+      //if ( tileA.color() == 8 )
+      //   return false;
       if ( tileA == tileB )
          return true;
    }
