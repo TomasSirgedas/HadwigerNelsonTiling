@@ -130,7 +130,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="tileDistEdit"/>
+           <widget class="QLineEdit" name="tileDistEdit">
+            <property name="text">
+             <string>1</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
