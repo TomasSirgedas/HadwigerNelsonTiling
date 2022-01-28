@@ -63,7 +63,12 @@ namespace
          return nullptr;
 
       QFile f( filename );
-      f.open( QFile::ReadOnly );
+      if ( !f.open( QFile::ReadOnly ) )
+      {         
+         std::shared_ptr<IGraphShape> shape( new GraphShapePlane );
+         std::shared_ptr<IGraphSymmetry> sym( new GraphSymmetry_Groups( {} ) );
+         return std::shared_ptr<DualGraph>( new DualGraph( sym, shape ) );
+      }
       QJsonDocument doc = QJsonDocument::fromJson( f.readAll() );
       Json j = toJson( doc.object() );
       return std::shared_ptr<DualGraph>( new DualGraph( j ) );
