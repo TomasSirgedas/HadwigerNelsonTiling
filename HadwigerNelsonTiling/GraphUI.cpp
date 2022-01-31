@@ -229,6 +229,7 @@ GraphUI::GraphUI( QWidget *parent )
       
    connect( ui.radiusLineEdit, &QLineEdit::editingFinished, [&]() {
       setRadius( ui.radiusLineEdit->text().toDouble() );
+      killFocus();
    } );
 
    connect( ui.playButton, &QPushButton::clicked, [&]() {  
@@ -345,15 +346,19 @@ GraphUI::GraphUI( QWidget *parent )
    } );
    connect( ui.outerRadiusEdit, &QLineEdit::editingFinished, [this](){
       ui.outerRadiusSlider->setValue( lround( ui.outerRadiusEdit->text().toDouble()*1000 ) );
+      killFocus();
    } );
    connect( ui.innerRadiusEdit, &QLineEdit::editingFinished, [this](){
       ui.innerRadiusSlider->setValue( lround( ui.innerRadiusEdit->text().toDouble()*1000 ) );
+      killFocus();
    } );
    connect( ui.stripWidthEdit, &QLineEdit::editingFinished, [this](){
       ui.stripWidthSlider->setValue( lround( ui.stripWidthEdit->text().toDouble()*1000 ) );
+      killFocus();
    } );
    connect( ui.stripHeightEdit, &QLineEdit::editingFinished, [this](){
       ui.stripHeightSlider->setValue( lround( ui.stripHeightEdit->text().toDouble()*1000 ) );
+      killFocus();
    } );
    connect( ui.zoomSlider, &QSlider::valueChanged, [this]( int value ) {
       ui.drawing->_Zoom = exp( ( value / 100. - .5 ) * 5 );
@@ -368,6 +373,7 @@ GraphUI::GraphUI( QWidget *parent )
    connect( ui.tileDistEdit, &QLineEdit::editingFinished, [this]() {
       _Simulation->_TileDist = ui.tileDistEdit->text().toDouble();
       updateDrawing();
+      killFocus();
    } );
 
 
@@ -410,6 +416,14 @@ GraphUI::GraphUI( QWidget *parent )
 
    QObject::connect( new QShortcut(QKeySequence(Qt::Key_Delete), this ), &QShortcut::activated, [this]() { deleteVertex(); } );
 
+   ui.outerRadiusEdit->setText( "1.5" );
+   ui.outerRadiusEdit->editingFinished();
+   ui.innerRadiusEdit->setText( "1" );
+   ui.innerRadiusEdit->editingFinished();
+   ui.stripWidthEdit->setText( "1" );
+   ui.stripWidthEdit->editingFinished();
+   ui.stripHeightEdit->setText( "1" );
+   ui.stripHeightEdit->editingFinished();
 }
 
 GraphUI::~GraphUI()
@@ -591,4 +605,10 @@ void GraphUI::updateModelFromUI()
    _Simulation->_InnerRadius = ui.diskRadioButton->isChecked() ? ui.innerRadiusEdit->text().toDouble() : 0;
    _Simulation->_StripWidth  = ui.stripRadioButton->isChecked() ? ui.stripWidthEdit->text().toDouble() : 0;
    _Simulation->_StripHeight = ui.stripRadioButton->isChecked() ? ui.stripHeightEdit->text().toDouble() : 0;
+}
+
+void GraphUI::killFocus()
+{
+   if ( QApplication::focusWidget() )
+      QApplication::focusWidget()->clearFocus();
 }

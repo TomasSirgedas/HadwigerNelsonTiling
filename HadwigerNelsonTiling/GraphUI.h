@@ -34,6 +34,8 @@ public:
    void onDualGraphModified();
    void updateModelFromUI();
 
+   void killFocus();
+
 private:
    Ui::GraphUI ui;
 
