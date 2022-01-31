@@ -111,7 +111,7 @@ void DualAnalysis::init( const DualGraph& dual )
       }
 
       PolyRigids rigids;
-      for ( int color = 0; color < MAX_COLORS; color++ )
+      for ( int color = 0; color < MAX_COLORS; color++ ) if ( color != BLANK_COLOR )
       {
          int falseCP0 = colorNeighborPositions[color];
          int falseCP1 = falseCP0==0 ? (int)ed.size()-1 : falseCP0-1;

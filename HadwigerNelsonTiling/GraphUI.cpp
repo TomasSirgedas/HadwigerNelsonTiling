@@ -392,6 +392,16 @@ GraphUI::GraphUI( QWidget *parent )
    QObject::connect( new QShortcut(QKeySequence(Qt::Key_K), this ), &QShortcut::activated, [this]() { addVertex( 8 ); } );
    QObject::connect( new QShortcut(QKeySequence(Qt::Key_9), this ), &QShortcut::activated, [this]() { addVertex( 9 ); } );
    QObject::connect( new QShortcut(QKeySequence(Qt::Key_N), this ), &QShortcut::activated, [this]() { addVertex( 9 ); } );
+   QObject::connect( new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_0), this ), &QShortcut::activated, [this]() { addVertex( 10 ); } );
+   QObject::connect( new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_1), this ), &QShortcut::activated, [this]() { addVertex( 11 ); } );
+   QObject::connect( new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_2), this ), &QShortcut::activated, [this]() { addVertex( 12 ); } );
+   QObject::connect( new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_3), this ), &QShortcut::activated, [this]() { addVertex( 13 ); } );
+   QObject::connect( new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_4), this ), &QShortcut::activated, [this]() { addVertex( 14 ); } );
+   QObject::connect( new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_5), this ), &QShortcut::activated, [this]() { addVertex( 15 ); } );
+   QObject::connect( new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_6), this ), &QShortcut::activated, [this]() { addVertex( 16 ); } );
+   QObject::connect( new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_7), this ), &QShortcut::activated, [this]() { addVertex( 17 ); } );
+   QObject::connect( new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_8), this ), &QShortcut::activated, [this]() { addVertex( 18 ); } );
+   QObject::connect( new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_9), this ), &QShortcut::activated, [this]() { addVertex( 19 ); } );
 
    QObject::connect( new QShortcut(QKeySequence(Qt::Key_Delete), this ), &QShortcut::activated, [this]() { deleteVertex(); } );
 
