@@ -56,6 +56,7 @@ public:
    double _PixelsPerUnit = -1;
    double _Zoom = 1;
    bool _ShowRigids = true;
+   bool _ShowViolations = true;
    bool _ShowTileGraph = true;
    bool _ShowDualGraph = true;
    bool _ShowLabels = true;

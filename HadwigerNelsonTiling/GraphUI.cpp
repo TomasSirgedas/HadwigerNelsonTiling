@@ -267,11 +267,16 @@ GraphUI::GraphUI( QWidget *parent )
       _Simulation->moveDualVerticesToCentroid();
       updateDrawing();
    } );   
-   
+
    connect( ui.showRigidsCheckBox, &QCheckBox::toggled, [&]() {
       ui.drawing->_ShowRigids = ui.showRigidsCheckBox->isChecked();
       updateDrawing();
    } );
+
+   connect( ui.showViolationsCheckBox, &QCheckBox::toggled, [&]() {
+      ui.drawing->_ShowViolations = ui.showViolationsCheckBox->isChecked();
+      updateDrawing();
+   } );   
 
    connect( ui.showTileGraphCheckBox, &QCheckBox::toggled, [&]() {
       ui.drawing->_ShowTileGraph = ui.showTileGraphCheckBox->isChecked();

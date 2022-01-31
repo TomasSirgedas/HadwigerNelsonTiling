@@ -153,6 +153,9 @@
           <property name="text">
            <string>Show Tile Graph</string>
           </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
         <item>
@@ -176,6 +179,16 @@
          <widget class="QCheckBox" name="showRigidsCheckBox">
           <property name="text">
            <string>Show Rigids</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="showViolationsCheckBox">
+          <property name="text">
+           <string>Show Violations</string>
           </property>
           <property name="checked">
            <bool>true</bool>

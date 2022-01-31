@@ -296,6 +296,41 @@ QImage Drawing::makeTransparentImage( const QSize& size, std::shared_ptr<const S
          }
       }    
 
+
+      if ( _ShowViolations )
+      {
+         {
+            double closeDist2 = pow( 1. - simulation->_Padding + .0001, 2 );
+            double farDist2 = pow( simulation->_TileDist + simulation->_Padding - .0001, 2 );
+            painter.setBrush( Qt::NoBrush );
+            std::unordered_set<uint64_t> usedEdges;
+            for ( const SectorId& sectorId : simulation->_TileGraph->_GraphSymmetry->allVisibleSectors() )
+               for ( const auto& pr : simulation->_KeepCloseFars )
+               {  
+                  TileGraph::VertexPtr aa = pr.a.premul( sectorId );
+                  TileGraph::VertexPtr bb = pr.b.premul( sectorId );
+                  if ( !usedEdges.insert( edgeId( aa, bb ) ).second )
+                     continue;
+                  XYZ a = sectorId.matrix() * pr.a.pos();
+                  XYZ b = sectorId.matrix() * pr.b.pos();
+                  if ( !(isVisible( a ) && isVisible( b )) )
+                     continue;
+                                    
+                  double dist2 = a.dist2( b );
+                  if ( pr.keepClose && dist2 > closeDist2 )
+                  {
+                     painter.setPen( QPen( QColor(0,255,0,96), 5 ) );
+                     painter.drawLine( toBitmap( a ), toBitmap( b ) );
+                  }
+                  if ( pr.keepFar && dist2 < farDist2 )
+                  {
+                     painter.setPen( QPen( QColor(255,0,0,96), 5 ) );
+                     painter.drawLine( toBitmap( a ), toBitmap( b ) );
+                  }
+               }
+         }
+      }
+
       // draw labels
       if ( _ShowLabels )
       {
