@@ -13,33 +13,50 @@ public:
    {
    }
 
+   static std::vector<int> normed( std::vector<int> v )
+   {
+      if ( v.size() <= 2 ) 
+         return v;
+      std::rotate( v.begin(), std::min_element( v.begin(), v.end() ), v.end() );
+      return v;
+   }
+
    TileGraph::VertexPtr createOrFindTileGraphVertex( const std::vector<DualGraph::VertexPtr>& poly, std::function<TileGraph::VertexPtr(const XYZ&)> createVertexFunc )
    {
       // check cache
       for ( const SectorId& sector : _Dual._GraphSymmetry->allSectors() )
       {
-         std::set<int> polyAsSet;
+         std::vector<int> polyAsVector;
          for ( const DualGraph::VertexPtr& c : poly )
-            polyAsSet.insert( c.premul( sector ).id() );
-         if ( _DualPolygonToTileVertex.count( polyAsSet ) )
-            return _DualPolygonToTileVertex.at(polyAsSet).premul( sector.inverted() );
+            polyAsVector.push_back( c.premul( sector ).id() );
+         polyAsVector = normed( polyAsVector );
+         if ( _DualPolygonToTileVertex.count( polyAsVector ) )
+            return _DualPolygonToTileVertex.at(polyAsVector).premul( sector.inverted() );
       }
 
       // create new
-      std::set<int> polyAsSet;
+      std::vector<int> polyAsVector;
       for ( const DualGraph::VertexPtr& c : poly )
-         polyAsSet.insert( c.id() );
+         polyAsVector.push_back( c.id() );
+      polyAsVector = normed( polyAsVector );
 
       XYZ sum;
       for ( const DualGraph::VertexPtr& c : poly )
          sum += c.pos();
+      XYZ positionForVertex = sum / poly.size();
 
-      return _DualPolygonToTileVertex[polyAsSet] = createVertexFunc( sum / poly.size() );
+      if ( poly.size() == 2 ) // perturb position a bit
+      {
+         XYZ norm = (poly[0].pos() - poly[1].pos()) ^ XYZ(0,0,1);
+         positionForVertex = (poly[0].pos() + poly[1].pos()) / 2 - norm * .1;
+      }
+
+      return _DualPolygonToTileVertex[polyAsVector] = createVertexFunc( positionForVertex );
    }
 
 public:
    DualGraph& _Dual;
-   std::map<std::set<int>, TileGraph::VertexPtr> _DualPolygonToTileVertex;
+   std::map<std::vector<int>, TileGraph::VertexPtr> _DualPolygonToTileVertex;
 };
 
 std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
@@ -67,7 +84,7 @@ std::shared_ptr<TileGraph> makeTileGraph( DualGraph& dual, double radius )
          bool onPerimeter = polys[0].empty() || !dual._GraphShape->isValidWinding( positionsOf( polys[0] ) );
          bool onInnerPerimeter = !onPerimeter && positionsOf( polys[0] ).size() >= 7;
          if ( onPerimeter || onInnerPerimeter )
-            polys = { { a, b }, { a, a.next( b ) } };
+            polys = { { a, b }, { a.next( b ), a } };
 
          for ( std::vector<DualGraph::VertexPtr>& poly : polys )
          {
