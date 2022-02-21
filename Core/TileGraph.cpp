@@ -115,25 +115,28 @@ std::vector<TileGraph::TilePtr> TileGraph::tilesAt( const VertexPtr& a, const Ve
 
 namespace
 {
-   void calcNeighbors( const TileGraph::VertexPtr& vtx, int depth, std::unordered_set<TileGraph::VertexPtr, TileGraph::VertexPtrHash>& st )
+   typedef std::unordered_set<TileGraph::VertexPtr, TileGraph::VertexPtrHash> VertexSet;
+   VertexSet calcNeighbors( const VertexSet& st )
    {
-      if ( !st.insert( vtx ).second )
-         return;
-
-      if ( depth <= 0 )
-         return;
-
-      std::vector<TileGraph::VertexPtr> ret;
-
+      VertexSet ret = st;
+      for ( const TileGraph::VertexPtr& vtx : st )
       for ( const TileGraph::VertexPtr& neighb : vtx.neighbors() )
-         calcNeighbors( neighb, depth-1, st );
+         ret.insert( neighb );
+      return ret;
+   }
+
+   VertexSet calcNeighbors( const TileGraph::VertexPtr& vtx, int depth )
+   {
+      VertexSet ret = { vtx };
+      for ( int i = 0; i < depth; i++ )
+         ret = calcNeighbors( ret );
+      return ret;
    }
 }
 
 std::vector<TileGraph::VertexPtr> TileGraph::VertexPtr::neighbors( int depth ) const
 {
-   std::unordered_set<VertexPtr, VertexPtrHash> st;
-   calcNeighbors( *this, depth, st );
+   std::unordered_set<VertexPtr, VertexPtrHash> st = calcNeighbors( *this, depth );
    st.erase( *this );
    return std::vector<TileGraph::VertexPtr>( st.begin(), st.end() );
 }
