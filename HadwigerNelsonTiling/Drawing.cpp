@@ -89,7 +89,7 @@ namespace
       return ret;
    }
 
-   std::vector<XYZ> calcTileOutline( std::shared_ptr<IGraphShape> shape, const TileGraph::TilePtr& tile, double maxSpacing, bool perimeterPopout = false )
+   std::vector<XYZ> calcTileOutline( std::shared_ptr<IGraphShape> shape, const TileGraph::TilePtr& tile, double maxSpacing, bool perimeterPopout, bool isCurvedEdgeAllowed  )
    {
       std::vector<XYZ> ret;
 
@@ -107,7 +107,7 @@ namespace
             continue;
          }
 
-         TileGraph::VertexPtr c = a.calcCurve( b ); // c = center of curve
+         TileGraph::VertexPtr c = isCurvedEdgeAllowed ? a.calcCurve( b ) : TileGraph::VertexPtr(); // c = center of curve
          std::vector<XYZ> curve;
          if ( c.isValid() )
          {
@@ -253,12 +253,14 @@ QImage Drawing::makeTransparentImage( const QSize& size, std::shared_ptr<const S
 
    if ( _ShowTileGraph && &graph != nullptr )
    {
+      bool isCurvedEdgeAllowed = simulation->_TileDist == 1;
+
       // draw tiles
       painter.setPen( Qt::NoPen );
       //painter.setPen( QColor( 0, 0, 0, 32 ) );
       for ( const TileGraph::TilePtr& tile : graph.allTiles() ) // if ( isVisible( a.pos() ) )
       {
-         std::vector<XYZ> outline = calcTileOutline( _GraphShape, tile, 10/_PixelsPerUnit/*max curve spacing*/, false );
+         std::vector<XYZ> outline = calcTileOutline( _GraphShape, tile, 10/_PixelsPerUnit/*max curve spacing*/, false, isCurvedEdgeAllowed );
          QPolygonF poly;
          for ( const XYZ& a : outline )
             poly.append( toBitmap( a ) );
