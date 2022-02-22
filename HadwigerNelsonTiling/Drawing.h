@@ -55,11 +55,11 @@ public:
    Matrix4x4 _ModelRotation;
    double _PixelsPerUnit = -1;
    double _Zoom = 1;
-   bool _ShowRigids = true;
+   bool _ShowRigids = false;
    bool _ShowViolations = true;
    bool _ShowTileGraph = true;
    bool _ShowDualGraph = true;
-   bool _ShowLabels = true;
+   bool _ShowLabels = false;
 
 private:
    std::shared_ptr<IGraphShape> _GraphShape;
