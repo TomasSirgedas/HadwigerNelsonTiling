@@ -246,7 +246,7 @@ GraphUI::GraphUI( QWidget *parent )
    } );
 
    connect( &_Timer, &QTimer::timeout, [this]() {
-      int simSteps = 50;
+      int simSteps = 250;
       QElapsedTimer t;
       t.start();
       double error = _Simulation->step( simSteps );
