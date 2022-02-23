@@ -231,7 +231,7 @@ std::vector<TileGraph::KeepCloseFar> TileGraph::calcKeepCloseFars() const
    std::vector<KeepCloseFar> ret;
    for ( const VertexPtr& vtx : rawVertices() )
    {      
-      for ( const VertexPtr& neighb : vtx.neighbors( 5/*search depth*/ ) )
+      for ( const VertexPtr& neighb : vtx.neighbors( 9/*search depth*/ ) )
       {
          KeepCloseFar kcf;
          kcf.a = vtx;
