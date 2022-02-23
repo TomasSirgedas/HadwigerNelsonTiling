@@ -6,9 +6,17 @@
 class Simulation
 {
 public:
+   struct KeepCloseFarConstraint
+   {
+      TileGraph::KeepCloseFar keepCloseFar;
+      int checkFrequency = 1;
+      int numViolations = 0;
+   };
+
+public:
    CORE_API void init( std::shared_ptr<TileGraph> graph );
    CORE_API void normalizeVertices();
-   CORE_API double step( double& paddingError );
+   CORE_API double step( int64_t stepIndex, double& paddingError );
    CORE_API double step( int numSteps );
    CORE_API void setRadius( double radius );   
    CORE_API void moveDualVerticesToCentroid();
@@ -25,7 +33,7 @@ public:
    TileGraph::VertexPtr _FixedVertex;
    std::shared_ptr<TileGraph> _TileGraph;
    std::shared_ptr<DualGraph> _DualGraph;
-   std::vector<TileGraph::KeepCloseFar> _KeepCloseFars;
+   std::vector<KeepCloseFarConstraint> _KeepCloseFars;
    std::vector<TileGraph::LineVertexConstraint> _LineVertexConstraints;
    std::pair<int, int> _ShowDistanceVertices = {-1,-1};
 };

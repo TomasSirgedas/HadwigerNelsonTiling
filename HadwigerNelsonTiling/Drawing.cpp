@@ -317,8 +317,10 @@ QImage Drawing::makeTransparentImage( const QSize& size, std::shared_ptr<const S
          painter.setBrush( Qt::NoBrush );
          std::unordered_set<uint64_t> usedEdges;
          for ( const SectorId& sectorId : simulation->_TileGraph->_GraphSymmetry->allVisibleSectors() )
-         for ( const auto& pr : simulation->_KeepCloseFars )
+         for ( const auto& kcfc : simulation->_KeepCloseFars )
          {  
+            const auto& pr = kcfc.keepCloseFar;
+
             TileGraph::VertexPtr aa = pr.a.premul( sectorId );
             TileGraph::VertexPtr bb = pr.b.premul( sectorId );
             if ( !usedEdges.insert( edgeId( aa, bb ) ).second )
@@ -362,8 +364,10 @@ QImage Drawing::makeTransparentImage( const QSize& size, std::shared_ptr<const S
             painter.setBrush( Qt::NoBrush );
             std::unordered_set<uint64_t> usedEdges;
             for ( const SectorId& sectorId : simulation->_TileGraph->_GraphSymmetry->allVisibleSectors() )
-               for ( const auto& pr : simulation->_KeepCloseFars )
+               for ( const auto& kcfc : simulation->_KeepCloseFars )
                {  
+                  const auto& pr = kcfc.keepCloseFar;
+
                   TileGraph::VertexPtr aa = pr.a.premul( sectorId );
                   TileGraph::VertexPtr bb = pr.b.premul( sectorId );
                   if ( !usedEdges.insert( edgeId( aa, bb ) ).second )

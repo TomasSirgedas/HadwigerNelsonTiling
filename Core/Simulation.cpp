@@ -17,7 +17,10 @@ void Simulation::init( std::shared_ptr<TileGraph> tileGraph )
 
    if ( _TileGraph )
    {
-      _KeepCloseFars = _TileGraph->calcKeepCloseFars();
+      _KeepCloseFars.clear();
+      for ( auto kcf : _TileGraph->calcKeepCloseFars() )
+         _KeepCloseFars.push_back( { kcf } );
+
       //_LineVertexConstraints = _Graph->calcLineVertexConstraints();
 
       _TileGraph->normalizeVertices();
@@ -42,7 +45,7 @@ void Simulation::setRadius( double radius )
    }
 }
 
-double Simulation::step( double& paddingError )
+double Simulation::step( int64_t stepIndex, double& paddingError )
 {   
    if ( !_TileGraph )
       return -1;
@@ -52,12 +55,17 @@ double Simulation::step( double& paddingError )
    paddingError = 0;
    vector<XYZ> vel( _TileGraph->_Vertices.size() );
 
-   for ( const TileGraph::KeepCloseFar& kcf : _KeepCloseFars )
+   for ( KeepCloseFarConstraint& kcfc : _KeepCloseFars )
    {
+      if ( stepIndex % kcfc.checkFrequency != 0 )
+         continue;
+
+      const TileGraph::KeepCloseFar& kcf = kcfc.keepCloseFar;
       XYZ a = kcf.a.pos();
       XYZ b = kcf.b.pos();
       double dist = a.dist( b );
 
+      bool wasViolation = false;
       double pad = kcf.keepClose && kcf.keepFar ? 0 : _Padding;
       if ( kcf.keepClose && dist >= 1.-pad )
       {
@@ -66,6 +74,7 @@ double Simulation::step( double& paddingError )
          totalError += max(0.,dist-1);
          paddingError += dist-(1-pad);
          if ( printErrors && !kcf.keepFar && dist-1 > 0 ) std::trace << "keep close " << kcf.a.id() << " " << kcf.b.id() << " " << dist-1 << std::endl;
+         wasViolation = true;
       }
       if ( kcf.keepFar && dist <= _TileDist+pad )
       {
@@ -74,6 +83,12 @@ double Simulation::step( double& paddingError )
          totalError += max(0.,_TileDist-dist);
          paddingError += (_TileDist+pad)-dist;
          if ( printErrors && !kcf.keepClose && _TileDist-dist > 0 ) std::trace << "keep far " << kcf.a.id() << " " << kcf.b.id() << " " << _TileDist-dist << std::endl;
+         wasViolation = true;
+      }
+      if ( wasViolation )
+      {
+         kcfc.checkFrequency = 1;
+         kcfc.numViolations++;
       }
    }
    ////static bool s_dolvc = true;
@@ -198,14 +213,21 @@ double Simulation::step( double& paddingError )
 
 double Simulation::step( int numSteps )
 {
+   for ( KeepCloseFarConstraint& kcfc : _KeepCloseFars )
+      kcfc.numViolations = 0;
+
    double tot = 0;
    double totalPaddingError = 0;
    for ( int i = 0; i < numSteps; i++ )
    {
       double paddingError = 0;
-      tot += step( paddingError );
+      tot += step( i, paddingError );
       totalPaddingError += paddingError;
    }
+
+   for ( KeepCloseFarConstraint& kcfc : _KeepCloseFars )
+      if ( kcfc.numViolations == 0 )
+         kcfc.checkFrequency = numSteps / 2;
 
    _PaddingError = totalPaddingError / numSteps;
    return tot / numSteps;
