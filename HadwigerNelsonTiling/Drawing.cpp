@@ -128,6 +128,40 @@ namespace
 
       return ret;
    }
+
+   std::vector<XYZ> calcTileExclusionZone( const TileGraph::TilePtr& tile, double radius, double maxSpacing )
+   {
+      std::vector<XYZ> ret;
+
+      std::vector<TileGraph::VertexPtr> v = tile.vertices();
+
+      for ( int i = 0; i < (int) v.size(); i++ )
+      {
+         const TileGraph::VertexPtr& a = v[(i+0)%v.size()];
+         const TileGraph::VertexPtr& b = v[(i+1)%v.size()];
+         const TileGraph::VertexPtr& c = v[(i+2)%v.size()];
+
+         XYZ normAB = ((a.pos() - b.pos()).normalized() ^ XYZ(0,0,1)) * radius;
+         XYZ normBC = ((b.pos() - c.pos()).normalized() ^ XYZ(0,0,1)) * radius;
+
+         //TileGraph::VertexPtr c = isCurvedEdgeAllowed ? a.calcCurve( b ) : TileGraph::VertexPtr(); // c = center of curve
+         //std::vector<XYZ> curve;
+         //if ( c.isValid() )
+         //{
+         //   curve = calcCurvePlanar( a.pos(), b.pos(), c.pos(), maxSpacing, false );
+         //}
+         //ret.insert( ret.end(), curve.begin(), curve.end() );
+
+         ret.push_back( a.pos() + normAB );
+         ret.push_back( b.pos() + normAB );
+         //ret.push_back( b.pos() + normBC );
+
+         std::vector<XYZ> curve = calcCurvePlanar( b.pos() + normAB, b.pos() + normBC, b.pos(), maxSpacing, false );
+         ret.insert( ret.end(), curve.begin(), curve.end() );
+      }
+
+      return ret;
+   }
    void drawMessage( QPainter& painter, const QPoint& pos, const std::string& message_ )
    {
       QFontMetrics fm( painter.font() );
@@ -168,6 +202,7 @@ void Drawing::refresh()
 
    _ModelToBitmap = Matrix4x4::translation( XYZ( width()/2, height()/2, 0. ) )
                   * Matrix4x4::scale( XYZ( _PixelsPerUnit, _PixelsPerUnit, 1 ) )
+                  * Matrix4x4::translation( -_ModelCenter )
                   * Matrix4x4::scale( XYZ( 1, -1, 1 ) );
 }
 
@@ -297,6 +332,26 @@ QImage Drawing::makeTransparentImage( const QSize& size, std::shared_ptr<const S
             }
          }
       }    
+
+      {
+         painter.setPen( QPen( QColor(255,0,0,255), 1.f ) );
+         painter.setBrush( Qt::NoBrush );
+
+         for ( const TileGraph::TilePtr& tile : graph.allTiles() ) // if ( isVisible( a.pos() ) )
+         {
+            if ( tile.color() != _ShowExclusionZoneColor )
+               continue;
+
+            std::vector<XYZ> outline = calcTileExclusionZone( tile, simulation->_TileDist, 10/_PixelsPerUnit/*max curve spacing*/ );
+            QPolygonF poly;
+            for ( const XYZ& a : outline )
+               poly.append( toBitmap( a ) );
+
+            painter.setPen( QPen( withAlpha( tileColor( tile.color() ), .8 ), 1.f ) );
+            painter.drawPolygon( poly );
+         }
+
+      }
 
 
       if ( _ShowViolations )

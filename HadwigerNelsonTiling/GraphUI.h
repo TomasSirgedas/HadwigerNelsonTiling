@@ -23,6 +23,7 @@ public:
    void deleteVertex();
 
    void handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isClick, bool isUnclick );
+   void handleWheel( const QPoint& mouseBitmapPos, QPoint angleDelta );
 
    bool getMousePos( XYZ& pos ) const;
    DualGraph::VertexPtr dualVertexAtMouse( double maxPixelDist ) const;

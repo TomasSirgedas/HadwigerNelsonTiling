@@ -316,6 +316,10 @@ GraphUI::GraphUI( QWidget *parent )
       //handleRightButton( event->pos(), false, false, true );
    } );
 
+   connect( ui.drawing, &Drawing::wheel, [this]( QWheelEvent* event ) {
+      handleWheel( event->pos(), event->angleDelta() );
+   } );
+
    connect( ui.outerRadiusSlider, &QSlider::valueChanged, [this]( int value ) {
       double r = value / 1000.;
       ui.outerRadiusEdit->setText( QString("%1").arg( r ) );
@@ -362,6 +366,7 @@ GraphUI::GraphUI( QWidget *parent )
    } );
    connect( ui.zoomSlider, &QSlider::valueChanged, [this]( int value ) {
       ui.drawing->_Zoom = exp( ( value / 100. - .5 ) * 5 );
+      ui.drawing->_ModelCenter = XYZ();
       ui.drawing->refresh();
       updateDrawing();
    } );
@@ -376,6 +381,12 @@ GraphUI::GraphUI( QWidget *parent )
       killFocus();
    } );
 
+   connect( ui.exclusionZoneColorLineEdit, &QLineEdit::editingFinished, [this]() {
+      ui.drawing->_ShowExclusionZoneColor = ui.exclusionZoneColorLineEdit->text().toInt();
+      updateDrawing();
+      killFocus();
+   } );
+   
 
    QObject::connect( new QShortcut(QKeySequence(Qt::Key_F1), this ), &QShortcut::activated, [this]() { loadGraph( hardcodedDualGraph( 1 ) ); } );
    QObject::connect( new QShortcut(QKeySequence(Qt::Key_F2), this ), &QShortcut::activated, [this]() { loadGraph( hardcodedDualGraph( 2 ) ); } );
@@ -519,6 +530,26 @@ void GraphUI::updateDrawing()
 
    double time = t.nsecsElapsed() * 1e-9;   
    ui.speedLabel->setText( "Speed(ms): " + QString::number( 1000*time ) );
+}
+
+void GraphUI::handleWheel( const QPoint& mouseBitmapPos, QPoint angleDelta )
+{
+   XYZ modelPos;
+   if ( !ui.drawing->getModelPos( mouseBitmapPos, modelPos ) )
+      return;
+
+
+   ui.drawing->_Zoom *= pow( 1.001, angleDelta.y() );
+
+   ui.drawing->refresh();
+   XYZ newModelPos;
+   if ( !ui.drawing->getModelPos( mouseBitmapPos, newModelPos ) )
+      return;
+
+   ui.drawing->_ModelCenter += Matrix4x4::scale( XYZ( 1, -1, 1 ) ) * (modelPos - newModelPos);
+
+   ui.drawing->refresh();
+   updateDrawing();
 }
 
 void GraphUI::handleMouse( const QPoint& mouseBitmapPos, bool isMove, bool isClick, bool isUnclick )

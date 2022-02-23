@@ -36,30 +36,34 @@ public:
 private:
    void resizeEvent( QResizeEvent *event ) override;
 
-   void mousePressEvent( QMouseEvent * event ) override { emit press( event ); }
-   void mouseReleaseEvent( QMouseEvent * event ) override { emit release( event ); }
-   void mouseMoveEvent( QMouseEvent * event ) override { emit move( event ); }
+   void mousePressEvent( QMouseEvent* event ) override { emit press( event ); }
+   void mouseReleaseEvent( QMouseEvent* event ) override { emit release( event ); }
+   void mouseMoveEvent( QMouseEvent* event ) override { emit move( event ); }
+   void wheelEvent( QWheelEvent* event ) override { emit wheel( event ); }
 
 signals:
    void resized();
 
-   void press( QMouseEvent * event );
-   void release( QMouseEvent * event );
-   void move( QMouseEvent * event );
+   void press( QMouseEvent* event );
+   void release( QMouseEvent* event );
+   void move( QMouseEvent* event );
+   void wheel( QWheelEvent* event );
 
 private:
    Ui::Drawing ui;
 
 public:
-   Matrix4x4 _ModelToBitmap;
+   Matrix4x4 _ModelToBitmap; // cached val
    Matrix4x4 _ModelRotation;
    double _PixelsPerUnit = -1;
    double _Zoom = 1;
+   XYZ _ModelCenter = XYZ( 1, 0, 0 );
    bool _ShowRigids = false;
    bool _ShowViolations = true;
    bool _ShowTileGraph = true;
    bool _ShowDualGraph = true;
    bool _ShowLabels = false;
+   int _ShowExclusionZoneColor = -1;
 
 private:
    std::shared_ptr<IGraphShape> _GraphShape;
